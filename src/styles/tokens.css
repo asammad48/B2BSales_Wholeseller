@@ -1,0 +1,35 @@
+:root {
+  /* Brand Colors */
+  --color-primary: #10b981; /* Emerald 500 */
+  --color-primary-hover: #059669; /* Emerald 600 */
+  --color-primary-glow: rgba(16, 185, 129, 0.4);
+  
+  --color-secondary: #0f172a; /* Slate 900 */
+  --color-accent: #06b6d4; /* Cyan 500 */
+  
+  /* Neutrals */
+  --bg-main: #0a0a0c;
+  --bg-card: #0f0f12;
+  --bg-sidebar: #0f0f12;
+  --bg-header: rgba(10, 10, 12, 0.8);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-focus: rgba(16, 185, 129, 0.5);
+  
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 15px var(--color-primary-glow);
+}

@@ -1,0 +1,5 @@
+{
+  "name": "Wholesaler Admin",
+  "description": "A comprehensive admin dashboard for wholesalers to manage products, inventory, orders, and users.",
+  "requestFramePermissions": []
+}
