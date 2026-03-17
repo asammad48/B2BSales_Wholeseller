@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Lock, Mail, RefreshCcw, AlertCircle, ArrowLeft } from 'lucide-react';
-import { authRepository } from '../../repositories/authRepository';
 import { useAuth } from '../../state/AuthContext';
 
 const LoginPage: React.FC = () => {
@@ -24,13 +23,8 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const data = await authRepository.login({ email, password });
-      if (data.token) {
-        await login(data.token);
-        navigate(from, { replace: true });
-      } else {
-        throw new Error('No token received from server');
-      }
+      await login({ email, password });
+      navigate(from, { replace: true });
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Invalid email or password');
