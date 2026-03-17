@@ -1,0 +1,35 @@
+{
+  "runtime": "Net80",
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "https://xm9cpxwr-51948.asse.devtunnels.ms/swagger/v1/swagger.json",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToTypeScriptClient": {
+      "className": "ApiClient",
+      "moduleName": "",
+      "namespace": "",
+      "typeScriptVersion": 5,
+      "template": "Axios",
+      "promiseType": "Promise",
+      "withCredentials": false,
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "generateOptionalParameters": true,
+      "exportTypes": true,
+      "wrapDtoExceptions": false,
+      "exceptionClass": "ApiException",
+      "wrapResponses": false,
+      "generateResponseClasses": true,
+      "responseClass": "SwaggerResponse",
+      "markOptionalProperties": true,
+      "typeStyle": "Interface",
+      "enumStyle": "StringLiteral",
+      "operationGenerationMode": "MultipleClientsFromOperationId",
+      "namingStrategy": "Default",
+      "output": "C:\\Users\\Abdul Sammad\\Downloads\\B2B_Sales\\Wholeseller\\wholesaler-admin\\src\\api\\generated\\apiClient.ts"
+    }
+  }
+}
