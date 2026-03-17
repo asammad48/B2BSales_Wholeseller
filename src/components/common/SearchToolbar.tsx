@@ -7,25 +7,25 @@ interface SearchToolbarProps {
   placeholder?: string;
 }
 
-export const SearchToolbar: React.FC<SearchToolbarProps> = ({
-  search,
-  onSearchChange,
-  placeholder = 'Search...'
+export const SearchToolbar: React.FC<SearchToolbarProps> = ({ 
+  search, 
+  onSearchChange, 
+  placeholder = "Search..." 
 }) => {
   return (
-    <div className="bg-[var(--bg-card)] p-4 rounded-t-[24px] border-b border-[var(--border-subtle)] flex items-center gap-4">
-      <div className="relative flex-1 max-w-md group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--text-secondary)] transition-colors" size={18} />
+    <div className="bg-white p-4 rounded-t-[24px] border-b border-gray-50 flex items-center gap-4">
+      <div className="relative flex-1 max-w-md">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <input
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-white/5 border border-[var(--border-subtle)] rounded-[var(--radius-lg)] py-2.5 pl-12 pr-4 outline-none text-sm font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:ring-2 focus:ring-[var(--border-focus)]/40 transition-all hover:bg-white/[0.07]"
+          className="w-full bg-gray-50 border-none rounded-xl py-2.5 pl-12 pr-4 focus:ring-2 focus:ring-gray-200 transition-all outline-none text-sm"
         />
       </div>
-
-      <button className="p-2.5 rounded-[var(--radius-md)] text-[var(--text-secondary)] bg-white/5 border border-[var(--border-subtle)] hover:bg-white/10 hover:text-[var(--text-primary)] transition-all">
+      
+      <button className="p-2.5 hover:bg-gray-50 rounded-xl text-gray-500 transition-colors border border-gray-100">
         <Filter size={18} />
       </button>
     </div>
