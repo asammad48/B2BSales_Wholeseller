@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
-import { productsRepository, Product } from '../../repositories/productsRepository';
+import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
 import { Plus, Package, CheckCircle2, XCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, Select, Button } from '../../components/common/Form';
+import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiClient';
+
+const trackingOptions: TrackingType[] = ['QuantityBased', 'Serialized'];
+const qualityOptions: QualityType[] = ['Original', 'OEM', 'HighCopy', 'Refurbished'];
+const pricingOptions: PricingMode[] = ['Direct', 'PercentageBased'];
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,6 +19,8 @@ export const ProductsPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [lookups, setLookups] = useState<CatalogLookups>({ categories: [], brands: [], models: [], partTypes: [] });
+  const [lookupsLoading, setLookupsLoading] = useState(false);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -28,6 +35,19 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
+  const fetchLookups = async () => {
+    setLookupsLoading(true);
+    try {
+      const response = await productsRepository.getCatalogLookups();
+      setLookups(response);
+    } catch (error) {
+      console.error('Failed to fetch catalog lookups', error);
+      alert('Failed to load lookup data');
+    } finally {
+      setLookupsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchProducts();
@@ -35,17 +55,47 @@ export const ProductsPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [search, page]);
 
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      fetchLookups();
+    }
+  }, [isCreateModalOpen]);
+
   const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const body = {
-      name: formData.get('name') as string,
+
+    const toOptional = (value: FormDataEntryValue | null) => {
+      const str = (value as string | null)?.trim();
+      return str ? str : undefined;
+    };
+
+    const toNumber = (value: FormDataEntryValue | null) => {
+      const str = (value as string | null)?.trim();
+      return str ? Number(str) : undefined;
+    };
+
+    const body: CreateProductPayload = {
+      categoryId: formData.get('categoryId') as string,
+      brandId: toOptional(formData.get('brandId')),
+      modelId: toOptional(formData.get('modelId')),
+      partTypeId: toOptional(formData.get('partTypeId')),
       sku: formData.get('sku') as string,
-      brandName: formData.get('brandName') as string,
-      modelName: formData.get('modelName') as string,
-      trackingType: formData.get('trackingType') as any,
-      qualityType: formData.get('qualityType') as any,
-      isActive: true
+      barcode: toOptional(formData.get('barcode')),
+      name: formData.get('name') as string,
+      shortDescription: toOptional(formData.get('shortDescription')),
+      longDescription: toOptional(formData.get('longDescription')),
+      specifications: toOptional(formData.get('specifications')),
+      trackingType: formData.get('trackingType') as TrackingType,
+      qualityType: formData.get('qualityType') as QualityType,
+      defaultBuyingPrice: Number(formData.get('defaultBuyingPrice')),
+      defaultSellingPrice: Number(formData.get('defaultSellingPrice')),
+      defaultPricingMode: formData.get('defaultPricingMode') as PricingMode,
+      defaultMarkupPercentage: toNumber(formData.get('defaultMarkupPercentage')),
+      warrantyDays: Number(formData.get('warrantyDays')),
+      lowStockThreshold: Number(formData.get('lowStockThreshold')),
+      primaryImagePath: toOptional(formData.get('primaryImagePath')),
+      primaryImageAltText: toOptional(formData.get('primaryImageAltText')),
     };
 
     try {
@@ -58,12 +108,12 @@ export const ProductsPage: React.FC = () => {
   };
 
   const columns = [
-    { 
-      header: 'ID', 
+    {
+      header: 'ID',
       accessor: (p: Product) => <span className="text-[10px] font-mono text-gray-400">{p.id}</span>
     },
-    { 
-      header: 'Product', 
+    {
+      header: 'Product',
       accessor: (p: Product) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
@@ -76,8 +126,8 @@ export const ProductsPage: React.FC = () => {
         </div>
       )
     },
-    { 
-      header: 'Brand / Model', 
+    {
+      header: 'Brand / Model',
       accessor: (p: Product) => (
         <div>
           <p className="font-medium">{p.brandName}</p>
@@ -87,8 +137,8 @@ export const ProductsPage: React.FC = () => {
     },
     { header: 'Tracking', accessor: 'trackingType' as keyof Product },
     { header: 'Quality', accessor: 'qualityType' as keyof Product },
-    { 
-      header: 'Status', 
+    {
+      header: 'Status',
       accessor: (p: Product) => (
         <div className={`flex items-center gap-1.5 ${p.isActive ? 'text-emerald-600' : 'text-gray-400'}`}>
           {p.isActive ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
@@ -101,11 +151,11 @@ export const ProductsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f5] p-6">
       <div className="max-w-7xl mx-auto">
-        <PageHeader 
-          title="Products" 
+        <PageHeader
+          title="Products"
           description="Manage your wholesale product catalog and inventory specifications."
           actions={
-            <button 
+            <button
               onClick={() => setIsCreateModalOpen(true)}
               className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
               style={{ backgroundColor: 'var(--primary-color)' }}
@@ -121,32 +171,31 @@ export const ProductsPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <SearchToolbar 
-            search={search} 
-            onSearchChange={setSearch} 
+          <SearchToolbar
+            search={search}
+            onSearchChange={setSearch}
             placeholder="Search by name, SKU, brand, model..."
           />
-          
-          <DataTable 
-            data={products} 
-            columns={columns} 
+
+          <DataTable
+            data={products}
+            columns={columns}
             loading={loading}
           />
 
-          {/* Pagination */}
           <div className="mt-6 flex items-center justify-between px-2">
             <p className="text-xs text-gray-400">
               Showing <span className="font-medium text-gray-600">{products.length}</span> of <span className="font-medium text-gray-600">{total}</span> products
             </p>
             <div className="flex gap-2">
-              <button 
+              <button
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
                 className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
                 Previous
               </button>
-              <button 
+              <button
                 disabled={page * 10 >= total}
                 onClick={() => setPage(p => p + 1)}
                 className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
@@ -158,22 +207,21 @@ export const ProductsPage: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Create Product Modal */}
       <AnimatePresence>
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCreateModalOpen(false)}
               className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[32px] shadow-xl p-8"
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-[32px] shadow-xl p-8"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-light">Create New Product</h2>
@@ -182,40 +230,127 @@ export const ProductsPage: React.FC = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleCreateProduct} className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <FormField label="Product Name">
-                    <Input name="name" required placeholder="e.g. iPhone 15 Pro" />
+              {lookupsLoading ? (
+                <p className="text-sm text-gray-500">Loading lookups...</p>
+              ) : (
+                <form onSubmit={handleCreateProduct} className="grid grid-cols-2 gap-4">
+                  <FormField label="Category">
+                    <Select name="categoryId" required>
+                      <option value="">Select category</option>
+                      {lookups.categories.map((item) => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                      ))}
+                    </Select>
                   </FormField>
-                </div>
-                <FormField label="SKU">
-                  <Input name="sku" required placeholder="e.g. IP15-PRO-128-BLK" />
-                </FormField>
-                <FormField label="Brand">
-                  <Input name="brandName" required placeholder="e.g. Apple" />
-                </FormField>
-                <FormField label="Model">
-                  <Input name="modelName" required placeholder="e.g. 15 Pro" />
-                </FormField>
-                <FormField label="Tracking Type">
-                  <Select name="trackingType" required>
-                    <option value="Serialized">Serialized</option>
-                    <option value="Non-Serialized">Non-Serialized</option>
-                  </Select>
-                </FormField>
-                <FormField label="Quality Type">
-                  <Select name="qualityType" required>
-                    <option value="New">New</option>
-                    <option value="Refurbished">Refurbished</option>
-                    <option value="Used">Used</option>
-                  </Select>
-                </FormField>
-                <div className="col-span-2 mt-4">
-                  <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
-                    Create Product
-                  </Button>
-                </div>
-              </form>
+                  <FormField label="Part Type">
+                    <Select name="partTypeId">
+                      <option value="">Select part type (optional)</option>
+                      {lookups.partTypes.map((item) => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                      ))}
+                    </Select>
+                  </FormField>
+
+                  <FormField label="Brand">
+                    <Select name="brandId">
+                      <option value="">Select brand (optional)</option>
+                      {lookups.brands.map((item) => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                      ))}
+                    </Select>
+                  </FormField>
+                  <FormField label="Model">
+                    <Select name="modelId">
+                      <option value="">Select model (optional)</option>
+                      {lookups.models.map((item) => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                      ))}
+                    </Select>
+                  </FormField>
+
+                  <FormField label="Product Name">
+                    <Input name="name" required />
+                  </FormField>
+                  <FormField label="SKU">
+                    <Input name="sku" required />
+                  </FormField>
+
+                  <FormField label="Barcode">
+                    <Input name="barcode" />
+                  </FormField>
+                  <FormField label="Tracking Type">
+                    <Select name="trackingType" required defaultValue="QuantityBased">
+                      {trackingOptions.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
+                    </Select>
+                  </FormField>
+
+                  <FormField label="Quality Type">
+                    <Select name="qualityType" required defaultValue="Original">
+                      {qualityOptions.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
+                    </Select>
+                  </FormField>
+                  <FormField label="Pricing Mode">
+                    <Select name="defaultPricingMode" required defaultValue="Direct">
+                      {pricingOptions.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
+                    </Select>
+                  </FormField>
+
+                  <FormField label="Buying Price">
+                    <Input name="defaultBuyingPrice" type="number" min="0" step="0.01" required />
+                  </FormField>
+                  <FormField label="Selling Price">
+                    <Input name="defaultSellingPrice" type="number" min="0" step="0.01" required />
+                  </FormField>
+
+                  <FormField label="Markup %">
+                    <Input name="defaultMarkupPercentage" type="number" min="0" step="0.01" />
+                  </FormField>
+                  <FormField label="Warranty Days">
+                    <Input name="warrantyDays" type="number" min="0" required />
+                  </FormField>
+
+                  <FormField label="Low Stock Threshold">
+                    <Input name="lowStockThreshold" type="number" min="0" required />
+                  </FormField>
+                  <FormField label="Primary Image Path">
+                    <Input name="primaryImagePath" type="url" placeholder="https://..." />
+                  </FormField>
+
+                  <FormField label="Primary Image Alt Text">
+                    <Input name="primaryImageAltText" />
+                  </FormField>
+
+                  <div className="col-span-2">
+                    <FormField label="Short Description">
+                      <textarea name="shortDescription" className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all min-h-16" />
+                    </FormField>
+                  </div>
+
+                  <div className="col-span-2">
+                    <FormField label="Long Description">
+                      <textarea name="longDescription" className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all min-h-24" />
+                    </FormField>
+                  </div>
+
+                  <div className="col-span-2">
+                    <FormField label="Specifications">
+                      <textarea name="specifications" className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all min-h-24" />
+                    </FormField>
+                  </div>
+
+                  <div className="col-span-2 mt-2">
+                    <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
+                      Create Product
+                    </Button>
+                  </div>
+                </form>
+              )}
             </motion.div>
           </div>
         )}
