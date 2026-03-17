@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { safeApiClient as apiClient } from './apiClientSafe';
 
 export type OrderStatus = 'Pending' | 'ReadyForPickup' | 'Completed' | 'Cancelled' | 'UnableToFulfill';
 

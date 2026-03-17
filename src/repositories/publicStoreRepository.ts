@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { safeApiClient as apiClient } from './apiClientSafe';
 import { ProductDetailResponseDto } from '../api/generated/apiClient';
 
 export const publicStoreRepository = {

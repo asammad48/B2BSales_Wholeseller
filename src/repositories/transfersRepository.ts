@@ -1,4 +1,4 @@
-import { apiClient } from '../api/client';
+import { safeApiClient as apiClient } from './apiClientSafe';
 
 export type TransferStatus = 'Pending' | 'Dispatched' | 'Received' | 'Cancelled';
 
