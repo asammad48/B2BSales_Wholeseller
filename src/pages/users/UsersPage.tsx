@@ -56,8 +56,8 @@ export const UsersPage: React.FC = () => {
       header: 'Roles', 
       accessor: (u: UserAdmin) => (
         <div className="flex flex-wrap gap-1">
-          {u.roleNames.map(role => (
-            <span key={role} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold uppercase tracking-widest">
+          {(u.roleNames ?? []).map((role, roleIndex) => (
+            <span key={`${u.id}-${role}-${roleIndex}`} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold uppercase tracking-widest">
               {role}
             </span>
           ))}

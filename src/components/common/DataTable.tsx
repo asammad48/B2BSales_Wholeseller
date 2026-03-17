@@ -53,14 +53,14 @@ export function DataTable<T extends { id: string | number }>({
             </tr>
           </thead>
           <tbody>
-            {data.map((item) => (
+            {data.map((item, rowIndex) => (
               <tr 
-                key={item.id}
+                key={`${item.id}-${rowIndex}`}
                 onClick={() => onRowClick?.(item)}
                 className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
               >
                 {columns.map((col, idx) => (
-                  <td key={idx} className={`px-6 py-4 text-sm text-gray-600 ${col.className || ''}`}>
+                  <td key={`${col.header}-${idx}`} className={`px-6 py-4 text-sm text-gray-600 ${col.className || ''}`}>
                     {typeof col.accessor === 'function' 
                       ? col.accessor(item) 
                       : (item[col.accessor] as React.ReactNode)}
