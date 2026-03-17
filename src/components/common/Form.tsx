@@ -31,7 +31,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
     <select
       ref={ref}
       {...props}
-      className={`w-full bg-white/5 border border-[var(--border-subtle)] rounded-[var(--radius-lg)] py-3 px-4 pr-10 text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] focus:ring-2 focus:ring-[var(--border-focus)]/40 transition-all appearance-none bg-[url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%2394a3b8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")] bg-[length:1.1rem] bg-[position:right_0.9rem_center] bg-no-repeat disabled:opacity-60 disabled:cursor-not-allowed [&>option]:bg-[var(--bg-card)] [&>option]:text-[var(--text-primary)] ${props.className || ''}`}
+      className={`w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all appearance-none ${props.className || ''}`}
     />
   )
 );
