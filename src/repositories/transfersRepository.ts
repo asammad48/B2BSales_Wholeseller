@@ -45,7 +45,7 @@ export const transfersRepository = {
     };
   },
 
-  async transfers(body: CreateTransferRequest): Promise<Transfer> {
+  async createTransfer(body: CreateTransferRequest): Promise<Transfer> {
     // Ensure items is populated if using simple fields
     if (body.productId && body.quantity && !body.items) {
       body.items = [{
@@ -63,7 +63,7 @@ export const transfersRepository = {
     return response.data as any;
   },
 
-  async dispatch(id: string): Promise<Transfer> {
+  async dispatchTransfer(id: string): Promise<Transfer> {
     const response = await apiClient.dispatch(id);
     
     if (!response.success || !response.data) {
@@ -73,7 +73,7 @@ export const transfersRepository = {
     return response.data as any;
   },
 
-  async receive(id: string): Promise<Transfer> {
+  async receiveTransfer(id: string): Promise<Transfer> {
     const response = await apiClient.receive(id);
     
     if (!response.success || !response.data) {
@@ -81,5 +81,17 @@ export const transfersRepository = {
     }
 
     return response.data as any;
+  },
+
+  async transfers(body: CreateTransferRequest): Promise<Transfer> {
+    return this.createTransfer(body);
+  },
+
+  async dispatch(id: string): Promise<Transfer> {
+    return this.dispatchTransfer(id);
+  },
+
+  async receive(id: string): Promise<Transfer> {
+    return this.receiveTransfer(id);
   },
 };

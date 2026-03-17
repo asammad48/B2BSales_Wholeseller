@@ -29,7 +29,8 @@ export const productsRepository = {
     sortBy: string = 'createdAt',
     sortDirection: 'asc' | 'desc' = 'desc'
   ): Promise<ProductsResponse> {
-    const response = await apiClient.productsGET(page, limit, search, sortBy, sortDirection);
+    const normalizedSearch = search.trim() || undefined;
+    const response = await apiClient.productsGET(page, limit, normalizedSearch, sortBy, sortDirection);
     
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch products');
@@ -43,6 +44,17 @@ export const productsRepository = {
     };
   },
 
+
+
+  async getProductById(id: string): Promise<Product> {
+    const response = await apiClient.productsGET2(id);
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to fetch product');
+    }
+
+    return response.data as any;
+  },
   async createProduct(product: Partial<Product>): Promise<Product> {
     const response = await apiClient.productsPOST(product as any);
     

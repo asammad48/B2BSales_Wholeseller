@@ -51,7 +51,7 @@ export const AdminThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updateTheme = async (newTheme: ThemeSettings) => {
-    await themeRepository.updateTheme(newTheme);
+    await themeRepository.updateCurrentTheme(newTheme);
     setTheme(newTheme);
     applyTheme(newTheme);
   };
