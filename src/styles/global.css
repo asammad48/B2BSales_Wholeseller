@@ -72,6 +72,19 @@
     @apply w-full bg-white/5 border border-[var(--border-subtle)] rounded-[var(--radius-lg)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] transition-all placeholder:text-[var(--text-muted)];
   }
 
+  .themed-select {
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+  }
+
+  .themed-select option {
+    border-radius: 999px;
+    padding: 8px 12px;
+    margin: 4px;
+  }
+
   /* Toolbar */
   .admin-toolbar {
     @apply flex items-center justify-between mb-8 gap-4 flex-wrap;
