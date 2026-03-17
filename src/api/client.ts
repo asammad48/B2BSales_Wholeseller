@@ -5,6 +5,7 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
 const axiosInstance = axios.create({
   baseURL: baseUrl,
+  transformResponse: [(data) => data],
 });
 
 // Add a request interceptor to include the JWT token
