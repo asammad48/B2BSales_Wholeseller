@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const token = authRepository.getToken();
       if (token) {
-        const userData = await authRepository.me();
+        const userData = await authRepository.getMe();
         setUser(userData);
       }
     } catch (error) {

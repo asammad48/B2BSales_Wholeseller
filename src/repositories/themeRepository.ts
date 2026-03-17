@@ -1,5 +1,5 @@
 import { apiClient } from '../api/client';
-import { ThemeResponseDto, UpdateThemeRequestDto } from '../api/generated/apiClient';
+import { UpdateThemeRequestDto } from '../api/generated/apiClient';
 
 export interface ThemeSettings {
   primaryColor: string;
@@ -30,6 +30,10 @@ export const themeRepository = {
     if (!response.success) {
       throw new Error(response.message || 'Failed to update theme');
     }
+  },
+
+  async updateCurrentTheme(settings: ThemeSettings): Promise<void> {
+    return this.updateTheme(settings);
   },
 
   async getPublicTheme(): Promise<ThemeSettings> {

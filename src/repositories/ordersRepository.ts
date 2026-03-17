@@ -34,7 +34,8 @@ export const ordersRepository = {
     limit: number = 10,
     search: string = ''
   ): Promise<OrdersResponse> {
-    const response = await apiClient.ordersGET(page, limit, search);
+    const normalizedSearch = search.trim() || undefined;
+    const response = await apiClient.ordersGET(page, limit, normalizedSearch);
     
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch orders');
@@ -48,7 +49,7 @@ export const ordersRepository = {
     };
   },
 
-  async ready(id: string): Promise<Order> {
+  async markReady(id: string): Promise<Order> {
     const response = await apiClient.ready(id);
     
     if (!response.success || !response.data) {
@@ -58,7 +59,7 @@ export const ordersRepository = {
     return response.data as any;
   },
 
-  async complete(id: string): Promise<Order> {
+  async completeOrder(id: string): Promise<Order> {
     const response = await apiClient.complete(id);
     
     if (!response.success || !response.data) {
@@ -68,7 +69,7 @@ export const ordersRepository = {
     return response.data as any;
   },
 
-  async unableToFulfill(id: string, reason: string): Promise<Order> {
+  async markUnableToFulfill(id: string, reason: string): Promise<Order> {
     const response = await apiClient.unableToFulfill(id, { reason } as any);
     
     if (!response.success || !response.data) {
@@ -76,5 +77,17 @@ export const ordersRepository = {
     }
 
     return response.data as any;
+  },
+
+  async ready(id: string): Promise<Order> {
+    return this.markReady(id);
+  },
+
+  async complete(id: string): Promise<Order> {
+    return this.completeOrder(id);
+  },
+
+  async unableToFulfill(id: string, reason: string): Promise<Order> {
+    return this.markUnableToFulfill(id, reason);
   },
 };

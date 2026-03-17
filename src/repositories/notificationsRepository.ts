@@ -12,13 +12,22 @@ export interface Notification {
 }
 
 export const notificationsRepository = {
-  async notifications(): Promise<Notification[]> {
-    const response = await apiClient.notifications();
+  async getNotifications(
+    page: number = 1,
+    limit: number = 10,
+    search: string = ''
+  ): Promise<Notification[]> {
+    const normalizedSearch = search.trim() || undefined;
+    const response = await apiClient.notifications(page, limit, normalizedSearch);
     
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch notifications');
     }
 
     return response.data.items as any[];
+  },
+
+  async notifications(): Promise<Notification[]> {
+    return this.getNotifications();
   },
 };

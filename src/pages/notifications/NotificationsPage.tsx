@@ -12,7 +12,7 @@ export const NotificationsPage: React.FC = () => {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const data = await notificationsRepository.notifications();
+      const data = await notificationsRepository.getNotifications();
       setNotifications(data);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
