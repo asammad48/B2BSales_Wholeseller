@@ -1,4 +1,11 @@
-import { safeApiClient as apiClient } from './apiClientSafe';
+import { apiClient } from '../api/client';
+import {
+  CreateProductRequestDto,
+  PricingMode,
+  PublicLookupItemDto,
+  QualityType,
+  TrackingType,
+} from '../api/generated/apiClient';
 
 export interface Product {
   id: string;
@@ -11,7 +18,8 @@ export interface Product {
   basePrice: number;
   isActive: boolean;
   createdAt: string;
-  trackingType: 'Serialized' | 'Non-Serialized' | 'None' | 'Serial' | 'Batch';
+  trackingType: TrackingType;
+  qualityType: QualityType;
 }
 
 export interface ProductsResponse {
@@ -19,6 +27,18 @@ export interface ProductsResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface CatalogLookups {
+  categories: PublicLookupItemDto[];
+  brands: PublicLookupItemDto[];
+  models: PublicLookupItemDto[];
+  partTypes: PublicLookupItemDto[];
+}
+
+export interface CreateProductPayload extends Omit<CreateProductRequestDto, 'images'> {
+  primaryImagePath?: string;
+  primaryImageAltText?: string;
 }
 
 export const productsRepository = {
@@ -31,7 +51,7 @@ export const productsRepository = {
   ): Promise<ProductsResponse> {
     const normalizedSearch = search.trim() || undefined;
     const response = await apiClient.productsGET(page, limit, normalizedSearch, sortBy, sortDirection);
-    
+
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch products');
     }
@@ -40,11 +60,24 @@ export const productsRepository = {
       data: (response.data.items || []) as any[],
       total: response.data.totalCount || 0,
       page: response.data.pageNumber || 1,
-      limit: response.data.pageSize || 10
+      limit: response.data.pageSize || 10,
     };
   },
 
+  async getCatalogLookups(): Promise<CatalogLookups> {
+    const response = await apiClient.lookups();
 
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to fetch catalog lookups');
+    }
+
+    return {
+      categories: response.data.categories || [],
+      brands: response.data.brands || [],
+      models: response.data.models || [],
+      partTypes: response.data.partTypes || [],
+    };
+  },
 
   async getProductById(id: string): Promise<Product> {
     const response = await apiClient.productsGET2(id);
@@ -55,13 +88,28 @@ export const productsRepository = {
 
     return response.data as any;
   },
-  async createProduct(product: Partial<Product>): Promise<Product> {
-    const response = await apiClient.productsPOST(product as any);
-    
+
+  async createProduct(product: CreateProductPayload): Promise<string> {
+    const body: CreateProductRequestDto = {
+      ...product,
+      images: product.primaryImagePath
+        ? [
+            {
+              filePath: product.primaryImagePath,
+              altText: product.primaryImageAltText || undefined,
+              isPrimary: true,
+              sortOrder: 0,
+            },
+          ]
+        : undefined,
+    };
+
+    const response = await apiClient.productsPOST(body);
+
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create product');
     }
 
-    return response.data as any;
-  }
+    return response.data;
+  },
 };
