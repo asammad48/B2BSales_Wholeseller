@@ -51,6 +51,13 @@ export interface IApiClient {
      */
     summary(clientId: string): Promise<ClientOrderSummaryDtoApiResponse>;
     /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    summary2(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined): Promise<DashboardSummaryDtoApiResponse>;
+    /**
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
      * @param search (optional) 
@@ -95,6 +102,10 @@ export interface IApiClient {
      * @return OK
      */
     notifications(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<NotificationListItemResponseDtoPageResponseApiResponse>;
+    /**
+     * @return OK
+     */
+    read(id: string): Promise<BooleanApiResponse>;
     /**
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
@@ -159,6 +170,11 @@ export interface IApiClient {
      */
     productsGET2(id: string): Promise<ProductDetailResponseDtoApiResponse>;
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    adjust2(productId: string, body?: AdjustProductPricingRequestDto | undefined): Promise<ProductPricingAdjustmentResultDtoApiResponse>;
+    /**
      * @return OK
      */
     shops(tenantId: string): Promise<PublicShopLookupItemDtoIEnumerableApiResponse>;
@@ -209,6 +225,57 @@ export interface IApiClient {
      * @return OK
      */
     newArrivals(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse>;
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    bestPerforming(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<BestPerformingClientReportItemDtoPageResponseApiResponse>;
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    topSelling(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<TopSellingProductReportItemDtoPageResponseApiResponse>;
+    /**
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    lowStock(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<LowStockReportItemDtoPageResponseApiResponse>;
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    byShop(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined): Promise<SalesByShopReportItemDtoListApiResponse>;
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    statusSummary(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined): Promise<OrderStatusSummaryDtoApiResponse>;
+    /**
+     * @return OK
+     */
+    lookup(): Promise<ShopLookupItemDtoIEnumerableApiResponse>;
     /**
      * @return OK
      */
@@ -657,6 +724,72 @@ export class ApiClient implements IApiClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<ClientOrderSummaryDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    summary2(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, cancelToken?: CancelToken): Promise<DashboardSummaryDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Dashboard/summary?";
+        if (rangeType === null)
+            throw new Error("The parameter 'rangeType' cannot be null.");
+        else if (rangeType !== undefined)
+            url_ += "RangeType=" + encodeURIComponent("" + rangeType) + "&";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "StartDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "EndDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSummary2(_response);
+        });
+    }
+
+    protected processSummary2(response: AxiosResponse): Promise<DashboardSummaryDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<DashboardSummaryDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<DashboardSummaryDtoApiResponse>(null as any);
     }
 
     /**
@@ -1136,6 +1269,60 @@ export class ApiClient implements IApiClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<NotificationListItemResponseDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    read(id: string, cancelToken?: CancelToken): Promise<BooleanApiResponse> {
+        let url_ = this.baseUrl + "/api/Notifications/{id}/read";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processRead(_response);
+        });
+    }
+
+    protected processRead(response: AxiosResponse): Promise<BooleanApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<BooleanApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<BooleanApiResponse>(null as any);
     }
 
     /**
@@ -1810,6 +1997,65 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    adjust2(productId: string, body?: AdjustProductPricingRequestDto | undefined, cancelToken?: CancelToken): Promise<ProductPricingAdjustmentResultDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Products/{productId}/pricing/adjust";
+        if (productId === undefined || productId === null)
+            throw new Error("The parameter 'productId' must be defined.");
+        url_ = url_.replace("{productId}", encodeURIComponent("" + productId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAdjust2(_response);
+        });
+    }
+
+    protected processAdjust2(response: AxiosResponse): Promise<ProductPricingAdjustmentResultDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ProductPricingAdjustmentResultDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ProductPricingAdjustmentResultDtoApiResponse>(null as any);
+    }
+
+    /**
      * @return OK
      */
     shops(tenantId: string, cancelToken?: CancelToken): Promise<PublicShopLookupItemDtoIEnumerableApiResponse> {
@@ -2319,6 +2565,447 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    bestPerforming(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<BestPerformingClientReportItemDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/Reports/clients/best-performing?";
+        if (rangeType === null)
+            throw new Error("The parameter 'rangeType' cannot be null.");
+        else if (rangeType !== undefined)
+            url_ += "RangeType=" + encodeURIComponent("" + rangeType) + "&";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "StartDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "EndDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processBestPerforming(_response);
+        });
+    }
+
+    protected processBestPerforming(response: AxiosResponse): Promise<BestPerformingClientReportItemDtoPageResponseApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<BestPerformingClientReportItemDtoPageResponseApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<BestPerformingClientReportItemDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    topSelling(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<TopSellingProductReportItemDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/Reports/products/top-selling?";
+        if (rangeType === null)
+            throw new Error("The parameter 'rangeType' cannot be null.");
+        else if (rangeType !== undefined)
+            url_ += "RangeType=" + encodeURIComponent("" + rangeType) + "&";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "StartDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "EndDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processTopSelling(_response);
+        });
+    }
+
+    protected processTopSelling(response: AxiosResponse): Promise<TopSellingProductReportItemDtoPageResponseApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<TopSellingProductReportItemDtoPageResponseApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<TopSellingProductReportItemDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    lowStock(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<LowStockReportItemDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/Reports/products/low-stock?";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processLowStock(_response);
+        });
+    }
+
+    protected processLowStock(response: AxiosResponse): Promise<LowStockReportItemDtoPageResponseApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<LowStockReportItemDtoPageResponseApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<LowStockReportItemDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    byShop(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, cancelToken?: CancelToken): Promise<SalesByShopReportItemDtoListApiResponse> {
+        let url_ = this.baseUrl + "/api/Reports/sales/by-shop?";
+        if (rangeType === null)
+            throw new Error("The parameter 'rangeType' cannot be null.");
+        else if (rangeType !== undefined)
+            url_ += "RangeType=" + encodeURIComponent("" + rangeType) + "&";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "StartDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "EndDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processByShop(_response);
+        });
+    }
+
+    protected processByShop(response: AxiosResponse): Promise<SalesByShopReportItemDtoListApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<SalesByShopReportItemDtoListApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<SalesByShopReportItemDtoListApiResponse>(null as any);
+    }
+
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    statusSummary(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, cancelToken?: CancelToken): Promise<OrderStatusSummaryDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Reports/orders/status-summary?";
+        if (rangeType === null)
+            throw new Error("The parameter 'rangeType' cannot be null.");
+        else if (rangeType !== undefined)
+            url_ += "RangeType=" + encodeURIComponent("" + rangeType) + "&";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "StartDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "EndDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processStatusSummary(_response);
+        });
+    }
+
+    protected processStatusSummary(response: AxiosResponse): Promise<OrderStatusSummaryDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<OrderStatusSummaryDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<OrderStatusSummaryDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    lookup( cancelToken?: CancelToken): Promise<ShopLookupItemDtoIEnumerableApiResponse> {
+        let url_ = this.baseUrl + "/api/Shops/lookup";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processLookup(_response);
+        });
+    }
+
+    protected processLookup(response: AxiosResponse): Promise<ShopLookupItemDtoIEnumerableApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ShopLookupItemDtoIEnumerableApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ShopLookupItemDtoIEnumerableApiResponse>(null as any);
+    }
+
+    /**
      * @return OK
      */
     currentGET( cancelToken?: CancelToken): Promise<ThemeResponseDtoApiResponse> {
@@ -2553,11 +3240,49 @@ export class ApiClient implements IApiClient {
     }
 }
 
+export interface AdjustProductPricingRequestDto {
+    buyingPrice?: number;
+    sellingPrice?: number;
+    pricingMode?: PricingMode;
+    markupPercentage?: number | undefined;
+    reason?: string | undefined;
+    updateDefaultPrice?: boolean;
+}
+
 export interface AdjustStockRequestDto {
     shopId?: string;
     productId?: string;
     quantityChange?: number;
     reason?: string;
+}
+
+export interface BestPerformingClientReportItemDto {
+    clientId?: string;
+    clientName?: string;
+    businessName?: string;
+    totalOrders?: number;
+    completedOrders?: number;
+    totalSales?: number;
+    averageOrderValue?: number;
+}
+
+export interface BestPerformingClientReportItemDtoPageResponse {
+    items?: BestPerformingClientReportItemDto[];
+    totalCount?: number;
+    pageNumber?: number;
+    pageSize?: number;
+}
+
+export interface BestPerformingClientReportItemDtoPageResponseApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: BestPerformingClientReportItemDtoPageResponse;
+}
+
+export interface BooleanApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: boolean;
 }
 
 export interface ChangePasswordRequestDto {
@@ -2704,6 +3429,21 @@ export interface CurrencyLookupResponseDto {
     symbol?: string;
 }
 
+export interface DashboardSummaryDto {
+    totalClients?: number;
+    totalSales?: number;
+    activeOrders?: number;
+    rangeType?: RangeType;
+    startDate?: Date;
+    endDate?: Date;
+}
+
+export interface DashboardSummaryDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: DashboardSummaryDto;
+}
+
 export interface ForgotPasswordRequestDto {
     email?: string;
 }
@@ -2805,6 +3545,29 @@ export interface LookupItemResponseDto {
     name?: string;
 }
 
+export interface LowStockReportItemDto {
+    productId?: string;
+    productName?: string;
+    sku?: string;
+    shopId?: string;
+    shopName?: string;
+    stockQuantity?: number;
+    lowStockThreshold?: number;
+}
+
+export interface LowStockReportItemDtoPageResponse {
+    items?: LowStockReportItemDto[];
+    totalCount?: number;
+    pageNumber?: number;
+    pageSize?: number;
+}
+
+export interface LowStockReportItemDtoPageResponseApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: LowStockReportItemDtoPageResponse;
+}
+
 export interface NotificationListItemResponseDto {
     id?: string;
     type?: string;
@@ -2812,6 +3575,8 @@ export interface NotificationListItemResponseDto {
     message?: string;
     isRead?: boolean;
     createdAt?: Date;
+    referenceId?: string | undefined;
+    referenceType?: string | undefined;
 }
 
 export interface NotificationListItemResponseDtoPageResponse {
@@ -2855,6 +3620,20 @@ export interface OrderListItemResponseDtoPageResponseApiResponse {
 }
 
 export type OrderStatus = "Pending" | "ReadyForPickup" | "Completed" | "Cancelled" | "UnableToFulfill";
+
+export interface OrderStatusSummaryDto {
+    pendingOrders?: number;
+    readyForPickupOrders?: number;
+    completedOrders?: number;
+    cancelledOrders?: number;
+    unableToFulfillOrders?: number;
+}
+
+export interface OrderStatusSummaryDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: OrderStatusSummaryDto;
+}
 
 export interface PlaceClientOrderItemRequestDto {
     productId?: string;
@@ -2961,6 +3740,21 @@ export interface ProductListItemResponseDtoPageResponseApiResponse {
     success?: boolean;
     message?: string;
     data?: ProductListItemResponseDtoPageResponse;
+}
+
+export interface ProductPricingAdjustmentResultDto {
+    productId?: string;
+    buyingPrice?: number;
+    sellingPrice?: number;
+    pricingMode?: PricingMode;
+    markupPercentage?: number | undefined;
+    updatedAt?: Date;
+}
+
+export interface ProductPricingAdjustmentResultDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: ProductPricingAdjustmentResultDto;
 }
 
 export interface PublicCatalogFiltersResponseDto {
@@ -3089,6 +3883,8 @@ export interface PublicShopLookupItemDtoIEnumerableApiResponse {
 
 export type QualityType = "Original" | "OEM" | "HighCopy" | "Refurbished";
 
+export type RangeType = "Day" | "Week" | "Month" | "Custom";
+
 export interface RelatedProductResponseDto {
     productId?: string;
     name?: string;
@@ -3101,12 +3897,40 @@ export interface ResetPasswordRequestDto {
     newPassword?: string;
 }
 
+export interface SalesByShopReportItemDto {
+    shopId?: string;
+    shopName?: string;
+    totalSales?: number;
+    completedOrders?: number;
+    averageOrderValue?: number;
+}
+
+export interface SalesByShopReportItemDtoListApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: SalesByShopReportItemDto[] | undefined;
+}
+
 export interface SerializedStockInUnitRequestDto {
     unitBarcode?: string;
     serialNumber?: string | undefined;
     imei1?: string | undefined;
     imei2?: string | undefined;
     salePrice?: number | undefined;
+}
+
+export interface ShopLookupItemDto {
+    id?: string;
+    name?: string;
+    code?: string;
+    isMain?: boolean;
+    isActive?: boolean;
+}
+
+export interface ShopLookupItemDtoIEnumerableApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: ShopLookupItemDto[] | undefined;
 }
 
 export interface ShopLookupResponseDto {
@@ -3149,6 +3973,29 @@ export interface ThemeResponseDtoApiResponse {
     success?: boolean;
     message?: string;
     data?: ThemeResponseDto;
+}
+
+export interface TopSellingProductReportItemDto {
+    productId?: string;
+    productName?: string;
+    sku?: string;
+    brandName?: string;
+    modelName?: string;
+    quantitySold?: number;
+    totalSales?: number;
+}
+
+export interface TopSellingProductReportItemDtoPageResponse {
+    items?: TopSellingProductReportItemDto[];
+    totalCount?: number;
+    pageNumber?: number;
+    pageSize?: number;
+}
+
+export interface TopSellingProductReportItemDtoPageResponseApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: TopSellingProductReportItemDtoPageResponse;
 }
 
 export type TrackingType = "QuantityBased" | "Serialized";
