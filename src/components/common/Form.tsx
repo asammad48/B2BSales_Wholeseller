@@ -31,7 +31,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
     <select
       ref={ref}
       {...props}
-      className={`w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all appearance-none ${props.className || ''}`}
+      className={`w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-full py-3 px-4 pr-10 text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all appearance-none themed-select ${props.className || ''}`}
     />
   )
 );
