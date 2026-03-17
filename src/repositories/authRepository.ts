@@ -35,7 +35,7 @@ export const authRepository = {
     };
   },
 
-  async me(): Promise<User> {
+  async getMe(): Promise<User> {
     const response = await apiClient.me();
 
     if (!response.success || !response.data) {
@@ -50,6 +50,10 @@ export const authRepository = {
       name: fullName || '',
       role: (role?.toLowerCase() as any) || 'staff'
     };
+  },
+
+  async me(): Promise<User> {
+    return this.getMe();
   },
 
   setToken(token: string) {

@@ -37,7 +37,7 @@ export const TransfersPage: React.FC = () => {
 
   const handleDispatch = async (id: string) => {
     try {
-      await transfersRepository.dispatch(id);
+      await transfersRepository.dispatchTransfer(id);
       fetchTransfers();
     } catch (error) {
       alert('Failed to dispatch transfer');
@@ -46,7 +46,7 @@ export const TransfersPage: React.FC = () => {
 
   const handleReceive = async (id: string) => {
     try {
-      await transfersRepository.receive(id);
+      await transfersRepository.receiveTransfer(id);
       fetchTransfers();
     } catch (error) {
       alert('Failed to receive transfer');
@@ -64,7 +64,7 @@ export const TransfersPage: React.FC = () => {
     };
 
     try {
-      await transfersRepository.transfers(body);
+      await transfersRepository.createTransfer(body);
       setIsCreateModalOpen(false);
       fetchTransfers();
     } catch (error) {

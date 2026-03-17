@@ -29,7 +29,8 @@ export const inventoryRepository = {
     limit: number = 10,
     search: string = ''
   ): Promise<InventoryResponse> {
-    const response = await apiClient.inventory(page, limit, search);
+    const normalizedSearch = search.trim() || undefined;
+    const response = await apiClient.inventory(page, limit, normalizedSearch);
     
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch inventory');
@@ -43,7 +44,7 @@ export const inventoryRepository = {
     };
   },
 
-  async stockIn(body: { productId: string; shopId: string; quantity: number; trackingType?: string }): Promise<InventoryItem> {
+  async createStockIn(body: { productId: string; shopId: string; quantity: number; trackingType?: string }): Promise<InventoryItem> {
     const response = await apiClient.stockIn(body as any);
     
     if (!response.success || !response.data) {
@@ -53,7 +54,7 @@ export const inventoryRepository = {
     return response.data as any;
   },
 
-  async adjust(body: { id: string; adjustment: number; reason: string }): Promise<InventoryItem> {
+  async adjustStock(body: { id: string; adjustment: number; reason: string }): Promise<InventoryItem> {
     const response = await apiClient.adjust(body as any);
     
     if (!response.success || !response.data) {
@@ -61,5 +62,13 @@ export const inventoryRepository = {
     }
 
     return response.data as any;
+  },
+
+  async stockIn(body: { productId: string; shopId: string; quantity: number; trackingType?: string }): Promise<InventoryItem> {
+    return this.createStockIn(body);
+  },
+
+  async adjust(body: { id: string; adjustment: number; reason: string }): Promise<InventoryItem> {
+    return this.adjustStock(body);
   }
 };
