@@ -3,7 +3,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
-import { Plus, Package, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Plus, Package, CheckCircle2, XCircle, X, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, Select, Button } from '../../components/common/Form';
 import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiClient';
@@ -21,6 +21,8 @@ export const ProductsPage: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lookups, setLookups] = useState<CatalogLookups>({ categories: [], brands: [], models: [], partTypes: [] });
   const [lookupsLoading, setLookupsLoading] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -107,6 +109,41 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
+
+
+  const handleAdjustPricing = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+
+    const formData = new FormData(e.currentTarget);
+    const buyingPrice = Number(formData.get('buyingPrice'));
+    const sellingPrice = Number(formData.get('sellingPrice'));
+    const pricingMode = formData.get('pricingMode') as PricingMode;
+    const markupRaw = (formData.get('markupPercentage') as string)?.trim();
+    const reasonRaw = (formData.get('reason') as string)?.trim();
+
+    if (buyingPrice < 0 || sellingPrice < 0) {
+      alert('Buying and selling prices must be non-negative');
+      return;
+    }
+
+    try {
+      await productsRepository.adjustProductPricing(selectedProduct.id, {
+        buyingPrice,
+        sellingPrice,
+        pricingMode,
+        markupPercentage: markupRaw ? Number(markupRaw) : undefined,
+        reason: reasonRaw || undefined,
+        updateDefaultPrice: true,
+      });
+      setIsPricingModalOpen(false);
+      setSelectedProduct(null);
+      fetchProducts();
+    } catch (error) {
+      alert('Failed to adjust pricing');
+    }
+  };
+
   const columns = [
     {
       header: 'ID',
@@ -146,6 +183,22 @@ export const ProductsPage: React.FC = () => {
         </div>
       )
     },
+    {
+      header: 'Actions',
+      accessor: (p: Product) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedProduct(p);
+            setIsPricingModalOpen(true);
+          }}
+          className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
+          title="Adjust Pricing"
+        >
+          <DollarSign size={16} />
+        </button>
+      )
+    }
   ];
 
   return (
@@ -355,6 +408,66 @@ export const ProductsPage: React.FC = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {isPricingModalOpen && selectedProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPricingModalOpen(false)}
+              className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-xl bg-white rounded-[32px] shadow-xl p-8"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-light">Adjust Pricing</h2>
+                  <p className="text-xs text-gray-400 mt-1">{selectedProduct.name} ({selectedProduct.sku})</p>
+                </div>
+                <button onClick={() => setIsPricingModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAdjustPricing} className="grid grid-cols-2 gap-4">
+                <FormField label="Buying Price">
+                  <Input name="buyingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultBuyingPrice || 0} required />
+                </FormField>
+                <FormField label="Selling Price">
+                  <Input name="sellingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultSellingPrice || selectedProduct.basePrice || 0} required />
+                </FormField>
+                <FormField label="Pricing Mode">
+                  <Select name="pricingMode" defaultValue={selectedProduct.defaultPricingMode || 'Direct'}>
+                    {pricingOptions.map((item) => (
+                      <option key={item} value={item}>{item}</option>
+                    ))}
+                  </Select>
+                </FormField>
+                <FormField label="Markup %">
+                  <Input name="markupPercentage" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultMarkupPercentage || ''} />
+                </FormField>
+                <div className="col-span-2">
+                  <FormField label="Reason (Optional)">
+                    <Input name="reason" placeholder="Reason for price change" />
+                  </FormField>
+                </div>
+                <div className="col-span-2">
+                  <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
+                    Save Pricing
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };

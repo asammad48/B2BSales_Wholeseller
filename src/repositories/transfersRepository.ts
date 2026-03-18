@@ -1,4 +1,5 @@
 import { safeApiClient as apiClient } from './apiClientSafe';
+import { shopsRepository, ShopLookupItem } from './shopsRepository';
 
 export type TransferStatus = 'Pending' | 'Dispatched' | 'Received' | 'Cancelled';
 
@@ -17,16 +18,15 @@ export interface Transfer {
   status: TransferStatus;
   createdAt: string;
   items: TransferItem[];
-  // Flattened for simple display if needed
   productName?: string;
   quantity?: number;
 }
 
 export interface CreateTransferRequest {
-  fromShopId: string;
-  toShopId: string;
-  items?: TransferItem[];
-  // For simple creation
+  sourceShopId: string;
+  destinationShopId: string;
+  notes?: string;
+  items?: Array<{ productId: string; quantity: number }>;
   productId?: string;
   quantity?: number;
 }
@@ -37,50 +37,54 @@ export interface TransfersResponse {
 }
 
 export const transfersRepository = {
-  async getTransfers(page: number = 1, limit: number = 10, search: string = ''): Promise<TransfersResponse> {
-    // Note: transfersGET is missing from generated client, returning empty for now
+  async getTransfers(_page: number = 1, _limit: number = 10, _search: string = ''): Promise<TransfersResponse> {
     return {
       data: [],
-      total: 0
+      total: 0,
     };
   },
 
+  async getShopsLookup(): Promise<ShopLookupItem[]> {
+    return shopsRepository.getShopsLookup();
+  },
+
   async createTransfer(body: CreateTransferRequest): Promise<Transfer> {
-    // Ensure items is populated if using simple fields
-    if (body.productId && body.quantity && !body.items) {
-      body.items = [{
-        productId: body.productId,
-        quantity: body.quantity,
-        productName: ''
-      }];
-    }
-    const response = await apiClient.transfers(body as any);
-    
+    const payload = {
+      sourceShopId: body.sourceShopId,
+      destinationShopId: body.destinationShopId,
+      notes: body.notes,
+      items: body.items || (body.productId && body.quantity
+        ? [{ productId: body.productId, quantity: body.quantity }]
+        : []),
+    };
+
+    const response = await apiClient.transfers(payload as any);
+
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create transfer');
     }
 
-    return response.data as any;
+    return { id: response.data, fromShopId: payload.sourceShopId, toShopId: payload.destinationShopId } as Transfer;
   },
 
   async dispatchTransfer(id: string): Promise<Transfer> {
     const response = await apiClient.dispatch(id);
-    
-    if (!response.success || !response.data) {
+
+    if (!response.success) {
       throw new Error(response.message || 'Failed to dispatch transfer');
     }
 
-    return response.data as any;
+    return { id } as Transfer;
   },
 
   async receiveTransfer(id: string): Promise<Transfer> {
     const response = await apiClient.receive(id);
-    
-    if (!response.success || !response.data) {
+
+    if (!response.success) {
       throw new Error(response.message || 'Failed to receive transfer');
     }
 
-    return response.data as any;
+    return { id } as Transfer;
   },
 
   async transfers(body: CreateTransferRequest): Promise<Transfer> {
