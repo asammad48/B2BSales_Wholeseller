@@ -8,6 +8,7 @@ import {
   ShoppingCart, 
   Truck, 
   Users, 
+  BarChart3,
   Palette, 
   Settings, 
   LogOut,
@@ -81,6 +82,8 @@ export const AdminLayout = () => {
     { to: '/inventory', icon: Boxes, label: 'Inventory' },
     { to: '/orders', icon: ShoppingCart, label: 'Orders' },
     { to: '/transfers', icon: Truck, label: 'Transfers' },
+    { to: '/reports', icon: BarChart3, label: 'Reports' },
+    { to: '/notifications', icon: Bell, label: 'Notifications' },
     { to: '/users', icon: Users, label: 'Users' },
     { to: '/theme', icon: Palette, label: 'Theme' },
     { to: '/settings/account', icon: Settings, label: 'Settings' },
@@ -163,10 +166,10 @@ export const AdminLayout = () => {
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="relative p-2 text-[var(--text-secondary)] hover:text-white transition-colors">
+            <Link to="/notifications" className="relative p-2 text-[var(--text-secondary)] hover:text-white transition-colors">
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-[var(--color-primary)] rounded-full border-2 border-[var(--bg-main)]" />
-            </button>
+            </Link>
             <div className="flex items-center gap-3 pl-6 border-l border-[var(--border-subtle)]">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-semibold text-white">{user?.name || 'Admin User'}</p>

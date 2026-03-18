@@ -3,6 +3,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { transfersRepository, Transfer } from '../../repositories/transfersRepository';
+import { shopsRepository, ShopLookupItem } from '../../repositories/shopsRepository';
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, Select, Button } from '../../components/common/Form';
@@ -14,6 +15,7 @@ export const TransfersPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [shops, setShops] = useState<ShopLookupItem[]>([]);
 
   const fetchTransfers = async () => {
     setLoading(true);
@@ -34,6 +36,18 @@ export const TransfersPage: React.FC = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [search, page]);
+
+  useEffect(() => {
+    const loadShops = async () => {
+      try {
+        const data = await shopsRepository.getShopsLookup();
+        setShops(data);
+      } catch (error) {
+        console.error('Failed to fetch shops lookup', error);
+      }
+    };
+    loadShops();
+  }, []);
 
   const handleDispatch = async (id: string) => {
     try {
@@ -57,11 +71,16 @@ export const TransfersPage: React.FC = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const body = {
-      fromShopId: formData.get('fromShopId') as string,
-      toShopId: formData.get('toShopId') as string,
+      sourceShopId: formData.get('sourceShopId') as string,
+      destinationShopId: formData.get('destinationShopId') as string,
       productId: formData.get('productId') as string,
       quantity: Number(formData.get('quantity'))
     };
+
+    if (body.sourceShopId === body.destinationShopId) {
+      alert('Source and destination shops cannot be the same.');
+      return;
+    }
 
     try {
       await transfersRepository.createTransfer(body);
@@ -240,10 +259,16 @@ export const TransfersPage: React.FC = () => {
 
               <form onSubmit={handleCreateTransfer} className="space-y-4">
                 <FormField label="From Shop ID">
-                  <Input name="fromShopId" required placeholder="e.g. s1" />
+                  <Select name="sourceShopId" required>
+                    <option value="">Select source shop</option>
+                    {shops.map((shop) => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
+                  </Select>
                 </FormField>
                 <FormField label="To Shop ID">
-                  <Input name="toShopId" required placeholder="e.g. s2" />
+                  <Select name="destinationShopId" required>
+                    <option value="">Select destination shop</option>
+                    {shops.map((shop) => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
+                  </Select>
                 </FormField>
                 <FormField label="Product ID">
                   <Input name="productId" required placeholder="e.g. 1" />

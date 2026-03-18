@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
 import { notificationsRepository, Notification } from '../../repositories/notificationsRepository';
-import { Bell, AlertTriangle, Info, Clock } from 'lucide-react';
+import { Bell, AlertTriangle, Info, Clock, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const NotificationsPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const data = await notificationsRepository.getNotifications();
-      setNotifications(data);
+      const response = await notificationsRepository.getNotifications(page, 10);
+      setNotifications(response.data);
+      setTotal(response.total);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
     } finally {
@@ -28,6 +31,8 @@ export const NotificationsPage: React.FC = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'LowStock': return <AlertTriangle size={16} className="text-amber-500" />;
+      case 'NewOrder': return <ShoppingBag size={16} className="text-emerald-500" />;
+      case 'Important': return <Bell size={16} className="text-red-500" />;
       case 'System': return <Info size={16} className="text-blue-500" />;
       default: return <Bell size={16} className="text-gray-400" />;
     }
@@ -72,7 +77,16 @@ export const NotificationsPage: React.FC = () => {
           {n.isRead ? (
             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Read</span>
           ) : (
-            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">New</span>
+            <button
+              className="text-[10px] font-bold uppercase tracking-widest text-blue-600"
+              onClick={async (e) => {
+                e.stopPropagation();
+                await notificationsRepository.markNotificationRead(n.id);
+                fetchNotifications();
+              }}
+            >
+              Mark as Read
+            </button>
           )}
         </div>
       )
@@ -97,6 +111,7 @@ export const NotificationsPage: React.FC = () => {
             columns={columns} 
             loading={loading}
           />
+          <p className="mt-3 text-xs text-gray-400">Showing {notifications.length} of {total} notifications</p>
         </motion.div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { ordersRepository, Order } from '../../repositories/ordersRepository';
 import { canMarkAsReady, canComplete, canMarkAsUnable, getStatusColor } from '../../utils/orderActions';
-import { ShoppingBag, CheckCircle2, PackageCheck, AlertCircle, X, Clock } from 'lucide-react';
+import { ShoppingBag, CheckCircle2, PackageCheck, AlertCircle, X, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, Select, Button } from '../../components/common/Form';
 
@@ -16,6 +16,7 @@ export const OrdersPage: React.FC = () => {
   const [page, setPage] = useState(1);
   
   const [isUnableModalOpen, setIsUnableModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const fetchOrders = async () => {
@@ -164,6 +165,15 @@ export const OrdersPage: React.FC = () => {
         <PageHeader 
           title="Orders" 
           description="Manage wholesale orders, track fulfillment status, and process completions."
+          actions={
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
+            >
+              <Plus size={18} />
+              <span>Create Order</span>
+            </button>
+          }
         />
 
         <motion.div
@@ -207,6 +217,78 @@ export const OrdersPage: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {isCreateModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsCreateModalOpen(false)}
+              className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[32px] shadow-xl p-8"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-light">Create Order</h2>
+                <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const clientId = String(formData.get('clientId') || '').trim();
+                const shopId = String(formData.get('shopId') || '').trim();
+                const productId = String(formData.get('productId') || '').trim();
+                const quantity = Number(formData.get('quantity'));
+                const notes = String(formData.get('notes') || '').trim();
+
+                if (!clientId || !shopId || !productId || !quantity || quantity <= 0) {
+                  alert('Client, shop, product and quantity (> 0) are required.');
+                  return;
+                }
+
+                try {
+                  await ordersRepository.createOrder({
+                    clientId,
+                    shopId,
+                    notes: notes || undefined,
+                    items: [{ productId, quantity }],
+                  });
+                  setIsCreateModalOpen(false);
+                  fetchOrders();
+                } catch {
+                  alert('Failed to create order');
+                }
+              }} className="space-y-4">
+                <FormField label="Client ID">
+                  <Input name="clientId" required />
+                </FormField>
+                <FormField label="Shop ID">
+                  <Input name="shopId" required />
+                </FormField>
+                <FormField label="Product ID">
+                  <Input name="productId" required />
+                </FormField>
+                <FormField label="Quantity">
+                  <Input name="quantity" type="number" min={1} required />
+                </FormField>
+                <FormField label="Notes">
+                  <Input name="notes" />
+                </FormField>
+                <Button type="submit">Create</Button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Unable to Fulfill Modal */}
       <AnimatePresence>

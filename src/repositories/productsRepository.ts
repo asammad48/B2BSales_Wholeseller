@@ -41,6 +41,15 @@ export interface CreateProductPayload extends Omit<CreateProductRequestDto, 'ima
   primaryImageAltText?: string;
 }
 
+export interface AdjustProductPricingPayload {
+  buyingPrice: number;
+  sellingPrice: number;
+  pricingMode?: PricingMode;
+  markupPercentage?: number;
+  reason?: string;
+  updateDefaultPrice?: boolean;
+}
+
 export const productsRepository = {
   async getProducts(
     page: number = 1,
@@ -108,6 +117,16 @@ export const productsRepository = {
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create product');
+    }
+
+    return response.data;
+  },
+
+  async adjustProductPricing(productId: string, body: AdjustProductPricingPayload) {
+    const response = await apiClient.adjust2(productId, body as any);
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to adjust product pricing');
     }
 
     return response.data;

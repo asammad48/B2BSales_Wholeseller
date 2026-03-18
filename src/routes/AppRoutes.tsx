@@ -6,6 +6,12 @@ import ThemeSettingsPage from '../pages/theme/ThemeSettingsPage';
 import { motion } from 'framer-motion';
 import { Boxes } from 'lucide-react';
 import NotFoundPage from '../pages/shared/NotFoundPage';
+import { DashboardPage } from '../pages/dashboard/DashboardPage';
+import { ReportsPage } from '../pages/reports/ReportsPage';
+import { OrdersPage } from '../pages/orders/OrdersPage';
+import { TransfersPage } from '../pages/transfers/TransfersPage';
+import { NotificationsPage } from '../pages/notifications/NotificationsPage';
+import { ProductsPage } from '../pages/products/ProductsPage';
 
 // Placeholder for other pages until they are built
 const PagePlaceholder = ({ title }: { title: string }) => (
@@ -65,11 +71,13 @@ export const AppRoutes = () => {
         </ProtectedRoute>
       }>
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<PagePlaceholder title="Dashboard" />} />
-        <Route path="products" element={<PagePlaceholder title="Products" />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="products" element={<ProductsPage />} />
         <Route path="inventory" element={<PagePlaceholder title="Inventory" />} />
-        <Route path="orders" element={<PagePlaceholder title="Orders" />} />
-        <Route path="transfers" element={<PagePlaceholder title="Transfers" />} />
+        <Route path="orders" element={<OrdersPage />} />
+        <Route path="transfers" element={<TransfersPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="users" element={<PagePlaceholder title="Users" />} />
         <Route path="theme" element={<ThemeSettingsPage />} />
         <Route path="settings/account" element={<PagePlaceholder title="Account Settings" />} />

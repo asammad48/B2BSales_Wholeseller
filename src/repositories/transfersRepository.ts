@@ -23,8 +23,8 @@ export interface Transfer {
 }
 
 export interface CreateTransferRequest {
-  fromShopId: string;
-  toShopId: string;
+  sourceShopId: string;
+  destinationShopId: string;
   items?: TransferItem[];
   // For simple creation
   productId?: string;

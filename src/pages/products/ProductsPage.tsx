@@ -3,7 +3,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
-import { Plus, Package, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Plus, Package, CheckCircle2, XCircle, X, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, Select, Button } from '../../components/common/Form';
 import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiClient';
@@ -21,6 +21,7 @@ export const ProductsPage: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lookups, setLookups] = useState<CatalogLookups>({ categories: [], brands: [], models: [], partTypes: [] });
   const [lookupsLoading, setLookupsLoading] = useState(false);
+  const [pricingProduct, setPricingProduct] = useState<Product | null>(null);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -146,6 +147,17 @@ export const ProductsPage: React.FC = () => {
         </div>
       )
     },
+    {
+      header: 'Actions',
+      accessor: (p: Product) => (
+        <button
+          onClick={() => setPricingProduct(p)}
+          className="px-2 py-1 rounded-lg text-xs bg-blue-50 text-blue-600 hover:bg-blue-100"
+        >
+          Adjust Pricing
+        </button>
+      )
+    }
   ];
 
   return (
@@ -351,6 +363,52 @@ export const ProductsPage: React.FC = () => {
                   </div>
                 </form>
               )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {pricingProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPricingProduct(null)} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-md bg-white rounded-[32px] shadow-xl p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-light">Adjust Pricing</h2>
+                  <p className="text-xs text-gray-400 mt-1">{pricingProduct.name}</p>
+                </div>
+                <button onClick={() => setPricingProduct(null)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+              </div>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                try {
+                  await productsRepository.adjustProductPricing(pricingProduct.id, {
+                    buyingPrice: Number(formData.get('buyingPrice')),
+                    sellingPrice: Number(formData.get('sellingPrice')),
+                    pricingMode: formData.get('pricingMode') as PricingMode,
+                    markupPercentage: formData.get('markupPercentage') ? Number(formData.get('markupPercentage')) : undefined,
+                    reason: (formData.get('reason') as string) || undefined,
+                    updateDefaultPrice: true,
+                  });
+                  setPricingProduct(null);
+                  fetchProducts();
+                } catch {
+                  alert('Failed to adjust product pricing');
+                }
+              }} className="space-y-4">
+                <FormField label="Buying Price"><Input type="number" step="0.01" name="buyingPrice" min={0} required /></FormField>
+                <FormField label="Selling Price"><Input type="number" step="0.01" name="sellingPrice" min={0} required /></FormField>
+                <FormField label="Pricing Mode">
+                  <Select name="pricingMode" defaultValue="Direct">
+                    {pricingOptions.map((item) => <option key={item} value={item}>{item}</option>)}
+                  </Select>
+                </FormField>
+                <FormField label="Markup %"><Input type="number" step="0.01" name="markupPercentage" min={0} /></FormField>
+                <FormField label="Reason"><Input name="reason" placeholder="Optional reason" /></FormField>
+                <Button type="submit" className="flex items-center justify-center gap-2"><DollarSign size={16} />Save Pricing</Button>
+              </form>
             </motion.div>
           </div>
         )}

@@ -28,6 +28,13 @@ export interface OrdersResponse {
   limit: number;
 }
 
+export interface CreateOrderPayload {
+  clientId: string;
+  shopId: string;
+  notes?: string;
+  items: Array<{ productId: string; quantity: number }>;
+}
+
 export const ordersRepository = {
   async getOrders(
     page: number = 1,
@@ -89,5 +96,20 @@ export const ordersRepository = {
 
   async unableToFulfill(id: string, reason: string): Promise<Order> {
     return this.markUnableToFulfill(id, reason);
+  },
+
+  async createOrder(body: CreateOrderPayload): Promise<string> {
+    const response = await apiClient.ordersPOST({
+      clientId: body.clientId,
+      shopId: body.shopId,
+      notes: body.notes,
+      items: body.items,
+    } as any);
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to create order');
+    }
+
+    return response.data;
   },
 };
