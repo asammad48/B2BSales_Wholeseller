@@ -1,7 +1,9 @@
+import { axiosInstance } from '../api/client';
 import { apiClient } from '../api/client';
 import {
-  CreateProductRequestDto,
+  AdjustProductPricingRequestDto,
   PricingMode,
+  ProductDetailResponseDto,
   PublicLookupItemDto,
   QualityType,
   TrackingType,
@@ -20,6 +22,10 @@ export interface Product {
   createdAt: string;
   trackingType: TrackingType;
   qualityType: QualityType;
+  defaultSellingPrice?: number;
+  defaultBuyingPrice?: number;
+  defaultPricingMode?: PricingMode;
+  defaultMarkupPercentage?: number;
 }
 
 export interface ProductsResponse {
@@ -36,10 +42,46 @@ export interface CatalogLookups {
   partTypes: PublicLookupItemDto[];
 }
 
-export interface CreateProductPayload extends Omit<CreateProductRequestDto, 'images'> {
-  primaryImagePath?: string;
-  primaryImageAltText?: string;
+export interface CreateProductImagePayload {
+  file: File;
+  altText?: string;
+  isPrimary: boolean;
+  sortOrder: number;
 }
+
+export interface CreateProductPayload {
+  categoryId: string;
+  brandId?: string;
+  modelId?: string;
+  partTypeId?: string;
+  sku: string;
+  barcode?: string;
+  name: string;
+  shortDescription?: string;
+  longDescription?: string;
+  specifications?: string;
+  trackingType: TrackingType;
+  qualityType: QualityType;
+  defaultBuyingPrice: number;
+  defaultSellingPrice: number;
+  defaultPricingMode: PricingMode;
+  defaultMarkupPercentage?: number;
+  warrantyDays: number;
+  lowStockThreshold: number;
+  images: CreateProductImagePayload[];
+}
+
+export interface ProductPricingPayload extends AdjustProductPricingRequestDto {
+  productId: string;
+}
+
+const appendOptional = (formData: FormData, key: string, value: string | number | boolean | undefined) => {
+  if (value === undefined || value === null || value === '') {
+    return;
+  }
+
+  formData.append(key, String(value));
+};
 
 export const productsRepository = {
   async getProducts(
@@ -79,35 +121,67 @@ export const productsRepository = {
     };
   },
 
-  async getProductById(id: string): Promise<Product> {
+  async getProductById(id: string): Promise<ProductDetailResponseDto> {
     const response = await apiClient.productsGET2(id);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch product');
     }
 
-    return response.data as any;
+    return response.data;
   },
 
   async createProduct(product: CreateProductPayload): Promise<string> {
-    const body: CreateProductRequestDto = {
-      ...product,
-      images: product.primaryImagePath
-        ? [
-            {
-              filePath: product.primaryImagePath,
-              altText: product.primaryImageAltText || undefined,
-              isPrimary: true,
-              sortOrder: 0,
-            },
-          ]
-        : undefined,
-    };
+    const formData = new FormData();
 
-    const response = await apiClient.productsPOST(body);
+    appendOptional(formData, 'categoryId', product.categoryId);
+    appendOptional(formData, 'brandId', product.brandId);
+    appendOptional(formData, 'modelId', product.modelId);
+    appendOptional(formData, 'partTypeId', product.partTypeId);
+    appendOptional(formData, 'sku', product.sku);
+    appendOptional(formData, 'barcode', product.barcode);
+    appendOptional(formData, 'name', product.name);
+    appendOptional(formData, 'shortDescription', product.shortDescription);
+    appendOptional(formData, 'longDescription', product.longDescription);
+    appendOptional(formData, 'specifications', product.specifications);
+    appendOptional(formData, 'trackingType', product.trackingType);
+    appendOptional(formData, 'qualityType', product.qualityType);
+    appendOptional(formData, 'defaultBuyingPrice', product.defaultBuyingPrice);
+    appendOptional(formData, 'defaultSellingPrice', product.defaultSellingPrice);
+    appendOptional(formData, 'defaultPricingMode', product.defaultPricingMode);
+    appendOptional(formData, 'defaultMarkupPercentage', product.defaultMarkupPercentage);
+    appendOptional(formData, 'warrantyDays', product.warrantyDays);
+    appendOptional(formData, 'lowStockThreshold', product.lowStockThreshold);
+
+    product.images.forEach((image, index) => {
+      formData.append(`images[${index}].file`, image.file);
+      appendOptional(formData, `images[${index}].altText`, image.altText);
+      appendOptional(formData, `images[${index}].isPrimary`, image.isPrimary);
+      appendOptional(formData, `images[${index}].sortOrder`, image.sortOrder);
+    });
+
+    const response = await axiosInstance.post('/api/Products', formData, {
+      headers: {
+        Accept: 'text/plain',
+      },
+      transformResponse: [(data) => data],
+    });
+
+    const payload = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+
+    if (!payload?.success || !payload?.data) {
+      throw new Error(payload?.message || 'Failed to create product');
+    }
+
+    return payload.data;
+  },
+
+  async updatePricing(payload: ProductPricingPayload) {
+    const { productId, ...body } = payload;
+    const response = await apiClient.adjust2(productId, body as AdjustProductPricingRequestDto);
 
     if (!response.success || !response.data) {
-      throw new Error(response.message || 'Failed to create product');
+      throw new Error(response.message || 'Failed to update pricing');
     }
 
     return response.data;

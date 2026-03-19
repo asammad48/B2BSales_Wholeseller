@@ -3,7 +3,7 @@ import { ApiClient } from './generated/apiClient';
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: baseUrl,
   transformResponse: [(data) => data],
 });
