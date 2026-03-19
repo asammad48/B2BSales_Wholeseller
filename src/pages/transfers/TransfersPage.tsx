@@ -6,6 +6,7 @@ import { transfersRepository, Transfer } from '../../repositories/transfersRepos
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, Select, Button } from '../../components/common/Form';
+import { ShopLookupItem } from '../../repositories/shopsRepository';
 
 export const TransfersPage: React.FC = () => {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
@@ -14,6 +15,7 @@ export const TransfersPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [shops, setShops] = useState<ShopLookupItem[]>([]);
 
   const fetchTransfers = async () => {
     setLoading(true);
@@ -53,17 +55,31 @@ export const TransfersPage: React.FC = () => {
     }
   };
 
+  const fetchShopsLookup = async () => {
+    try {
+      const response = await transfersRepository.getShopsLookup();
+      setShops(response);
+    } catch (error) {
+      console.error('Failed to fetch shops lookup', error);
+    }
+  };
+
   const handleCreateTransfer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const body = {
-      fromShopId: formData.get('fromShopId') as string,
-      toShopId: formData.get('toShopId') as string,
+      sourceShopId: formData.get('sourceShopId') as string,
+      destinationShopId: formData.get('destinationShopId') as string,
       productId: formData.get('productId') as string,
       quantity: Number(formData.get('quantity'))
     };
 
     try {
+      if (body.sourceShopId === body.destinationShopId) {
+        alert('Source and destination shops must be different');
+        return;
+      }
+
       await transfersRepository.createTransfer(body);
       setIsCreateModalOpen(false);
       fetchTransfers();
@@ -162,7 +178,7 @@ export const TransfersPage: React.FC = () => {
           description="Manage inventory movement between different shop locations."
           actions={
             <button 
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => { setIsCreateModalOpen(true); fetchShopsLookup(); }}
               className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
               style={{ backgroundColor: 'var(--primary-color)' }}
             >
@@ -239,11 +255,21 @@ export const TransfersPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleCreateTransfer} className="space-y-4">
-                <FormField label="From Shop ID">
-                  <Input name="fromShopId" required placeholder="e.g. s1" />
+                <FormField label="Source Shop">
+                  <Select name="sourceShopId" required>
+                    <option value="">Select source shop</option>
+                    {shops.map((shop) => (
+                      <option key={`source-${shop.id}`} value={shop.id}>{shop.name}</option>
+                    ))}
+                  </Select>
                 </FormField>
-                <FormField label="To Shop ID">
-                  <Input name="toShopId" required placeholder="e.g. s2" />
+                <FormField label="Destination Shop">
+                  <Select name="destinationShopId" required>
+                    <option value="">Select destination shop</option>
+                    {shops.map((shop) => (
+                      <option key={`destination-${shop.id}`} value={shop.id}>{shop.name}</option>
+                    ))}
+                  </Select>
                 </FormField>
                 <FormField label="Product ID">
                   <Input name="productId" required placeholder="e.g. 1" />

@@ -1,7 +1,9 @@
 import { apiClient } from '../api/client';
 import {
+  AdjustProductPricingRequestDto,
   CreateProductRequestDto,
   PricingMode,
+  ProductPricingAdjustmentResultDto,
   PublicLookupItemDto,
   QualityType,
   TrackingType,
@@ -16,6 +18,10 @@ export interface Product {
   modelName: string;
   categoryName: string;
   basePrice: number;
+  defaultBuyingPrice?: number;
+  defaultSellingPrice?: number;
+  defaultPricingMode?: PricingMode;
+  defaultMarkupPercentage?: number;
   isActive: boolean;
   createdAt: string;
   trackingType: TrackingType;
@@ -108,6 +114,16 @@ export const productsRepository = {
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create product');
+    }
+
+    return response.data;
+  },
+
+  async adjustProductPricing(productId: string, body: AdjustProductPricingRequestDto): Promise<ProductPricingAdjustmentResultDto> {
+    const response = await apiClient.adjust2(productId, body);
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to adjust product pricing');
     }
 
     return response.data;
