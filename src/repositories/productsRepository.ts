@@ -1,7 +1,7 @@
 import { apiClient } from '../api/client';
 import {
   AdjustProductPricingRequestDto,
-  CreateProductRequestDto,
+  CreateProductImageRequestDto,
   PricingMode,
   ProductPricingAdjustmentResultDto,
   PublicLookupItemDto,
@@ -42,10 +42,51 @@ export interface CatalogLookups {
   partTypes: PublicLookupItemDto[];
 }
 
-export interface CreateProductPayload extends Omit<CreateProductRequestDto, 'images'> {
-  primaryImagePath?: string;
-  primaryImageAltText?: string;
+export interface CreateProductImageInput {
+  file: File;
+  altText?: string;
+  isPrimary: boolean;
+  sortOrder: number;
 }
+
+export interface CreateProductPayload {
+  categoryId: string;
+  brandId?: string;
+  modelId?: string;
+  partTypeId?: string;
+  sku: string;
+  barcode?: string;
+  name: string;
+  shortDescription?: string;
+  longDescription?: string;
+  specifications?: string;
+  trackingType: TrackingType;
+  qualityType: QualityType;
+  defaultBuyingPrice: number;
+  defaultSellingPrice: number;
+  defaultPricingMode: PricingMode;
+  defaultMarkupPercentage: number;
+  warrantyDays: number;
+  lowStockThreshold: number;
+  images: CreateProductImageInput[];
+}
+
+const normalizeOptionalString = (value?: string) => {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
+};
+
+const ensureSinglePrimaryImage = (images: CreateProductImageInput[]) => {
+  const primaryImages = images.filter((image) => image.isPrimary);
+
+  if (images.length === 0) {
+    throw new Error('At least one product image is required');
+  }
+
+  if (primaryImages.length !== 1) {
+    throw new Error('Exactly one product image must be marked as primary');
+  }
+};
 
 export const productsRepository = {
   async getProducts(
@@ -96,21 +137,43 @@ export const productsRepository = {
   },
 
   async createProduct(product: CreateProductPayload): Promise<string> {
-    const body: CreateProductRequestDto = {
-      ...product,
-      images: product.primaryImagePath
-        ? [
-            {
-              filePath: product.primaryImagePath,
-              altText: product.primaryImageAltText || undefined,
-              isPrimary: true,
-              sortOrder: 0,
-            },
-          ]
-        : undefined,
-    };
+    ensureSinglePrimaryImage(product.images);
 
-    const response = await apiClient.productsPOST(body);
+    const normalizedImages = product.images.map<CreateProductImageRequestDto>((image, index) => ({
+      altText: normalizeOptionalString(image.altText),
+      isPrimary: image.isPrimary,
+      sortOrder: index,
+      filePath: image.file.name,
+    }));
+
+    const response = await apiClient.productsPOST(
+      product.categoryId,
+      product.brandId ?? '',
+      product.modelId ?? '',
+      product.partTypeId ?? '',
+      product.sku,
+      product.barcode ?? '',
+      product.name,
+      product.shortDescription ?? '',
+      product.longDescription ?? '',
+      product.specifications ?? '',
+      product.trackingType,
+      product.qualityType,
+      product.defaultBuyingPrice,
+      product.defaultSellingPrice,
+      product.defaultPricingMode,
+      product.defaultMarkupPercentage,
+      product.warrantyDays,
+      product.lowStockThreshold,
+      normalizedImages.map((image) => ({
+        ...image,
+        toString: () => JSON.stringify(image),
+      })) as CreateProductImageRequestDto[],
+      product.images.map((image) => ({
+        data: image.file,
+        fileName: image.file.name,
+      }))
+    );
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create product');
