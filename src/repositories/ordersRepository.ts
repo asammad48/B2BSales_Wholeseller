@@ -1,3 +1,11 @@
+import {
+  CreateOrderItemRequestDto,
+  CreateOrderRequestDto,
+  CurrencyLookupResponseDto,
+  LookupBundleResponseDto,
+  ProductLookupResponseDto,
+  ShopLookupResponseDto,
+} from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
 
 export type OrderStatus = 'Pending' | 'ReadyForPickup' | 'Completed' | 'Cancelled' | 'UnableToFulfill';
@@ -8,20 +16,19 @@ export interface OrderItem {
   price: number;
 }
 
-export interface CreateOrderBody {
+export interface CreateOrderBody extends CreateOrderRequestDto {
   clientId: string;
   shopId: string;
-  notes?: string;
-  items: Array<{
-    productId: string;
-    quantity: number;
-  }>;
+  currencyId: string;
+  exchangeRate: number;
+  items: CreateOrderItemRequestDto[];
 }
 
 export interface OrderFormLookups {
   clients: Array<{ id: string; name: string }>;
-  shops: Array<{ id: string; name: string }>;
-  products: Array<{ id: string; name: string }>;
+  shops: ShopLookupResponseDto[];
+  products: ProductLookupResponseDto[];
+  currencies: CurrencyLookupResponseDto[];
 }
 
 export interface Order {
@@ -96,7 +103,7 @@ export const ordersRepository = {
   },
 
   async createOrder(body: CreateOrderBody): Promise<string> {
-    const response = await apiClient.ordersPOST(body as any);
+    const response = await apiClient.ordersPOST(body);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create order');
@@ -106,32 +113,22 @@ export const ordersRepository = {
   },
 
   async getCreateOrderLookups(): Promise<OrderFormLookups> {
-    const [bundleResponse, productsResponse] = await Promise.all([
-      apiClient.bundle(),
-      apiClient.productsGET(1, 100),
-    ]);
+    const bundleResponse = await apiClient.bundle();
 
     if (!bundleResponse.success || !bundleResponse.data) {
       throw new Error(bundleResponse.message || 'Failed to fetch order lookups');
     }
 
-    if (!productsResponse.success || !productsResponse.data) {
-      throw new Error(productsResponse.message || 'Failed to fetch products for order lookups');
-    }
+    const bundle: LookupBundleResponseDto = bundleResponse.data;
 
     return {
-      clients: (bundleResponse.data.clients || []).map((client) => ({
+      clients: (bundle.clients || []).map((client) => ({
         id: client.id || '',
         name: client.name || '',
       })),
-      shops: (bundleResponse.data.shops || []).map((shop) => ({
-        id: shop.id || '',
-        name: shop.name || '',
-      })),
-      products: (productsResponse.data.items || []).map((product) => ({
-        id: product.id || '',
-        name: product.name || '',
-      })),
+      shops: bundle.shops || [],
+      products: bundle.products || [],
+      currencies: bundle.currencies || [],
     };
   },
 

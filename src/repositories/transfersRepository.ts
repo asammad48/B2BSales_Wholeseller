@@ -1,3 +1,7 @@
+import {
+  CreateStockTransferRequestDto,
+  ProductLookupResponseDto,
+} from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
 import { shopsRepository, ShopLookupItem } from './shopsRepository';
 
@@ -22,13 +26,16 @@ export interface Transfer {
   quantity?: number;
 }
 
-export interface CreateTransferRequest {
+export interface CreateTransferRequest extends CreateStockTransferRequestDto {
   sourceShopId: string;
   destinationShopId: string;
   notes?: string;
-  items?: Array<{ productId: string; quantity: number }>;
-  productId?: string;
-  quantity?: number;
+  items: Array<{ productId: string; quantity: number }>;
+}
+
+export interface TransferFormLookups {
+  shops: ShopLookupItem[];
+  products: ProductLookupResponseDto[];
 }
 
 export interface TransfersResponse {
@@ -48,23 +55,30 @@ export const transfersRepository = {
     return shopsRepository.getShopsLookup();
   },
 
-  async createTransfer(body: CreateTransferRequest): Promise<Transfer> {
-    const payload = {
-      sourceShopId: body.sourceShopId,
-      destinationShopId: body.destinationShopId,
-      notes: body.notes,
-      items: body.items || (body.productId && body.quantity
-        ? [{ productId: body.productId, quantity: body.quantity }]
-        : []),
-    };
+  async getCreateTransferLookups(): Promise<TransferFormLookups> {
+    const [shops, bundleResponse] = await Promise.all([
+      this.getShopsLookup(),
+      apiClient.bundle(),
+    ]);
 
-    const response = await apiClient.transfers(payload as any);
+    if (!bundleResponse.success || !bundleResponse.data) {
+      throw new Error(bundleResponse.message || 'Failed to fetch transfer lookups');
+    }
+
+    return {
+      shops,
+      products: bundleResponse.data.products || [],
+    };
+  },
+
+  async createTransfer(body: CreateTransferRequest): Promise<Transfer> {
+    const response = await apiClient.transfers(body);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create transfer');
     }
 
-    return { id: response.data, fromShopId: payload.sourceShopId, toShopId: payload.destinationShopId } as Transfer;
+    return { id: response.data, fromShopId: body.sourceShopId, toShopId: body.destinationShopId } as Transfer;
   },
 
   async dispatchTransfer(id: string): Promise<Transfer> {
