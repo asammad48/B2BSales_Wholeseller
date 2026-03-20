@@ -1,3 +1,4 @@
+import { AdjustStockRequestDto, StockInRequestDto } from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
 
 export interface InventoryItem {
@@ -31,7 +32,7 @@ export const inventoryRepository = {
   ): Promise<InventoryResponse> {
     const normalizedSearch = search.trim() || undefined;
     const response = await apiClient.inventory(page, limit, normalizedSearch);
-    
+
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch inventory');
     }
@@ -40,35 +41,35 @@ export const inventoryRepository = {
       data: (response.data.items || []) as any[],
       total: response.data.totalCount || 0,
       page: response.data.pageNumber || 1,
-      limit: response.data.pageSize || 10
+      limit: response.data.pageSize || 10,
     };
   },
 
-  async createStockIn(body: { productId: string; shopId: string; quantity: number; trackingType?: string }): Promise<InventoryItem> {
-    const response = await apiClient.stockIn(body as any);
-    
+  async createStockIn(body: StockInRequestDto): Promise<string> {
+    const response = await apiClient.stockIn(body);
+
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to stock in');
     }
 
-    return response.data as any;
+    return response.data;
   },
 
-  async adjustStock(body: { id: string; adjustment: number; reason: string }): Promise<InventoryItem> {
-    const response = await apiClient.adjust(body as any);
-    
+  async adjustStock(body: AdjustStockRequestDto): Promise<string> {
+    const response = await apiClient.adjust(body);
+
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to adjust inventory');
     }
 
-    return response.data as any;
+    return response.data;
   },
 
-  async stockIn(body: { productId: string; shopId: string; quantity: number; trackingType?: string }): Promise<InventoryItem> {
+  async stockIn(body: StockInRequestDto): Promise<string> {
     return this.createStockIn(body);
   },
 
-  async adjust(body: { id: string; adjustment: number; reason: string }): Promise<InventoryItem> {
+  async adjust(body: AdjustStockRequestDto): Promise<string> {
     return this.adjustStock(body);
-  }
+  },
 };
