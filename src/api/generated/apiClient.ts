@@ -161,10 +161,29 @@ export interface IApiClient {
      */
     productsGET(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ProductListItemResponseDtoPageResponseApiResponse>;
     /**
-     * @param body (optional) 
+     * @param categoryId (optional) 
+     * @param brandId (optional) 
+     * @param modelId (optional) 
+     * @param partTypeId (optional) 
+     * @param sku (optional) 
+     * @param barcode (optional) 
+     * @param name (optional) 
+     * @param shortDescription (optional) 
+     * @param longDescription (optional) 
+     * @param specifications (optional) 
+     * @param trackingType (optional) 
+     * @param qualityType (optional) 
+     * @param defaultBuyingPrice (optional) 
+     * @param defaultSellingPrice (optional) 
+     * @param defaultPricingMode (optional) 
+     * @param defaultMarkupPercentage (optional) 
+     * @param warrantyDays (optional) 
+     * @param lowStockThreshold (optional) 
+     * @param images (optional) 
+     * @param imageFiles (optional) 
      * @return OK
      */
-    productsPOST(body?: CreateProductRequestDto | undefined): Promise<GuidApiResponse>;
+    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined): Promise<GuidApiResponse>;
     /**
      * @return OK
      */
@@ -1887,21 +1906,119 @@ export class ApiClient implements IApiClient {
     }
 
     /**
-     * @param body (optional) 
+     * @param categoryId (optional) 
+     * @param brandId (optional) 
+     * @param modelId (optional) 
+     * @param partTypeId (optional) 
+     * @param sku (optional) 
+     * @param barcode (optional) 
+     * @param name (optional) 
+     * @param shortDescription (optional) 
+     * @param longDescription (optional) 
+     * @param specifications (optional) 
+     * @param trackingType (optional) 
+     * @param qualityType (optional) 
+     * @param defaultBuyingPrice (optional) 
+     * @param defaultSellingPrice (optional) 
+     * @param defaultPricingMode (optional) 
+     * @param defaultMarkupPercentage (optional) 
+     * @param warrantyDays (optional) 
+     * @param lowStockThreshold (optional) 
+     * @param images (optional) 
+     * @param imageFiles (optional) 
      * @return OK
      */
-    productsPOST(body?: CreateProductRequestDto | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
+    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
         let url_ = this.baseUrl + "/api/Products";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
+        const content_ = new FormData();
+        if (categoryId === null || categoryId === undefined)
+            throw new Error("The parameter 'categoryId' cannot be null.");
+        else
+            content_.append("CategoryId", categoryId.toString());
+        if (brandId === null || brandId === undefined)
+            throw new Error("The parameter 'brandId' cannot be null.");
+        else
+            content_.append("BrandId", brandId.toString());
+        if (modelId === null || modelId === undefined)
+            throw new Error("The parameter 'modelId' cannot be null.");
+        else
+            content_.append("ModelId", modelId.toString());
+        if (partTypeId === null || partTypeId === undefined)
+            throw new Error("The parameter 'partTypeId' cannot be null.");
+        else
+            content_.append("PartTypeId", partTypeId.toString());
+        if (sku === null || sku === undefined)
+            throw new Error("The parameter 'sku' cannot be null.");
+        else
+            content_.append("Sku", sku.toString());
+        if (barcode === null || barcode === undefined)
+            throw new Error("The parameter 'barcode' cannot be null.");
+        else
+            content_.append("Barcode", barcode.toString());
+        if (name === null || name === undefined)
+            throw new Error("The parameter 'name' cannot be null.");
+        else
+            content_.append("Name", name.toString());
+        if (shortDescription === null || shortDescription === undefined)
+            throw new Error("The parameter 'shortDescription' cannot be null.");
+        else
+            content_.append("ShortDescription", shortDescription.toString());
+        if (longDescription === null || longDescription === undefined)
+            throw new Error("The parameter 'longDescription' cannot be null.");
+        else
+            content_.append("LongDescription", longDescription.toString());
+        if (specifications === null || specifications === undefined)
+            throw new Error("The parameter 'specifications' cannot be null.");
+        else
+            content_.append("Specifications", specifications.toString());
+        if (trackingType === null || trackingType === undefined)
+            throw new Error("The parameter 'trackingType' cannot be null.");
+        else
+            content_.append("TrackingType", trackingType.toString());
+        if (qualityType === null || qualityType === undefined)
+            throw new Error("The parameter 'qualityType' cannot be null.");
+        else
+            content_.append("QualityType", qualityType.toString());
+        if (defaultBuyingPrice === null || defaultBuyingPrice === undefined)
+            throw new Error("The parameter 'defaultBuyingPrice' cannot be null.");
+        else
+            content_.append("DefaultBuyingPrice", defaultBuyingPrice.toString());
+        if (defaultSellingPrice === null || defaultSellingPrice === undefined)
+            throw new Error("The parameter 'defaultSellingPrice' cannot be null.");
+        else
+            content_.append("DefaultSellingPrice", defaultSellingPrice.toString());
+        if (defaultPricingMode === null || defaultPricingMode === undefined)
+            throw new Error("The parameter 'defaultPricingMode' cannot be null.");
+        else
+            content_.append("DefaultPricingMode", defaultPricingMode.toString());
+        if (defaultMarkupPercentage === null || defaultMarkupPercentage === undefined)
+            throw new Error("The parameter 'defaultMarkupPercentage' cannot be null.");
+        else
+            content_.append("DefaultMarkupPercentage", defaultMarkupPercentage.toString());
+        if (warrantyDays === null || warrantyDays === undefined)
+            throw new Error("The parameter 'warrantyDays' cannot be null.");
+        else
+            content_.append("WarrantyDays", warrantyDays.toString());
+        if (lowStockThreshold === null || lowStockThreshold === undefined)
+            throw new Error("The parameter 'lowStockThreshold' cannot be null.");
+        else
+            content_.append("LowStockThreshold", lowStockThreshold.toString());
+        if (images === null || images === undefined)
+            throw new Error("The parameter 'images' cannot be null.");
+        else
+            images.forEach(item_ => content_.append("Images", item_.toString()));
+        if (imageFiles === null || imageFiles === undefined)
+            throw new Error("The parameter 'imageFiles' cannot be null.");
+        else
+            imageFiles.forEach(item_ => content_.append("imageFiles", item_.data, item_.fileName ? item_.fileName : "imageFiles") );
 
         let options_: AxiosRequestConfig = {
             data: content_,
             method: "POST",
             url: url_,
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "text/plain"
             },
             cancelToken
@@ -3388,28 +3505,6 @@ export interface CreateProductImageRequestDto {
     sortOrder?: number;
 }
 
-export interface CreateProductRequestDto {
-    categoryId?: string;
-    brandId?: string | undefined;
-    modelId?: string | undefined;
-    partTypeId?: string | undefined;
-    sku?: string;
-    barcode?: string | undefined;
-    name?: string;
-    shortDescription?: string | undefined;
-    longDescription?: string | undefined;
-    specifications?: string | undefined;
-    trackingType?: TrackingType;
-    qualityType?: QualityType;
-    defaultBuyingPrice?: number;
-    defaultSellingPrice?: number;
-    defaultPricingMode?: PricingMode;
-    defaultMarkupPercentage?: number | undefined;
-    warrantyDays?: number;
-    lowStockThreshold?: number;
-    images?: CreateProductImageRequestDto[];
-}
-
 export interface CreateStockTransferItemRequestDto {
     productId?: string;
     quantity?: number;
@@ -3528,6 +3623,7 @@ export interface LookupBundleResponseDto {
     brands?: LookupItemResponseDto[];
     models?: LookupItemResponseDto[];
     partTypes?: LookupItemResponseDto[];
+    products?: ProductLookupResponseDto[];
     shops?: ShopLookupResponseDto[];
     clients?: LookupItemResponseDto[];
     currencies?: CurrencyLookupResponseDto[];
@@ -3742,6 +3838,16 @@ export interface ProductListItemResponseDtoPageResponseApiResponse {
     data?: ProductListItemResponseDtoPageResponse;
 }
 
+export interface ProductLookupResponseDto {
+    id?: string;
+    name?: string;
+    sku?: string;
+    brandName?: string | undefined;
+    modelName?: string | undefined;
+    barcode?: string | undefined;
+    isActive?: boolean;
+}
+
 export interface ProductPricingAdjustmentResultDto {
     productId?: string;
     buyingPrice?: number;
@@ -3937,6 +4043,8 @@ export interface ShopLookupResponseDto {
     id?: string;
     name?: string;
     code?: string;
+    isMain?: boolean;
+    isActive?: boolean;
 }
 
 export interface StockInRequestDto {
@@ -4052,6 +4160,11 @@ export interface UserProfileResponseDtoApiResponse {
     success?: boolean;
     message?: string;
     data?: UserProfileResponseDto;
+}
+
+export interface FileParameter {
+    data: any;
+    fileName: string;
 }
 
 export class ApiException extends Error {
