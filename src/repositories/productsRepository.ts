@@ -1,4 +1,5 @@
-import { adminHttpClient, apiClient } from '../api/client';
+import { env } from '../env';
+import { apiClient } from '../api/client';
 import {
   AdjustProductPricingRequestDto,
   CreateProductImageRequestDto,
@@ -76,13 +77,7 @@ const toRequiredString = (value?: string) => value?.trim() ?? '';
 
 const toRequiredNumber = (value?: number) => value ?? 0;
 
-const parseGuidResponse = (rawResponse: unknown): GuidApiResponse => {
-  if (typeof rawResponse === 'string') {
-    return JSON.parse(rawResponse) as GuidApiResponse;
-  }
-
-  return rawResponse as GuidApiResponse;
-};
+const parseGuidResponse = (rawResponse: string): GuidApiResponse => JSON.parse(rawResponse) as GuidApiResponse;
 
 export const productsRepository = {
   async getProducts(
@@ -172,20 +167,29 @@ export const productsRepository = {
       formData.append('imageFiles', image.file, image.file.name);
     });
 
-    const rawResponse = await adminHttpClient.post('/api/Products', formData, {
-      headers: {
-        Accept: 'text/plain',
-      },
-      transformResponse: [(data) => data],
-    });
+    const authToken = localStorage.getItem('admin_access_token');
+    const headers: Record<string, string> = {
+      Accept: 'text/plain',
+    };
 
-    const response = parseGuidResponse(rawResponse.data);
-
-    if (!response.success || !response.data) {
-      throw new Error(response.message || 'Failed to create product');
+    if (authToken) {
+      headers.Authorization = `Bearer ${authToken}`;
     }
 
-    return response.data;
+    const response = await fetch(`${env.API_BASE_URL}/api/Products`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const responseText = await response.text();
+    const parsedResponse = parseGuidResponse(responseText);
+
+    if (!response.ok || !parsedResponse.success || !parsedResponse.data) {
+      throw new Error(parsedResponse.message || 'Failed to create product');
+    }
+
+    return parsedResponse.data;
   },
 
   async adjustProductPricing(productId: string, body: AdjustProductPricingRequestDto): Promise<ProductPricingAdjustmentResultDto> {

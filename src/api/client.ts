@@ -3,13 +3,13 @@ import { ApiClient } from './generated/apiClient';
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
-export const adminHttpClient = axios.create({
+const axiosInstance = axios.create({
   baseURL: baseUrl,
   transformResponse: [(data) => data],
 });
 
 // Add a request interceptor to include the JWT token
-adminHttpClient.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('admin_access_token');
     if (token) {
@@ -22,5 +22,5 @@ adminHttpClient.interceptors.request.use(
   }
 );
 
-export const apiClient = new ApiClient(baseUrl, adminHttpClient);
+export const apiClient = new ApiClient(baseUrl, axiosInstance);
 export { ApiClient };
