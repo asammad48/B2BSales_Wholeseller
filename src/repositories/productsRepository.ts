@@ -1,8 +1,8 @@
-import { apiClient } from '../api/client';
+import { adminHttpClient, apiClient } from '../api/client';
 import {
   AdjustProductPricingRequestDto,
   CreateProductImageRequestDto,
-  FileParameter,
+  GuidApiResponse,
   PricingMode,
   ProductPricingAdjustmentResultDto,
   PublicLookupItemDto,
@@ -76,6 +76,14 @@ const toRequiredString = (value?: string) => value?.trim() ?? '';
 
 const toRequiredNumber = (value?: number) => value ?? 0;
 
+const parseGuidResponse = (rawResponse: unknown): GuidApiResponse => {
+  if (typeof rawResponse === 'string') {
+    return JSON.parse(rawResponse) as GuidApiResponse;
+  }
+
+  return rawResponse as GuidApiResponse;
+};
+
 export const productsRepository = {
   async getProducts(
     page: number = 1,
@@ -129,6 +137,7 @@ export const productsRepository = {
       throw new Error('At least one product image is required');
     }
 
+    const formData = new FormData();
     const imageMetadata: CreateProductImageRequestDto[] = product.images.map((image, index) => ({
       altText: image.altText?.trim() || undefined,
       isPrimary: image.isPrimary,
@@ -136,34 +145,41 @@ export const productsRepository = {
       filePath: image.file.name,
     }));
 
-    const imageFiles = product.images.map((image, index) => ({
-      data: image.file,
-      fileName: image.file.name,
-      toString: () => JSON.stringify(imageMetadata[index]),
-    })) as Array<FileParameter & { toString: () => string }>;
+    formData.append('CategoryId', toRequiredString(product.categoryId));
+    formData.append('BrandId', toRequiredString(product.brandId));
+    formData.append('ModelId', toRequiredString(product.modelId));
+    formData.append('PartTypeId', toRequiredString(product.partTypeId));
+    formData.append('Sku', toRequiredString(product.sku));
+    formData.append('Barcode', toRequiredString(product.barcode));
+    formData.append('Name', toRequiredString(product.name));
+    formData.append('ShortDescription', toRequiredString(product.shortDescription));
+    formData.append('LongDescription', toRequiredString(product.longDescription));
+    formData.append('Specifications', toRequiredString(product.specifications));
+    formData.append('TrackingType', product.trackingType);
+    formData.append('QualityType', product.qualityType);
+    formData.append('DefaultBuyingPrice', String(toRequiredNumber(product.defaultBuyingPrice)));
+    formData.append('DefaultSellingPrice', String(toRequiredNumber(product.defaultSellingPrice)));
+    formData.append('DefaultPricingMode', product.defaultPricingMode || 'Direct');
+    formData.append('DefaultMarkupPercentage', String(toRequiredNumber(product.defaultMarkupPercentage)));
+    formData.append('WarrantyDays', String(toRequiredNumber(product.warrantyDays)));
+    formData.append('LowStockThreshold', String(toRequiredNumber(product.lowStockThreshold)));
 
-    const response = await (apiClient as any).productsPOST(
-      toRequiredString(product.categoryId),
-      toRequiredString(product.brandId),
-      toRequiredString(product.modelId),
-      toRequiredString(product.partTypeId),
-      toRequiredString(product.sku),
-      toRequiredString(product.barcode),
-      toRequiredString(product.name),
-      toRequiredString(product.shortDescription),
-      toRequiredString(product.longDescription),
-      toRequiredString(product.specifications),
-      product.trackingType,
-      product.qualityType,
-      toRequiredNumber(product.defaultBuyingPrice),
-      toRequiredNumber(product.defaultSellingPrice),
-      product.defaultPricingMode,
-      toRequiredNumber(product.defaultMarkupPercentage),
-      toRequiredNumber(product.warrantyDays),
-      toRequiredNumber(product.lowStockThreshold),
-      imageFiles,
-      imageFiles
-    );
+    imageMetadata.forEach((image) => {
+      formData.append('Images', JSON.stringify(image));
+    });
+
+    product.images.forEach((image) => {
+      formData.append('imageFiles', image.file, image.file.name);
+    });
+
+    const rawResponse = await adminHttpClient.post('/api/Products', formData, {
+      headers: {
+        Accept: 'text/plain',
+      },
+      transformResponse: [(data) => data],
+    });
+
+    const response = parseGuidResponse(rawResponse.data);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create product');
