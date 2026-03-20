@@ -8,6 +8,22 @@ export interface OrderItem {
   price: number;
 }
 
+export interface CreateOrderBody {
+  clientId: string;
+  shopId: string;
+  notes?: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+  }>;
+}
+
+export interface OrderFormLookups {
+  clients: Array<{ id: string; name: string }>;
+  shops: Array<{ id: string; name: string }>;
+  products: Array<{ id: string; name: string }>;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -79,6 +95,46 @@ export const ordersRepository = {
     return response.data as any;
   },
 
+  async createOrder(body: CreateOrderBody): Promise<string> {
+    const response = await apiClient.ordersPOST(body as any);
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to create order');
+    }
+
+    return response.data;
+  },
+
+  async getCreateOrderLookups(): Promise<OrderFormLookups> {
+    const [bundleResponse, productsResponse] = await Promise.all([
+      apiClient.bundle(),
+      apiClient.productsGET(1, 100),
+    ]);
+
+    if (!bundleResponse.success || !bundleResponse.data) {
+      throw new Error(bundleResponse.message || 'Failed to fetch order lookups');
+    }
+
+    if (!productsResponse.success || !productsResponse.data) {
+      throw new Error(productsResponse.message || 'Failed to fetch products for order lookups');
+    }
+
+    return {
+      clients: (bundleResponse.data.clients || []).map((client) => ({
+        id: client.id || '',
+        name: client.name || '',
+      })),
+      shops: (bundleResponse.data.shops || []).map((shop) => ({
+        id: shop.id || '',
+        name: shop.name || '',
+      })),
+      products: (productsResponse.data.items || []).map((product) => ({
+        id: product.id || '',
+        name: product.name || '',
+      })),
+    };
+  },
+
   async ready(id: string): Promise<Order> {
     return this.markReady(id);
   },
@@ -89,5 +145,9 @@ export const ordersRepository = {
 
   async unableToFulfill(id: string, reason: string): Promise<Order> {
     return this.markUnableToFulfill(id, reason);
+  },
+
+  async ordersPOST(body: CreateOrderBody): Promise<string> {
+    return this.createOrder(body);
   },
 };
