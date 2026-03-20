@@ -1,12 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
+import { ProductLookupResponseDto } from '../../api/generated/apiClient';
 import { transfersRepository, Transfer } from '../../repositories/transfersRepository';
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FormField, Input, Select, Button } from '../../components/common/Form';
+import { FormField, Input, SearchableSelect, SearchableSelectOption, Button } from '../../components/common/Form';
 import { ShopLookupItem } from '../../repositories/shopsRepository';
+
+const mapShopOptions = (items: ShopLookupItem[]): SearchableSelectOption[] =>
+  items
+    .filter((item) => item.id && item.name)
+    .map((item) => ({
+      value: item.id,
+      label: item.name,
+      searchText: item.code,
+    }));
+
+const mapProductOptions = (items: ProductLookupResponseDto[]): SearchableSelectOption[] =>
+  items
+    .filter((item) => item.id && item.name)
+    .map((item) => ({
+      value: item.id as string,
+      label: item.name as string,
+      searchText: [item.sku, item.brandName, item.modelName, item.barcode].filter(Boolean).join(' '),
+    }));
 
 export const TransfersPage: React.FC = () => {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
@@ -15,7 +34,15 @@ export const TransfersPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [lookupLoading, setLookupLoading] = useState(false);
   const [shops, setShops] = useState<ShopLookupItem[]>([]);
+  const [products, setProducts] = useState<ProductLookupResponseDto[]>([]);
+  const [sourceShopId, setSourceShopId] = useState('');
+  const [destinationShopId, setDestinationShopId] = useState('');
+  const [productId, setProductId] = useState('');
+
+  const shopOptions = useMemo(() => mapShopOptions(shops), [shops]);
+  const productOptions = useMemo(() => mapProductOptions(products), [products]);
 
   const fetchTransfers = async () => {
     setLoading(true);
@@ -55,33 +82,56 @@ export const TransfersPage: React.FC = () => {
     }
   };
 
-  const fetchShopsLookup = async () => {
+  const resetCreateForm = () => {
+    setSourceShopId('');
+    setDestinationShopId('');
+    setProductId('');
+  };
+
+  const fetchCreateLookups = async () => {
+    setLookupLoading(true);
     try {
-      const response = await transfersRepository.getShopsLookup();
-      setShops(response);
+      const response = await transfersRepository.getCreateTransferLookups();
+      setShops(response.shops);
+      setProducts(response.products);
     } catch (error) {
-      console.error('Failed to fetch shops lookup', error);
+      console.error('Failed to fetch transfer lookups', error);
+      alert('Failed to load transfer lookups');
+    } finally {
+      setLookupLoading(false);
     }
   };
 
   const handleCreateTransfer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const body = {
-      sourceShopId: formData.get('sourceShopId') as string,
-      destinationShopId: formData.get('destinationShopId') as string,
-      productId: formData.get('productId') as string,
-      quantity: Number(formData.get('quantity'))
-    };
+    const quantity = Number(formData.get('quantity'));
+    const notesValue = (formData.get('notes') as string | null)?.trim();
 
     try {
-      if (body.sourceShopId === body.destinationShopId) {
+      if (!sourceShopId || !destinationShopId || !productId) {
+        alert('From shop, to shop, and product are required');
+        return;
+      }
+
+      if (sourceShopId === destinationShopId) {
         alert('Source and destination shops must be different');
         return;
       }
 
-      await transfersRepository.createTransfer(body);
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        alert('Quantity must be greater than 0');
+        return;
+      }
+
+      await transfersRepository.createTransfer({
+        sourceShopId,
+        destinationShopId,
+        notes: notesValue || undefined,
+        items: [{ productId, quantity }],
+      });
       setIsCreateModalOpen(false);
+      resetCreateForm();
       fetchTransfers();
     } catch (error) {
       alert('Failed to create transfer');
@@ -98,12 +148,12 @@ export const TransfersPage: React.FC = () => {
   };
 
   const columns = [
-    { 
-      header: 'ID', 
+    {
+      header: 'ID',
       accessor: (t: Transfer) => <span className="text-[10px] font-mono text-gray-400">{t.id}</span>
     },
-    { 
-      header: 'Product', 
+    {
+      header: 'Product',
       accessor: (t: Transfer) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
@@ -116,8 +166,8 @@ export const TransfersPage: React.FC = () => {
         </div>
       )
     },
-    { 
-      header: 'Route', 
+    {
+      header: 'Route',
       accessor: (t: Transfer) => (
         <div className="flex items-center gap-2 text-xs">
           <span className="font-medium text-gray-600">{t.fromShopName}</span>
@@ -126,16 +176,16 @@ export const TransfersPage: React.FC = () => {
         </div>
       )
     },
-    { 
-      header: 'Status', 
+    {
+      header: 'Status',
       accessor: (t: Transfer) => (
         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(t.status)}`}>
           {t.status}
         </span>
       )
     },
-    { 
-      header: 'Date', 
+    {
+      header: 'Date',
       accessor: (t: Transfer) => (
         <div className="flex items-center gap-1.5 text-gray-400">
           <Clock size={14} />
@@ -148,7 +198,7 @@ export const TransfersPage: React.FC = () => {
       accessor: (t: Transfer) => (
         <div className="flex items-center gap-2">
           {t.status === 'Pending' && (
-            <button 
+            <button
               onClick={() => handleDispatch(t.id)}
               className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors"
               title="Dispatch"
@@ -157,7 +207,7 @@ export const TransfersPage: React.FC = () => {
             </button>
           )}
           {t.status === 'Dispatched' && (
-            <button 
+            <button
               onClick={() => handleReceive(t.id)}
               className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
               title="Receive"
@@ -173,12 +223,16 @@ export const TransfersPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f5] p-6">
       <div className="max-w-7xl mx-auto">
-        <PageHeader 
-          title="Stock Transfers" 
+        <PageHeader
+          title="Stock Transfers"
           description="Manage inventory movement between different shop locations."
           actions={
-            <button 
-              onClick={() => { setIsCreateModalOpen(true); fetchShopsLookup(); }}
+            <button
+              onClick={() => {
+                setIsCreateModalOpen(true);
+                resetCreateForm();
+                fetchCreateLookups();
+              }}
               className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
               style={{ backgroundColor: 'var(--primary-color)' }}
             >
@@ -193,32 +247,31 @@ export const TransfersPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <SearchToolbar 
-            search={search} 
-            onSearchChange={setSearch} 
+          <SearchToolbar
+            search={search}
+            onSearchChange={setSearch}
             placeholder="Search by product or shop..."
           />
-          
-          <DataTable 
-            data={transfers} 
-            columns={columns} 
+
+          <DataTable
+            data={transfers}
+            columns={columns}
             loading={loading}
           />
 
-          {/* Pagination */}
           <div className="mt-6 flex items-center justify-between px-2">
             <p className="text-xs text-gray-400">
               Showing <span className="font-medium text-gray-600">{transfers.length}</span> of <span className="font-medium text-gray-600">{total}</span> records
             </p>
             <div className="flex gap-2">
-              <button 
+              <button
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
                 className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
                 Previous
               </button>
-              <button 
+              <button
                 disabled={page * 10 >= total}
                 onClick={() => setPage(p => p + 1)}
                 className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
@@ -230,18 +283,17 @@ export const TransfersPage: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Create Transfer Modal */}
       <AnimatePresence>
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCreateModalOpen(false)}
               className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -254,33 +306,54 @@ export const TransfersPage: React.FC = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleCreateTransfer} className="space-y-4">
-                <FormField label="Source Shop">
-                  <Select name="sourceShopId" required>
-                    <option value="">Select source shop</option>
-                    {shops.map((shop) => (
-                      <option key={`source-${shop.id}`} value={shop.id}>{shop.name}</option>
-                    ))}
-                  </Select>
-                </FormField>
-                <FormField label="Destination Shop">
-                  <Select name="destinationShopId" required>
-                    <option value="">Select destination shop</option>
-                    {shops.map((shop) => (
-                      <option key={`destination-${shop.id}`} value={shop.id}>{shop.name}</option>
-                    ))}
-                  </Select>
-                </FormField>
-                <FormField label="Product ID">
-                  <Input name="productId" required placeholder="e.g. 1" />
-                </FormField>
-                <FormField label="Quantity">
-                  <Input name="quantity" type="number" required min="1" placeholder="0" />
-                </FormField>
-                <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
-                  Create Transfer
-                </Button>
-              </form>
+              {lookupLoading ? (
+                <p className="text-sm text-gray-500">Loading lookups...</p>
+              ) : (
+                <form onSubmit={handleCreateTransfer} className="space-y-4">
+                  <FormField label="From Shop">
+                    <SearchableSelect
+                      name="sourceShopId"
+                      required
+                      value={sourceShopId}
+                      onChange={setSourceShopId}
+                      placeholder="Select source shop"
+                      searchPlaceholder="Search shops"
+                      options={shopOptions}
+                    />
+                  </FormField>
+                  <FormField label="To Shop">
+                    <SearchableSelect
+                      name="destinationShopId"
+                      required
+                      value={destinationShopId}
+                      onChange={setDestinationShopId}
+                      placeholder="Select destination shop"
+                      searchPlaceholder="Search shops"
+                      options={shopOptions}
+                    />
+                  </FormField>
+                  <FormField label="Product">
+                    <SearchableSelect
+                      name="productId"
+                      required
+                      value={productId}
+                      onChange={setProductId}
+                      placeholder="Select product"
+                      searchPlaceholder="Search products"
+                      options={productOptions}
+                    />
+                  </FormField>
+                  <FormField label="Quantity">
+                    <Input name="quantity" type="number" required min="1" placeholder="0" defaultValue="1" />
+                  </FormField>
+                  <FormField label="Notes">
+                    <Input name="notes" placeholder="Optional note" />
+                  </FormField>
+                  <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
+                    Create Transfer
+                  </Button>
+                </form>
+              )}
             </motion.div>
           </div>
         )}

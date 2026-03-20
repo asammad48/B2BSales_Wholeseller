@@ -5,7 +5,7 @@ import { DataTable } from '../../components/common/DataTable';
 import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
 import { Plus, Package, CheckCircle2, XCircle, X, DollarSign, GripVertical, ImagePlus, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FormField, Input, SearchableSelect, SearchableSelectOption, Select, Button } from '../../components/common/Form';
+import { FormField, Input, SearchableSelect, SearchableSelectOption, Button } from '../../components/common/Form';
 import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiClient';
 
 const trackingOptions: TrackingType[] = ['QuantityBased', 'Serialized'];
@@ -40,6 +40,12 @@ const mapLookupOptions = (items: { id?: string; name?: string; code?: string | u
       label: item.name as string,
       searchText: item.code,
     }));
+
+const mapEnumOptions = (items: string[]): SearchableSelectOption[] =>
+  items.map((item) => ({
+    value: item,
+    label: item,
+  }));
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -116,6 +122,9 @@ export const ProductsPage: React.FC = () => {
   const brandOptions = useMemo(() => mapLookupOptions(lookups.brands), [lookups.brands]);
   const modelOptions = useMemo(() => mapLookupOptions(lookups.models), [lookups.models]);
   const partTypeOptions = useMemo(() => mapLookupOptions(lookups.partTypes), [lookups.partTypes]);
+  const trackingTypeOptions = useMemo(() => mapEnumOptions(trackingOptions), []);
+  const qualityTypeOptions = useMemo(() => mapEnumOptions(qualityOptions), []);
+  const pricingModeOptions = useMemo(() => mapEnumOptions(pricingOptions), []);
 
   const resetCreateModal = () => {
     setIsCreateModalOpen(false);
@@ -438,35 +447,26 @@ export const ProductsPage: React.FC = () => {
                     <Input name="barcode" />
                   </FormField>
                   <FormField label="Tracking Type">
-                    <Select name="trackingType" required defaultValue="QuantityBased">
-                      {trackingOptions.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </Select>
+                    <SearchableSelect name="trackingType" required defaultValue="QuantityBased" placeholder="Select tracking type" searchPlaceholder="Search tracking types" options={trackingTypeOptions} />
                   </FormField>
 
                   <FormField label="Quality Type">
-                    <Select name="qualityType" required defaultValue="Original">
-                      {qualityOptions.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </Select>
+                    <SearchableSelect name="qualityType" required defaultValue="Original" placeholder="Select quality type" searchPlaceholder="Search quality types" options={qualityTypeOptions} />
                   </FormField>
                   <FormField label="Pricing Mode">
-                    <Select
+                    <SearchableSelect
                       name="defaultPricingMode"
                       required
                       value={createPricingMode}
-                      onChange={(event) => {
-                        const nextMode = event.target.value as PricingMode;
+                      onChange={(value) => {
+                        const nextMode = value as PricingMode;
                         setCreatePricingMode(nextMode);
                         setCreateMarkup(getPricingMarkupValue(nextMode, createMarkup));
                       }}
-                    >
-                      {pricingOptions.map((item) => (
-                        <option key={item} value={item}>{item}</option>
-                      ))}
-                    </Select>
+                      placeholder="Select pricing mode"
+                      searchPlaceholder="Search pricing modes"
+                      options={pricingModeOptions}
+                    />
                   </FormField>
 
                   <FormField label="Buying Price">
@@ -627,19 +627,18 @@ export const ProductsPage: React.FC = () => {
                   <Input name="sellingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultSellingPrice || selectedProduct.basePrice || 0} required />
                 </FormField>
                 <FormField label="Pricing Mode">
-                  <Select
+                  <SearchableSelect
                     name="pricingMode"
                     value={pricingMode}
-                    onChange={(event) => {
-                      const nextMode = event.target.value as PricingMode;
+                    onChange={(value) => {
+                      const nextMode = value as PricingMode;
                       setPricingMode(nextMode);
                       setPricingMarkup(getPricingMarkupValue(nextMode, pricingMarkup));
                     }}
-                  >
-                    {pricingOptions.map((item) => (
-                      <option key={item} value={item}>{item}</option>
-                    ))}
-                  </Select>
+                    placeholder="Select pricing mode"
+                    searchPlaceholder="Search pricing modes"
+                    options={pricingModeOptions}
+                  />
                 </FormField>
                 {pricingMode === 'PercentageBased' && (
                   <FormField label="Markup %">
