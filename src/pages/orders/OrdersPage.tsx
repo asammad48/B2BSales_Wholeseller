@@ -6,7 +6,7 @@ import { ordersRepository, Order } from '../../repositories/ordersRepository';
 import { canMarkAsReady, canComplete, canMarkAsUnable, getStatusColor } from '../../utils/orderActions';
 import { ShoppingBag, CheckCircle2, PackageCheck, AlertCircle, X, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FormField, Input, Select, Button } from '../../components/common/Form';
+import { FormField, Input, Select, Button, SearchableSelect } from '../../components/common/Form';
 
 export const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -23,6 +23,7 @@ export const OrdersPage: React.FC = () => {
   const [clients, setClients] = useState<Array<{ id: string; name: string }>>([]);
   const [shops, setShops] = useState<Array<{ id: string; name: string }>>([]);
   const [products, setProducts] = useState<Array<{ id: string; name: string }>>([]);
+  const [createSelections, setCreateSelections] = useState({ clientId: '', shopId: '', productId: '' });
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -116,6 +117,7 @@ export const OrdersPage: React.FC = () => {
         items: [{ productId, quantity }],
       });
       setIsCreateModalOpen(false);
+      setCreateSelections({ clientId: '', shopId: '', productId: '' });
       fetchOrders();
     } catch (error) {
       alert('Failed to create order');
@@ -230,9 +232,9 @@ export const OrdersPage: React.FC = () => {
                 <p className="text-sm text-gray-500">Loading order form data...</p>
               ) : (
                 <form onSubmit={handleCreateOrder} className="space-y-4">
-                  <FormField label="Client"><Select name="clientId" required><option value="">Select client</option>{clients.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
-                  <FormField label="Shop"><Select name="shopId" required><option value="">Select shop</option>{shops.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
-                  <FormField label="Product"><Select name="productId" required><option value="">Select product</option>{products.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</Select></FormField>
+                  <FormField label="Client"><SearchableSelect name="clientId" required value={createSelections.clientId} onChange={(value) => setCreateSelections((current) => ({ ...current, clientId: value }))} options={clients.map((item) => ({ value: item.id, label: item.name }))} placeholder="Select client" searchPlaceholder="Search clients" /></FormField>
+                  <FormField label="Shop"><SearchableSelect name="shopId" required value={createSelections.shopId} onChange={(value) => setCreateSelections((current) => ({ ...current, shopId: value }))} options={shops.map((item) => ({ value: item.id, label: item.name }))} placeholder="Select shop" searchPlaceholder="Search shops" /></FormField>
+                  <FormField label="Product"><SearchableSelect name="productId" required value={createSelections.productId} onChange={(value) => setCreateSelections((current) => ({ ...current, productId: value }))} options={products.map((item) => ({ value: item.id, label: item.name }))} placeholder="Select product" searchPlaceholder="Search products" /></FormField>
                   <FormField label="Quantity"><Input name="quantity" type="number" min="1" required /></FormField>
                   <FormField label="Notes"><Input name="notes" placeholder="Optional note" /></FormField>
                   <Button type="submit">Submit Order</Button>

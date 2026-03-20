@@ -1,16 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
-import { Plus, Package, CheckCircle2, XCircle, X, DollarSign } from 'lucide-react';
+import { Plus, Package, CheckCircle2, XCircle, X, DollarSign, GripVertical, Star, Trash2, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FormField, Input, Select, Button } from '../../components/common/Form';
+import { FormField, Input, Select, Button, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
 import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiClient';
+import { isPercentageBasedPricingMode, normalizeMarkupValue } from '../../utils/pricing';
 
 const trackingOptions: TrackingType[] = ['QuantityBased', 'Serialized'];
 const qualityOptions: QualityType[] = ['Original', 'OEM', 'HighCopy', 'Refurbished'];
 const pricingOptions: PricingMode[] = ['Direct', 'PercentageBased'];
+
+interface ProductImageDraft {
+  id: string;
+  file: File;
+  previewUrl: string;
+  altText: string;
+  isPrimary: boolean;
+  sortOrder: number;
+}
+
+const mapLookupOptions = (items: Array<{ id?: string; name?: string }>): SearchableSelectOption[] => (
+  items.map((item) => ({
+    value: item.id || '',
+    label: item.name || '',
+  })).filter((item) => item.value && item.label)
+);
 
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,6 +40,47 @@ export const ProductsPage: React.FC = () => {
   const [lookupsLoading, setLookupsLoading] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [createSelections, setCreateSelections] = useState({
+    categoryId: '',
+    partTypeId: '',
+    brandId: '',
+    modelId: '',
+  });
+  const [createPricingMode, setCreatePricingMode] = useState<PricingMode>('Direct');
+  const [createMarkupValue, setCreateMarkupValue] = useState('0');
+  const [productImages, setProductImages] = useState<ProductImageDraft[]>([]);
+  const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
+  const productImagesRef = useRef<ProductImageDraft[]>([]);
+  const [pricingForm, setPricingForm] = useState({
+    pricingMode: 'Direct' as PricingMode,
+    markupPercentage: '0',
+  });
+
+  const categoryOptions = useMemo(() => mapLookupOptions(lookups.categories), [lookups.categories]);
+  const partTypeOptions = useMemo(() => mapLookupOptions(lookups.partTypes), [lookups.partTypes]);
+  const brandOptions = useMemo(() => mapLookupOptions(lookups.brands), [lookups.brands]);
+  const modelOptions = useMemo(() => mapLookupOptions(lookups.models), [lookups.models]);
+
+  const resetCreateFormState = () => {
+    setCreateSelections({
+      categoryId: '',
+      partTypeId: '',
+      brandId: '',
+      modelId: '',
+    });
+    setCreatePricingMode('Direct');
+    setCreateMarkupValue('0');
+    setDraggedImageId(null);
+    setProductImages((current) => {
+      current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+      return [];
+    });
+  };
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+    resetCreateFormState();
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -63,6 +121,103 @@ export const ProductsPage: React.FC = () => {
     }
   }, [isCreateModalOpen]);
 
+  useEffect(() => {
+    productImagesRef.current = productImages;
+  }, [productImages]);
+
+  useEffect(() => () => {
+    productImagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+  }, []);
+
+  useEffect(() => {
+    if (!isPricingModalOpen || !selectedProduct) {
+      return;
+    }
+
+    const nextPricingMode = selectedProduct.defaultPricingMode || 'Direct';
+    setPricingForm({
+      pricingMode: nextPricingMode,
+      markupPercentage: String(normalizeMarkupValue(nextPricingMode, selectedProduct.defaultMarkupPercentage) ?? 0),
+    });
+  }, [isPricingModalOpen, selectedProduct]);
+
+  const handleCreateImageSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []) as File[];
+
+    if (!files.length) {
+      return;
+    }
+
+    setProductImages((current) => {
+      const shouldSetPrimary = current.length === 0;
+      const nextImages = files.map((file, index) => ({
+        id: `${file.name}-${file.lastModified}-${index}`,
+        file,
+        previewUrl: URL.createObjectURL(file),
+        altText: '',
+        isPrimary: shouldSetPrimary && index === 0,
+        sortOrder: current.length + index,
+      }));
+
+      return [...current, ...nextImages];
+    });
+
+    event.target.value = '';
+  };
+
+  const handleImageAltTextChange = (imageId: string, altText: string) => {
+    setProductImages((current) => current.map((image) => (
+      image.id === imageId ? { ...image, altText } : image
+    )));
+  };
+
+  const handlePrimaryImageChange = (imageId: string) => {
+    setProductImages((current) => current.map((image) => ({
+      ...image,
+      isPrimary: image.id === imageId,
+    })));
+  };
+
+  const handleRemoveImage = (imageId: string) => {
+    setProductImages((current) => {
+      const removedImage = current.find((image) => image.id === imageId);
+      if (removedImage) {
+        URL.revokeObjectURL(removedImage.previewUrl);
+      }
+
+      const remaining = current.filter((image) => image.id !== imageId);
+      return remaining.map((image, index) => ({
+        ...image,
+        isPrimary: remaining.some((item) => item.isPrimary) ? image.isPrimary : index === 0,
+        sortOrder: index,
+      }));
+    });
+  };
+
+  const moveImage = (sourceId: string, targetId: string) => {
+    if (sourceId === targetId) {
+      return;
+    }
+
+    setProductImages((current) => {
+      const sourceIndex = current.findIndex((image) => image.id === sourceId);
+      const targetIndex = current.findIndex((image) => image.id === targetId);
+
+      if (sourceIndex < 0 || targetIndex < 0) {
+        return current;
+      }
+
+      const nextImages = [...current];
+      const [movedImage] = nextImages.splice(sourceIndex, 1);
+      nextImages.splice(targetIndex, 0, movedImage);
+
+      return nextImages.map((image, index) => ({
+        ...image,
+        sortOrder: index,
+      }));
+    });
+  };
+
   const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -76,6 +231,18 @@ export const ProductsPage: React.FC = () => {
       const str = (value as string | null)?.trim();
       return str ? Number(str) : undefined;
     };
+
+    const primaryImageCount = productImages.filter((image) => image.isPrimary).length;
+
+    if (!productImages.length) {
+      alert('At least one image is required');
+      return;
+    }
+
+    if (primaryImageCount !== 1) {
+      alert('Please select exactly one primary image');
+      return;
+    }
 
     const body: CreateProductPayload = {
       categoryId: formData.get('categoryId') as string,
@@ -93,23 +260,29 @@ export const ProductsPage: React.FC = () => {
       defaultBuyingPrice: Number(formData.get('defaultBuyingPrice')),
       defaultSellingPrice: Number(formData.get('defaultSellingPrice')),
       defaultPricingMode: formData.get('defaultPricingMode') as PricingMode,
-      defaultMarkupPercentage: toNumber(formData.get('defaultMarkupPercentage')),
+      defaultMarkupPercentage: normalizeMarkupValue(
+        formData.get('defaultPricingMode') as PricingMode,
+        toNumber(formData.get('defaultMarkupPercentage'))
+      ),
       warrantyDays: Number(formData.get('warrantyDays')),
       lowStockThreshold: Number(formData.get('lowStockThreshold')),
-      primaryImagePath: toOptional(formData.get('primaryImagePath')),
-      primaryImageAltText: toOptional(formData.get('primaryImageAltText')),
+      images: productImages.map((image, index) => ({
+        file: image.file,
+        altText: image.altText.trim() || undefined,
+        isPrimary: image.isPrimary,
+        sortOrder: index,
+      })),
     };
 
     try {
       await productsRepository.createProduct(body);
-      setIsCreateModalOpen(false);
+      closeCreateModal();
       fetchProducts();
     } catch (error) {
+      console.error('Failed to create product', error);
       alert('Failed to create product');
     }
   };
-
-
 
   const handleAdjustPricing = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -132,7 +305,7 @@ export const ProductsPage: React.FC = () => {
         buyingPrice,
         sellingPrice,
         pricingMode,
-        markupPercentage: markupRaw ? Number(markupRaw) : undefined,
+        markupPercentage: normalizeMarkupValue(pricingMode, markupRaw ? Number(markupRaw) : undefined),
         reason: reasonRaw || undefined,
         updateDefaultPrice: true,
       });
@@ -140,6 +313,7 @@ export const ProductsPage: React.FC = () => {
       setSelectedProduct(null);
       fetchProducts();
     } catch (error) {
+      console.error('Failed to adjust pricing', error);
       alert('Failed to adjust pricing');
     }
   };
@@ -267,7 +441,7 @@ export const ProductsPage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsCreateModalOpen(false)}
+              onClick={closeCreateModal}
               className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             />
             <motion.div
@@ -278,7 +452,7 @@ export const ProductsPage: React.FC = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-light">Create New Product</h2>
-                <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <button onClick={closeCreateModal} className="text-gray-400 hover:text-gray-600">
                   <X size={24} />
                 </button>
               </div>
@@ -288,37 +462,46 @@ export const ProductsPage: React.FC = () => {
               ) : (
                 <form onSubmit={handleCreateProduct} className="grid grid-cols-2 gap-4">
                   <FormField label="Category">
-                    <Select name="categoryId" required>
-                      <option value="">Select category</option>
-                      {lookups.categories.map((item) => (
-                        <option key={item.id} value={item.id}>{item.name}</option>
-                      ))}
-                    </Select>
+                    <SearchableSelect
+                      name="categoryId"
+                      value={createSelections.categoryId}
+                      onChange={(value) => setCreateSelections((current) => ({ ...current, categoryId: value }))}
+                      options={categoryOptions}
+                      placeholder="Select category"
+                      searchPlaceholder="Search categories"
+                      required
+                    />
                   </FormField>
                   <FormField label="Part Type">
-                    <Select name="partTypeId">
-                      <option value="">Select part type (optional)</option>
-                      {lookups.partTypes.map((item) => (
-                        <option key={item.id} value={item.id}>{item.name}</option>
-                      ))}
-                    </Select>
+                    <SearchableSelect
+                      name="partTypeId"
+                      value={createSelections.partTypeId}
+                      onChange={(value) => setCreateSelections((current) => ({ ...current, partTypeId: value }))}
+                      options={partTypeOptions}
+                      placeholder="Select part type (optional)"
+                      searchPlaceholder="Search part types"
+                    />
                   </FormField>
 
                   <FormField label="Brand">
-                    <Select name="brandId">
-                      <option value="">Select brand (optional)</option>
-                      {lookups.brands.map((item) => (
-                        <option key={item.id} value={item.id}>{item.name}</option>
-                      ))}
-                    </Select>
+                    <SearchableSelect
+                      name="brandId"
+                      value={createSelections.brandId}
+                      onChange={(value) => setCreateSelections((current) => ({ ...current, brandId: value }))}
+                      options={brandOptions}
+                      placeholder="Select brand (optional)"
+                      searchPlaceholder="Search brands"
+                    />
                   </FormField>
                   <FormField label="Model">
-                    <Select name="modelId">
-                      <option value="">Select model (optional)</option>
-                      {lookups.models.map((item) => (
-                        <option key={item.id} value={item.id}>{item.name}</option>
-                      ))}
-                    </Select>
+                    <SearchableSelect
+                      name="modelId"
+                      value={createSelections.modelId}
+                      onChange={(value) => setCreateSelections((current) => ({ ...current, modelId: value }))}
+                      options={modelOptions}
+                      placeholder="Select model (optional)"
+                      searchPlaceholder="Search models"
+                    />
                   </FormField>
 
                   <FormField label="Product Name">
@@ -347,7 +530,16 @@ export const ProductsPage: React.FC = () => {
                     </Select>
                   </FormField>
                   <FormField label="Pricing Mode">
-                    <Select name="defaultPricingMode" required defaultValue="Direct">
+                    <Select
+                      name="defaultPricingMode"
+                      required
+                      value={createPricingMode}
+                      onChange={(event) => {
+                        const nextValue = event.target.value as PricingMode;
+                        setCreatePricingMode(nextValue);
+                        setCreateMarkupValue(String(normalizeMarkupValue(nextValue) ?? 0));
+                      }}
+                    >
                       {pricingOptions.map((item) => (
                         <option key={item} value={item}>{item}</option>
                       ))}
@@ -361,9 +553,18 @@ export const ProductsPage: React.FC = () => {
                     <Input name="defaultSellingPrice" type="number" min="0" step="0.01" required />
                   </FormField>
 
-                  <FormField label="Markup %">
-                    <Input name="defaultMarkupPercentage" type="number" min="0" step="0.01" />
-                  </FormField>
+                  {isPercentageBasedPricingMode(createPricingMode) && (
+                    <FormField label="Markup %">
+                      <Input
+                        name="defaultMarkupPercentage"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={createMarkupValue}
+                        onChange={(event) => setCreateMarkupValue(event.target.value)}
+                      />
+                    </FormField>
+                  )}
                   <FormField label="Warranty Days">
                     <Input name="warrantyDays" type="number" min="0" required />
                   </FormField>
@@ -371,13 +572,79 @@ export const ProductsPage: React.FC = () => {
                   <FormField label="Low Stock Threshold">
                     <Input name="lowStockThreshold" type="number" min="0" required />
                   </FormField>
-                  <FormField label="Primary Image Path">
-                    <Input name="primaryImagePath" type="url" placeholder="https://..." />
-                  </FormField>
 
-                  <FormField label="Primary Image Alt Text">
-                    <Input name="primaryImageAltText" />
-                  </FormField>
+                  <div className="col-span-2 rounded-3xl border border-dashed border-gray-200 bg-gray-50/60 p-5 space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Product Images</p>
+                        <p className="text-xs text-gray-400">Add one or more images, choose one primary image, and drag cards to set sort order.</p>
+                      </div>
+                      <label className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm cursor-pointer hover:bg-gray-100 transition-colors">
+                        <Upload size={16} />
+                        <span>Add Images</span>
+                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleCreateImageSelection} />
+                      </label>
+                    </div>
+
+                    {productImages.length > 0 ? (
+                      <div className="space-y-3">
+                        {productImages.map((image) => (
+                          <div
+                            key={image.id}
+                            draggable
+                            onDragStart={() => setDraggedImageId(image.id)}
+                            onDragOver={(event) => event.preventDefault()}
+                            onDrop={() => {
+                              if (draggedImageId) {
+                                moveImage(draggedImageId, image.id);
+                                setDraggedImageId(null);
+                              }
+                            }}
+                            onDragEnd={() => setDraggedImageId(null)}
+                            className="grid grid-cols-[auto_96px_1fr_auto] gap-4 rounded-2xl bg-white p-4 shadow-sm items-center"
+                          >
+                            <div className="text-gray-300 cursor-grab">
+                              <GripVertical size={18} />
+                            </div>
+                            <img src={image.previewUrl} alt={image.altText || image.file.name} className="h-24 w-24 rounded-2xl object-cover bg-gray-100" />
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                                <span className="font-medium text-gray-800">{image.file.name}</span>
+                                <span>Sort order: {image.sortOrder + 1}</span>
+                              </div>
+                              <Input
+                                value={image.altText}
+                                onChange={(event) => handleImageAltTextChange(image.id, event.target.value)}
+                                placeholder="Alt text (optional)"
+                              />
+                              <label className="inline-flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="primaryProductImage"
+                                  checked={image.isPrimary}
+                                  onChange={() => handlePrimaryImageChange(image.id)}
+                                />
+                                <span className="inline-flex items-center gap-1">
+                                  <Star size={14} className={image.isPrimary ? 'text-amber-500 fill-amber-500' : 'text-gray-400'} />
+                                  Primary image
+                                </span>
+                              </label>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(image.id)}
+                              className="rounded-xl p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                              title="Remove image"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="rounded-2xl bg-white px-4 py-5 text-sm text-red-500">At least one image is required before you can create the product.</p>
+                    )}
+                  </div>
 
                   <div className="col-span-2">
                     <FormField label="Short Description">
@@ -443,15 +710,34 @@ export const ProductsPage: React.FC = () => {
                   <Input name="sellingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultSellingPrice || selectedProduct.basePrice || 0} required />
                 </FormField>
                 <FormField label="Pricing Mode">
-                  <Select name="pricingMode" defaultValue={selectedProduct.defaultPricingMode || 'Direct'}>
+                  <Select
+                    name="pricingMode"
+                    value={pricingForm.pricingMode}
+                    onChange={(event) => {
+                      const nextValue = event.target.value as PricingMode;
+                      setPricingForm({
+                        pricingMode: nextValue,
+                        markupPercentage: String(normalizeMarkupValue(nextValue) ?? 0),
+                      });
+                    }}
+                  >
                     {pricingOptions.map((item) => (
                       <option key={item} value={item}>{item}</option>
                     ))}
                   </Select>
                 </FormField>
-                <FormField label="Markup %">
-                  <Input name="markupPercentage" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultMarkupPercentage || ''} />
-                </FormField>
+                {isPercentageBasedPricingMode(pricingForm.pricingMode) && (
+                  <FormField label="Markup %">
+                    <Input
+                      name="markupPercentage"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={pricingForm.markupPercentage}
+                      onChange={(event) => setPricingForm((current) => ({ ...current, markupPercentage: event.target.value }))}
+                    />
+                  </FormField>
+                )}
                 <div className="col-span-2">
                   <FormField label="Reason (Optional)">
                     <Input name="reason" placeholder="Reason for price change" />

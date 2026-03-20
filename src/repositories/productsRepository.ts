@@ -1,7 +1,8 @@
 import { apiClient } from '../api/client';
 import {
   AdjustProductPricingRequestDto,
-  CreateProductRequestDto,
+  CreateProductImageRequestDto,
+  FileParameter,
   PricingMode,
   ProductPricingAdjustmentResultDto,
   PublicLookupItemDto,
@@ -42,10 +43,38 @@ export interface CatalogLookups {
   partTypes: PublicLookupItemDto[];
 }
 
-export interface CreateProductPayload extends Omit<CreateProductRequestDto, 'images'> {
-  primaryImagePath?: string;
-  primaryImageAltText?: string;
+export interface CreateProductImageUpload {
+  file: File;
+  altText?: string;
+  isPrimary: boolean;
+  sortOrder: number;
 }
+
+export interface CreateProductPayload {
+  categoryId?: string;
+  brandId?: string;
+  modelId?: string;
+  partTypeId?: string;
+  sku?: string;
+  barcode?: string;
+  name?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  specifications?: string;
+  trackingType: TrackingType;
+  qualityType: QualityType;
+  defaultBuyingPrice?: number;
+  defaultSellingPrice?: number;
+  defaultPricingMode?: PricingMode;
+  defaultMarkupPercentage?: number;
+  warrantyDays?: number;
+  lowStockThreshold?: number;
+  images: CreateProductImageUpload[];
+}
+
+const toRequiredString = (value?: string) => value?.trim() ?? '';
+
+const toRequiredNumber = (value?: number) => value ?? 0;
 
 export const productsRepository = {
   async getProducts(
@@ -96,21 +125,45 @@ export const productsRepository = {
   },
 
   async createProduct(product: CreateProductPayload): Promise<string> {
-    const body: CreateProductRequestDto = {
-      ...product,
-      images: product.primaryImagePath
-        ? [
-            {
-              filePath: product.primaryImagePath,
-              altText: product.primaryImageAltText || undefined,
-              isPrimary: true,
-              sortOrder: 0,
-            },
-          ]
-        : undefined,
-    };
+    if (!product.images.length) {
+      throw new Error('At least one product image is required');
+    }
 
-    const response = await apiClient.productsPOST(body);
+    const imageMetadata: CreateProductImageRequestDto[] = product.images.map((image, index) => ({
+      altText: image.altText?.trim() || undefined,
+      isPrimary: image.isPrimary,
+      sortOrder: image.sortOrder ?? index,
+      filePath: image.file.name,
+    }));
+
+    const imageFiles = product.images.map((image, index) => ({
+      data: image.file,
+      fileName: image.file.name,
+      toString: () => JSON.stringify(imageMetadata[index]),
+    })) as Array<FileParameter & { toString: () => string }>;
+
+    const response = await (apiClient as any).productsPOST(
+      toRequiredString(product.categoryId),
+      toRequiredString(product.brandId),
+      toRequiredString(product.modelId),
+      toRequiredString(product.partTypeId),
+      toRequiredString(product.sku),
+      toRequiredString(product.barcode),
+      toRequiredString(product.name),
+      toRequiredString(product.shortDescription),
+      toRequiredString(product.longDescription),
+      toRequiredString(product.specifications),
+      product.trackingType,
+      product.qualityType,
+      toRequiredNumber(product.defaultBuyingPrice),
+      toRequiredNumber(product.defaultSellingPrice),
+      product.defaultPricingMode,
+      toRequiredNumber(product.defaultMarkupPercentage),
+      toRequiredNumber(product.warrantyDays),
+      toRequiredNumber(product.lowStockThreshold),
+      imageFiles,
+      imageFiles
+    );
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create product');

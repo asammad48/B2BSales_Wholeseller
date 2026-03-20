@@ -3,9 +3,10 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { inventoryRepository, InventoryItem } from '../../repositories/inventoryRepository';
-import { Package, ArrowDownCircle, Settings2, AlertTriangle, CheckCircle2, X } from 'lucide-react';
+import { lookupsRepository } from '../../repositories/lookupsRepository';
+import { Package, ArrowDownCircle, Settings2, AlertTriangle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FormField, Input, Select, Button } from '../../components/common/Form';
+import { FormField, Input, Select, Button, SearchableSelect } from '../../components/common/Form';
 
 export const InventoryPage: React.FC = () => {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -13,11 +14,15 @@ export const InventoryPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  
-  // Modal states
+
   const [isStockInOpen, setIsStockInOpen] = useState(false);
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [productOptions, setProductOptions] = useState<Array<{ value: string; label: string; keywords?: string[] }>>([]);
+  const [shopOptions, setShopOptions] = useState<Array<{ value: string; label: string; keywords?: string[] }>>([]);
+  const [stockInSelection, setStockInSelection] = useState({ productId: '', shopId: '' });
+
 
   const fetchInventory = async () => {
     setLoading(true);
@@ -32,6 +37,27 @@ export const InventoryPage: React.FC = () => {
     }
   };
 
+  const fetchInventoryLookups = async () => {
+    setLookupLoading(true);
+    try {
+      const response = await lookupsRepository.getInventoryFormLookups();
+      setProductOptions(response.products.map((product) => ({
+        value: product.id,
+        label: product.name,
+      })));
+      setShopOptions(response.shops.map((shop) => ({
+        value: shop.id,
+        label: shop.name,
+        keywords: shop.code ? [shop.code] : undefined,
+      })));
+    } catch (error) {
+      console.error('Failed to load inventory lookups', error);
+      alert('Failed to load inventory lookups');
+    } finally {
+      setLookupLoading(false);
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchInventory();
@@ -40,12 +66,12 @@ export const InventoryPage: React.FC = () => {
   }, [search, page]);
 
   const columns = [
-    { 
-      header: 'ID', 
+    {
+      header: 'ID',
       accessor: (i: InventoryItem) => <span className="text-[10px] font-mono text-gray-400">{i.id}</span>
     },
-    { 
-      header: 'Product', 
+    {
+      header: 'Product',
       accessor: (i: InventoryItem) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
@@ -59,8 +85,8 @@ export const InventoryPage: React.FC = () => {
       )
     },
     { header: 'Shop', accessor: 'shopName' as keyof InventoryItem },
-    { 
-      header: 'Stock Level', 
+    {
+      header: 'Stock Level',
       accessor: (i: InventoryItem) => {
         const isLow = i.quantityOnHand <= i.lowStockThreshold;
         return (
@@ -74,8 +100,8 @@ export const InventoryPage: React.FC = () => {
       }
     },
     { header: 'Reserved', accessor: 'reservedQuantity' as keyof InventoryItem },
-    { 
-      header: 'Available', 
+    {
+      header: 'Available',
       accessor: (i: InventoryItem) => (
         <span className="font-medium text-emerald-600">
           {i.quantityOnHand - i.reservedQuantity}
@@ -87,7 +113,7 @@ export const InventoryPage: React.FC = () => {
       header: 'Actions',
       accessor: (i: InventoryItem) => (
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               setSelectedItem(i);
@@ -115,8 +141,10 @@ export const InventoryPage: React.FC = () => {
     try {
       await inventoryRepository.stockIn(body);
       setIsStockInOpen(false);
+      setStockInSelection({ productId: '', shopId: '' });
       fetchInventory();
     } catch (error) {
+      console.error('Failed to process stock in', error);
       alert('Failed to process stock in');
     }
   };
@@ -124,7 +152,7 @@ export const InventoryPage: React.FC = () => {
   const handleAdjustment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedItem) return;
-    
+
     const formData = new FormData(e.currentTarget);
     const body = {
       id: selectedItem.id,
@@ -138,6 +166,7 @@ export const InventoryPage: React.FC = () => {
       setSelectedItem(null);
       fetchInventory();
     } catch (error) {
+      console.error('Failed to process adjustment', error);
       alert('Failed to process adjustment');
     }
   };
@@ -145,12 +174,15 @@ export const InventoryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f5] p-6">
       <div className="max-w-7xl mx-auto">
-        <PageHeader 
-          title="Inventory" 
+        <PageHeader
+          title="Inventory"
           description="Monitor stock levels across all shop locations and manage adjustments."
           actions={
-            <button 
-              onClick={() => setIsStockInOpen(true)}
+            <button
+              onClick={() => {
+                setIsStockInOpen(true);
+                fetchInventoryLookups();
+              }}
               className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
               style={{ backgroundColor: 'var(--primary-color)' }}
             >
@@ -165,32 +197,31 @@ export const InventoryPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <SearchToolbar 
-            search={search} 
-            onSearchChange={setSearch} 
+          <SearchToolbar
+            search={search}
+            onSearchChange={setSearch}
             placeholder="Search by product, SKU, brand, model, shop..."
           />
-          
-          <DataTable 
-            data={items} 
-            columns={columns} 
+
+          <DataTable
+            data={items}
+            columns={columns}
             loading={loading}
           />
 
-          {/* Pagination */}
           <div className="mt-6 flex items-center justify-between px-2">
             <p className="text-xs text-gray-400">
               Showing <span className="font-medium text-gray-600">{items.length}</span> of <span className="font-medium text-gray-600">{total}</span> records
             </p>
             <div className="flex gap-2">
-              <button 
+              <button
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
                 className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
                 Previous
               </button>
-              <button 
+              <button
                 disabled={page * 10 >= total}
                 onClick={() => setPage(p => p + 1)}
                 className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
@@ -202,18 +233,17 @@ export const InventoryPage: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Stock In Modal */}
       <AnimatePresence>
         {isStockInOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsStockInOpen(false)}
               className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -226,37 +256,56 @@ export const InventoryPage: React.FC = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleStockIn} className="space-y-4">
-                <FormField label="Product ID">
-                  <Input name="productId" required placeholder="e.g. 1" />
-                </FormField>
-                <FormField label="Shop ID">
-                  <Input name="shopId" required placeholder="e.g. s1" />
-                </FormField>
-                <FormField label="Quantity">
-                  <Input name="quantity" type="number" required min="1" placeholder="0" />
-                </FormField>
-                <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
-                  Process Stock In
-                </Button>
-              </form>
+              {lookupLoading ? (
+                <p className="text-sm text-gray-500">Loading inventory lookups...</p>
+              ) : (
+                <form onSubmit={handleStockIn} className="space-y-4">
+                  <FormField label="Product">
+                    <SearchableSelect
+                      name="productId"
+                      value={stockInSelection.productId}
+                      onChange={(value) => setStockInSelection((current) => ({ ...current, productId: value }))}
+                      options={productOptions}
+                      placeholder="Select product"
+                      searchPlaceholder="Search products"
+                      required
+                    />
+                  </FormField>
+                  <FormField label="Shop">
+                    <SearchableSelect
+                      name="shopId"
+                      value={stockInSelection.shopId}
+                      onChange={(value) => setStockInSelection((current) => ({ ...current, shopId: value }))}
+                      options={shopOptions}
+                      placeholder="Select shop"
+                      searchPlaceholder="Search shops"
+                      required
+                    />
+                  </FormField>
+                  <FormField label="Quantity">
+                    <Input name="quantity" type="number" required min="1" placeholder="0" />
+                  </FormField>
+                  <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
+                    Process Stock In
+                  </Button>
+                </form>
+              )}
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Adjustment Modal */}
       <AnimatePresence>
         {isAdjustOpen && selectedItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAdjustOpen(false)}
               className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}

@@ -5,7 +5,7 @@ import { DataTable } from '../../components/common/DataTable';
 import { transfersRepository, Transfer } from '../../repositories/transfersRepository';
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FormField, Input, Select, Button } from '../../components/common/Form';
+import { FormField, Input, Select, Button, SearchableSelect } from '../../components/common/Form';
 import { ShopLookupItem } from '../../repositories/shopsRepository';
 
 export const TransfersPage: React.FC = () => {
@@ -16,6 +16,7 @@ export const TransfersPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [shops, setShops] = useState<ShopLookupItem[]>([]);
+  const [transferSelections, setTransferSelections] = useState({ sourceShopId: '', destinationShopId: '' });
 
   const fetchTransfers = async () => {
     setLoading(true);
@@ -82,6 +83,7 @@ export const TransfersPage: React.FC = () => {
 
       await transfersRepository.createTransfer(body);
       setIsCreateModalOpen(false);
+      setTransferSelections({ sourceShopId: '', destinationShopId: '' });
       fetchTransfers();
     } catch (error) {
       alert('Failed to create transfer');
@@ -256,20 +258,10 @@ export const TransfersPage: React.FC = () => {
 
               <form onSubmit={handleCreateTransfer} className="space-y-4">
                 <FormField label="Source Shop">
-                  <Select name="sourceShopId" required>
-                    <option value="">Select source shop</option>
-                    {shops.map((shop) => (
-                      <option key={`source-${shop.id}`} value={shop.id}>{shop.name}</option>
-                    ))}
-                  </Select>
+                  <SearchableSelect name="sourceShopId" required value={transferSelections.sourceShopId} onChange={(value) => setTransferSelections((current) => ({ ...current, sourceShopId: value }))} options={shops.map((shop) => ({ value: shop.id, label: shop.name, keywords: shop.code ? [shop.code] : undefined }))} placeholder="Select source shop" searchPlaceholder="Search shops" />
                 </FormField>
                 <FormField label="Destination Shop">
-                  <Select name="destinationShopId" required>
-                    <option value="">Select destination shop</option>
-                    {shops.map((shop) => (
-                      <option key={`destination-${shop.id}`} value={shop.id}>{shop.name}</option>
-                    ))}
-                  </Select>
+                  <SearchableSelect name="destinationShopId" required value={transferSelections.destinationShopId} onChange={(value) => setTransferSelections((current) => ({ ...current, destinationShopId: value }))} options={shops.map((shop) => ({ value: shop.id, label: shop.name, keywords: shop.code ? [shop.code] : undefined }))} placeholder="Select destination shop" searchPlaceholder="Search shops" />
                 </FormField>
                 <FormField label="Product ID">
                   <Input name="productId" required placeholder="e.g. 1" />
