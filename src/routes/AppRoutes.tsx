@@ -1,27 +1,27 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Boxes } from 'lucide-react';
 import { ProtectedRoute } from './ProtectedRoute';
 import { AdminLayout } from '../layouts/AdminLayout';
 import ThemeSettingsPage from '../pages/theme/ThemeSettingsPage';
-import { motion } from 'framer-motion';
-import { Boxes } from 'lucide-react';
 import NotFoundPage from '../pages/shared/NotFoundPage';
+import LoginPage from '../pages/public/LoginPage';
+import ProductDetailPage from '../pages/public/ProductDetailPage';
+import { DashboardPage } from '../pages/dashboard/DashboardPage';
+import { OrdersPage } from '../pages/orders/OrdersPage';
+import { UsersPage } from '../pages/users/UsersPage';
+import { ClientsPage } from '../pages/clients/ClientsPage';
+import { ContactInquiriesPage } from '../pages/contactInquiries/ContactInquiriesPage';
 
-// Placeholder for other pages until they are built
 const PagePlaceholder = ({ title }: { title: string }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-  >
+  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}>
     <div className="admin-toolbar">
       <div>
         <h1 className="text-3xl font-bold text-white tracking-tight">{title}</h1>
         <p className="text-[var(--text-muted)] mt-1">Manage your {title.toLowerCase()} and system settings.</p>
       </div>
-      <button className="btn-primary">
-        Add New
-      </button>
+      <button className="btn-primary">Add New</button>
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -50,27 +50,22 @@ const PagePlaceholder = ({ title }: { title: string }) => (
   </motion.div>
 );
 
-import LoginPage from '../pages/public/LoginPage';
-import ProductDetailPage from '../pages/public/ProductDetailPage';
-
 export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/product/:id" element={<ProductDetailPage />} />
-      
-      <Route path="/" element={
-        <ProtectedRoute>
-          <AdminLayout />
-        </ProtectedRoute>
-      }>
+
+      <Route path="/" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<PagePlaceholder title="Dashboard" />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products" element={<PagePlaceholder title="Products" />} />
         <Route path="inventory" element={<PagePlaceholder title="Inventory" />} />
-        <Route path="orders" element={<PagePlaceholder title="Orders" />} />
+        <Route path="orders" element={<OrdersPage />} />
         <Route path="transfers" element={<PagePlaceholder title="Transfers" />} />
-        <Route path="users" element={<PagePlaceholder title="Users" />} />
+        <Route path="users" element={<UsersPage />} />
+        <Route path="clients" element={<ClientsPage />} />
+        <Route path="contact-inquiries" element={<ContactInquiriesPage />} />
         <Route path="theme" element={<ThemeSettingsPage />} />
         <Route path="settings/account" element={<PagePlaceholder title="Account Settings" />} />
         <Route path="*" element={<NotFoundPage />} />
