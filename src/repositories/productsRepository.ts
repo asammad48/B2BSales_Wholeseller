@@ -1,13 +1,15 @@
 import { apiClient } from '../api/client';
 import {
-  AdjustProductPricingRequestDto,
   CreateProductImageRequestDto,
+  CurrencyLookupResponseDto,
   PricingMode,
   ProductPricingAdjustmentResultDto,
   PublicLookupItemDto,
   QualityType,
   TrackingType,
 } from '../api/generated/apiClient';
+import { adminHttp, getApiErrorMessage, unwrapApiResponse } from './adminHttp';
+import { lookupsRepository } from './lookupsRepository';
 
 export interface Product {
   id: string;
@@ -18,6 +20,8 @@ export interface Product {
   modelName: string;
   categoryName: string;
   basePrice: number;
+  baseCurrencyId?: string;
+  baseCurrencyCode?: string;
   defaultBuyingPrice?: number;
   defaultSellingPrice?: number;
   defaultPricingMode?: PricingMode;
@@ -40,6 +44,7 @@ export interface CatalogLookups {
   brands: PublicLookupItemDto[];
   models: PublicLookupItemDto[];
   partTypes: PublicLookupItemDto[];
+  currencies: CurrencyLookupResponseDto[];
 }
 
 export interface CreateProductImageInput {
@@ -63,12 +68,25 @@ export interface CreateProductPayload {
   trackingType: TrackingType;
   qualityType: QualityType;
   defaultBuyingPrice: number;
-  defaultSellingPrice: number;
-  defaultPricingMode: PricingMode;
-  defaultMarkupPercentage: number;
+  baseCurrencyId: string;
+  basePrice: number;
+  pricingMode: PricingMode;
+  sellingPrice: number;
+  markupPercentage?: number;
   warrantyDays: number;
   lowStockThreshold: number;
   images: CreateProductImageInput[];
+}
+
+export interface AdjustProductPricingPayload {
+  buyingPrice?: number;
+  baseCurrencyId: string;
+  basePrice: number;
+  pricingMode: PricingMode;
+  sellingPrice: number;
+  markupPercentage?: number;
+  reason?: string;
+  updateDefaultPrice?: boolean;
 }
 
 const normalizeOptionalString = (value?: string) => {
@@ -88,6 +106,14 @@ const ensureSinglePrimaryImage = (images: CreateProductImageInput[]) => {
   }
 };
 
+const appendIfPresent = (formData: FormData, key: string, value: string | number | undefined) => {
+  if (value === undefined || value === null || value === '') {
+    return;
+  }
+
+  formData.append(key, String(value));
+};
+
 export const productsRepository = {
   async getProducts(
     page: number = 1,
@@ -104,7 +130,25 @@ export const productsRepository = {
     }
 
     return {
-      data: (response.data.items || []) as any[],
+      data: ((response.data.items || []) as any[]).map((item) => ({
+        ...item,
+        id: item.id || '',
+        name: item.name || '',
+        sku: item.sku || '',
+        barcode: item.barcode || '',
+        brandName: item.brandName || '',
+        modelName: item.modelName || '',
+        categoryName: item.categoryName || '',
+        basePrice: Number(item.basePrice || item.defaultBuyingPrice || 0),
+        baseCurrencyId: item.baseCurrencyId,
+        baseCurrencyCode: item.baseCurrencyCode,
+        defaultBuyingPrice: Number(item.defaultBuyingPrice || 0),
+        defaultSellingPrice: Number(item.defaultSellingPrice || 0),
+        defaultPricingMode: item.defaultPricingMode,
+        defaultMarkupPercentage: item.defaultMarkupPercentage,
+        isActive: Boolean(item.isActive),
+        createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : new Date().toISOString(),
+      })),
       total: response.data.totalCount || 0,
       page: response.data.pageNumber || 1,
       limit: response.data.pageSize || 10,
@@ -112,17 +156,21 @@ export const productsRepository = {
   },
 
   async getCatalogLookups(): Promise<CatalogLookups> {
-    const response = await apiClient.lookups();
+    const [catalogResponse, bundleResponse] = await Promise.all([
+      apiClient.lookups(),
+      lookupsRepository.getBundle(),
+    ]);
 
-    if (!response.success || !response.data) {
-      throw new Error(response.message || 'Failed to fetch catalog lookups');
+    if (!catalogResponse.success || !catalogResponse.data) {
+      throw new Error(catalogResponse.message || 'Failed to fetch catalog lookups');
     }
 
     return {
-      categories: response.data.categories || [],
-      brands: response.data.brands || [],
-      models: response.data.models || [],
-      partTypes: response.data.partTypes || [],
+      categories: catalogResponse.data.categories || [],
+      brands: catalogResponse.data.brands || [],
+      models: catalogResponse.data.models || [],
+      partTypes: catalogResponse.data.partTypes || [],
+      currencies: bundleResponse.currencies || [],
     };
   },
 
@@ -146,49 +194,77 @@ export const productsRepository = {
       filePath: image.file.name,
     }));
 
-    const response = await apiClient.productsPOST(
-      product.categoryId,
-      product.brandId ?? '',
-      product.modelId ?? '',
-      product.partTypeId ?? '',
-      product.sku,
-      product.barcode ?? '',
-      product.name,
-      product.shortDescription ?? '',
-      product.longDescription ?? '',
-      product.specifications ?? '',
-      product.trackingType,
-      product.qualityType,
-      product.defaultBuyingPrice,
-      product.defaultSellingPrice,
-      product.defaultPricingMode,
-      product.defaultMarkupPercentage,
-      product.warrantyDays,
-      product.lowStockThreshold,
-      normalizedImages.map((image) => ({
-        ...image,
-        toString: () => JSON.stringify(image),
-      })) as CreateProductImageRequestDto[],
-      product.images.map((image) => ({
-        data: image.file,
-        fileName: image.file.name,
-      }))
-    );
+    const formData = new FormData();
+    appendIfPresent(formData, 'CategoryId', product.categoryId);
+    appendIfPresent(formData, 'BrandId', product.brandId);
+    appendIfPresent(formData, 'ModelId', product.modelId);
+    appendIfPresent(formData, 'PartTypeId', product.partTypeId);
+    appendIfPresent(formData, 'Sku', product.sku);
+    appendIfPresent(formData, 'Barcode', product.barcode);
+    appendIfPresent(formData, 'Name', product.name);
+    appendIfPresent(formData, 'ShortDescription', product.shortDescription);
+    appendIfPresent(formData, 'LongDescription', product.longDescription);
+    appendIfPresent(formData, 'Specifications', product.specifications);
+    appendIfPresent(formData, 'TrackingType', product.trackingType);
+    appendIfPresent(formData, 'QualityType', product.qualityType);
+    appendIfPresent(formData, 'DefaultBuyingPrice', product.defaultBuyingPrice);
+    appendIfPresent(formData, 'DefaultSellingPrice', product.sellingPrice);
+    appendIfPresent(formData, 'DefaultPricingMode', product.pricingMode);
+    appendIfPresent(formData, 'DefaultMarkupPercentage', product.markupPercentage ?? 0);
+    appendIfPresent(formData, 'BaseCurrencyId', product.baseCurrencyId);
+    appendIfPresent(formData, 'BasePrice', product.basePrice);
+    appendIfPresent(formData, 'PricingMode', product.pricingMode);
+    appendIfPresent(formData, 'SellingPrice', product.sellingPrice);
+    appendIfPresent(formData, 'MarkupPercentage', product.markupPercentage ?? 0);
+    appendIfPresent(formData, 'WarrantyDays', product.warrantyDays);
+    appendIfPresent(formData, 'LowStockThreshold', product.lowStockThreshold);
 
-    if (!response.success || !response.data) {
-      throw new Error(response.message || 'Failed to create product');
+    normalizedImages.forEach((image, index) => {
+      formData.append(`Images[${index}].FilePath`, image.filePath || '');
+      formData.append(`Images[${index}].AltText`, image.altText || '');
+      formData.append(`Images[${index}].IsPrimary`, String(Boolean(image.isPrimary)));
+      formData.append(`Images[${index}].SortOrder`, String(image.sortOrder || 0));
+    });
+
+    product.images.forEach((image) => {
+      formData.append('ImageFiles', image.file, image.file.name);
+    });
+
+    try {
+      const response = await adminHttp.post('/api/Products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Accept: 'text/plain',
+        },
+      });
+
+      return unwrapApiResponse<string>(response.data);
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to create product'));
     }
-
-    return response.data;
   },
 
-  async adjustProductPricing(productId: string, body: AdjustProductPricingRequestDto): Promise<ProductPricingAdjustmentResultDto> {
-    const response = await apiClient.adjust2(productId, body);
+  async adjustProductPricing(productId: string, body: AdjustProductPricingPayload): Promise<ProductPricingAdjustmentResultDto> {
+    try {
+      const response = await adminHttp.post(`/api/Products/${encodeURIComponent(productId)}/pricing/adjust`, {
+        buyingPrice: body.buyingPrice,
+        baseCurrencyId: body.baseCurrencyId,
+        basePrice: body.basePrice,
+        pricingMode: body.pricingMode,
+        sellingPrice: body.sellingPrice,
+        markupPercentage: body.markupPercentage,
+        reason: body.reason,
+        updateDefaultPrice: body.updateDefaultPrice,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/plain',
+        },
+      });
 
-    if (!response.success || !response.data) {
-      throw new Error(response.message || 'Failed to adjust product pricing');
+      return unwrapApiResponse<ProductPricingAdjustmentResultDto>(response.data);
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to adjust product pricing'));
     }
-
-    return response.data;
   },
 };

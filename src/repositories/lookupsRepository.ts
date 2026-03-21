@@ -1,9 +1,10 @@
+import { CurrencyLookupResponseDto, ProductLookupResponseDto, ShopLookupResponseDto } from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
-import { ProductLookupResponseDto, ShopLookupResponseDto } from '../api/generated/apiClient';
 
 export interface LookupBundle {
   products: ProductLookupResponseDto[];
   shops: ShopLookupResponseDto[];
+  currencies: CurrencyLookupResponseDto[];
 }
 
 export const lookupsRepository = {
@@ -17,6 +18,7 @@ export const lookupsRepository = {
     return {
       products: response.data.products || [],
       shops: response.data.shops || [],
+      currencies: response.data.currencies || [],
     };
   },
 };
