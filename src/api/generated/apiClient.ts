@@ -51,12 +51,42 @@ export interface IApiClient {
      */
     summary(clientId: string): Promise<ClientOrderSummaryDtoApiResponse>;
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    clients(body?: CreateClientRequestDto | undefined): Promise<ClientResponseDtoApiResponse>;
+    /**
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    contactInquiries(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ContactInquiryListItemDtoPageResponseApiResponse>;
+    /**
+     * @return OK
+     */
+    contactInquiries2(id: string): Promise<ContactInquiryDetailsDtoApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    status(id: string, body?: UpdateContactInquiryStatusRequestDto | undefined): Promise<StringApiResponse>;
+    /**
      * @param rangeType (optional) 
      * @param startDate (optional) 
      * @param endDate (optional) 
      * @return OK
      */
     summary2(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined): Promise<DashboardSummaryDtoApiResponse>;
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    overview(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined): Promise<DashboardOverviewDtoApiResponse>;
     /**
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
@@ -120,6 +150,10 @@ export interface IApiClient {
      * @return OK
      */
     ordersPOST(body?: CreateOrderRequestDto | undefined): Promise<GuidApiResponse>;
+    /**
+     * @return OK
+     */
+    ordersGET2(id: string): Promise<OrderDetailsDtoApiResponse>;
     /**
      * @param body (optional) 
      * @return OK
@@ -245,6 +279,11 @@ export interface IApiClient {
      */
     newArrivals(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse>;
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    contact(body?: CreateContactInquiryRequestDto | undefined): Promise<CreateContactInquiryResponseDtoApiResponse>;
+    /**
      * @param rangeType (optional) 
      * @param startDate (optional) 
      * @param endDate (optional) 
@@ -316,7 +355,12 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    users(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<UserListItemResponseDtoPageResponseApiResponse>;
+    usersGET(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<UserListItemResponseDtoPageResponseApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    usersPOST(body?: CreateUserRequestDto | undefined): Promise<UserListItemResponseDtoApiResponse>;
 }
 
 export class ApiClient implements IApiClient {
@@ -746,6 +790,251 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    clients(body?: CreateClientRequestDto | undefined, cancelToken?: CancelToken): Promise<ClientResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Clients";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processClients(_response);
+        });
+    }
+
+    protected processClients(response: AxiosResponse): Promise<ClientResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ClientResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ClientResponseDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    contactInquiries(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ContactInquiryListItemDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/contact-inquiries?";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processContactInquiries(_response);
+        });
+    }
+
+    protected processContactInquiries(response: AxiosResponse): Promise<ContactInquiryListItemDtoPageResponseApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ContactInquiryListItemDtoPageResponseApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ContactInquiryListItemDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    contactInquiries2(id: string, cancelToken?: CancelToken): Promise<ContactInquiryDetailsDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/contact-inquiries/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processContactInquiries2(_response);
+        });
+    }
+
+    protected processContactInquiries2(response: AxiosResponse): Promise<ContactInquiryDetailsDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ContactInquiryDetailsDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ContactInquiryDetailsDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    status(id: string, body?: UpdateContactInquiryStatusRequestDto | undefined, cancelToken?: CancelToken): Promise<StringApiResponse> {
+        let url_ = this.baseUrl + "/api/contact-inquiries/{id}/status";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processStatus(_response);
+        });
+    }
+
+    protected processStatus(response: AxiosResponse): Promise<StringApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<StringApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<StringApiResponse>(null as any);
+    }
+
+    /**
      * @param rangeType (optional) 
      * @param startDate (optional) 
      * @param endDate (optional) 
@@ -809,6 +1098,72 @@ export class ApiClient implements IApiClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<DashboardSummaryDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @param rangeType (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    overview(rangeType?: RangeType | undefined, startDate?: Date | undefined, endDate?: Date | undefined, cancelToken?: CancelToken): Promise<DashboardOverviewDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Dashboard/overview?";
+        if (rangeType === null)
+            throw new Error("The parameter 'rangeType' cannot be null.");
+        else if (rangeType !== undefined)
+            url_ += "RangeType=" + encodeURIComponent("" + rangeType) + "&";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "StartDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "EndDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processOverview(_response);
+        });
+    }
+
+    protected processOverview(response: AxiosResponse): Promise<DashboardOverviewDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<DashboardOverviewDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<DashboardOverviewDtoApiResponse>(null as any);
     }
 
     /**
@@ -1474,6 +1829,60 @@ export class ApiClient implements IApiClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<GuidApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    ordersGET2(id: string, cancelToken?: CancelToken): Promise<OrderDetailsDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Orders/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processOrdersGET2(_response);
+        });
+    }
+
+    protected processOrdersGET2(response: AxiosResponse): Promise<OrderDetailsDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<OrderDetailsDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<OrderDetailsDtoApiResponse>(null as any);
     }
 
     /**
@@ -2682,6 +3091,62 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    contact(body?: CreateContactInquiryRequestDto | undefined, cancelToken?: CancelToken): Promise<CreateContactInquiryResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/public/contact";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processContact(_response);
+        });
+    }
+
+    protected processContact(response: AxiosResponse): Promise<CreateContactInquiryResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<CreateContactInquiryResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<CreateContactInquiryResponseDtoApiResponse>(null as any);
+    }
+
+    /**
      * @param rangeType (optional) 
      * @param startDate (optional) 
      * @param endDate (optional) 
@@ -3288,7 +3753,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    users(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<UserListItemResponseDtoPageResponseApiResponse> {
+    usersGET(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<UserListItemResponseDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/Users?";
         if (pageNumber === null)
             throw new Error("The parameter 'pageNumber' cannot be null.");
@@ -3328,11 +3793,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processUsers(_response);
+            return this.processUsersGET(_response);
         });
     }
 
-    protected processUsers(response: AxiosResponse): Promise<UserListItemResponseDtoPageResponseApiResponse> {
+    protected processUsersGET(response: AxiosResponse): Promise<UserListItemResponseDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3354,6 +3819,62 @@ export class ApiClient implements IApiClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<UserListItemResponseDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    usersPOST(body?: CreateUserRequestDto | undefined, cancelToken?: CancelToken): Promise<UserListItemResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Users";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processUsersPOST(_response);
+        });
+    }
+
+    protected processUsersPOST(response: AxiosResponse): Promise<UserListItemResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<UserListItemResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<UserListItemResponseDtoApiResponse>(null as any);
     }
 }
 
@@ -3484,6 +4005,100 @@ export interface ClientOrderSummaryDtoApiResponse {
     data?: ClientOrderSummaryDto;
 }
 
+export interface ClientResponseDto {
+    id?: string;
+    name?: string;
+    businessName?: string;
+    email?: string;
+    phone?: string;
+    status?: string;
+}
+
+export interface ClientResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: ClientResponseDto;
+}
+
+export type ClientStatus = "PendingApproval" | "Approved" | "Suspended";
+
+export interface ContactInquiryDetailsDto {
+    id?: string;
+    name?: string;
+    email?: string;
+    mobileNo?: string;
+    subject?: string;
+    message?: string;
+    status?: string;
+    isRead?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface ContactInquiryDetailsDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: ContactInquiryDetailsDto;
+}
+
+export interface ContactInquiryListItemDto {
+    id?: string;
+    name?: string;
+    email?: string;
+    mobileNo?: string;
+    subject?: string;
+    status?: string;
+    createdAt?: Date;
+    isRead?: boolean;
+}
+
+export interface ContactInquiryListItemDtoPageResponse {
+    items?: ContactInquiryListItemDto[];
+    totalCount?: number;
+    pageNumber?: number;
+    pageSize?: number;
+}
+
+export interface ContactInquiryListItemDtoPageResponseApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: ContactInquiryListItemDtoPageResponse;
+}
+
+export type ContactInquiryStatus = "New" | "Read" | "Replied" | "Closed";
+
+export interface CreateClientRequestDto {
+    name: string;
+    businessName: string;
+    phone: string;
+    email: string;
+    address?: string | undefined;
+    preferredCurrencyId?: string | undefined;
+    preferredLanguageId?: string | undefined;
+    priceTierId?: string | undefined;
+    status?: ClientStatus;
+}
+
+export interface CreateContactInquiryRequestDto {
+    name: string;
+    email: string;
+    mobileNo: string;
+    subject: string;
+    message: string;
+}
+
+export interface CreateContactInquiryResponseDto {
+    inquiryId?: string;
+    message?: string;
+    submittedAt?: Date;
+}
+
+export interface CreateContactInquiryResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: CreateContactInquiryResponseDto;
+}
+
 export interface CreateOrderItemRequestDto {
     productId?: string;
     quantity?: number;
@@ -3517,11 +4132,38 @@ export interface CreateStockTransferRequestDto {
     items?: CreateStockTransferItemRequestDto[];
 }
 
+export interface CreateUserRequestDto {
+    fullName: string;
+    email: string;
+    phone?: string | undefined;
+    password: string;
+    role: string;
+    shopId?: string | undefined;
+    preferredLanguageId?: string | undefined;
+    isActive?: boolean;
+}
+
 export interface CurrencyLookupResponseDto {
     id?: string;
     name?: string;
     code?: string;
     symbol?: string;
+}
+
+export interface DashboardOverviewDto {
+    summary?: DashboardSummaryMetricsDto;
+    recentOrders?: OrderListItemResponseDto[];
+    recentInquiries?: InquiryPreviewDto[];
+    lowStockPreview?: LowStockReportItemDto[];
+    bestPerformingClientsPreview?: BestPerformingClientReportItemDto[];
+    topSellingProductsPreview?: TopSellingProductReportItemDto[];
+    unreadNotificationsCount?: number;
+}
+
+export interface DashboardOverviewDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: DashboardOverviewDto;
 }
 
 export interface DashboardSummaryDto {
@@ -3537,6 +4179,19 @@ export interface DashboardSummaryDtoApiResponse {
     success?: boolean;
     message?: string;
     data?: DashboardSummaryDto;
+}
+
+export interface DashboardSummaryMetricsDto {
+    totalClients?: number;
+    totalSales?: number;
+    activeOrders?: number;
+    totalProducts?: number;
+    lowStockProducts?: number;
+    pendingOrders?: number;
+    readyForPickupOrders?: number;
+    completedOrders?: number;
+    orderStatusSummary?: OrderStatusSummaryDto;
+    unreadInquiriesCount?: number;
 }
 
 export interface ForgotPasswordRequestDto {
@@ -3558,6 +4213,14 @@ export interface GuidApiResponse {
     success?: boolean;
     message?: string;
     data?: string;
+}
+
+export interface InquiryPreviewDto {
+    id?: string;
+    name?: string;
+    subject?: string;
+    status?: string;
+    createdAt?: Date;
 }
 
 export interface InventoryListItemResponseDto {
@@ -3686,6 +4349,44 @@ export interface NotificationListItemResponseDtoPageResponseApiResponse {
     success?: boolean;
     message?: string;
     data?: NotificationListItemResponseDtoPageResponse;
+}
+
+export interface OrderDetailsDto {
+    orderId?: string;
+    orderNumber?: string;
+    clientId?: string;
+    clientName?: string;
+    businessName?: string;
+    shopId?: string;
+    shopName?: string;
+    status?: string;
+    statusLabel?: string;
+    currencyCode?: string;
+    subtotal?: number;
+    discountAmount?: number;
+    taxAmount?: number;
+    totalAmount?: number;
+    notes?: string | undefined;
+    createdAt?: Date;
+    readyAt?: Date | undefined;
+    completedAt?: Date | undefined;
+    items?: OrderDetailsItemDto[];
+}
+
+export interface OrderDetailsDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: OrderDetailsDto;
+}
+
+export interface OrderDetailsItemDto {
+    orderItemId?: string;
+    productId?: string;
+    productName?: string;
+    sku?: string;
+    quantity?: number;
+    unitPrice?: number;
+    lineTotal?: number;
 }
 
 export interface OrderListItemResponseDto {
@@ -4112,6 +4813,10 @@ export interface UnableToFulfillRequest {
     reason?: string | undefined;
 }
 
+export interface UpdateContactInquiryStatusRequestDto {
+    status?: ContactInquiryStatus;
+}
+
 export interface UpdateThemeRequestDto {
     logoPath?: string | undefined;
     primaryColor?: string;
@@ -4130,6 +4835,12 @@ export interface UserListItemResponseDto {
     email?: string;
     role?: string;
     isActive?: boolean;
+}
+
+export interface UserListItemResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: UserListItemResponseDto;
 }
 
 export interface UserListItemResponseDtoPageResponse {
