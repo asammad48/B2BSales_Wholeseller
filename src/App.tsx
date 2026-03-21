@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './state/AuthContext';
 import { SettingsProvider, useSettings } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
-import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins } from 'lucide-react';
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { OrdersPage } from './pages/orders/OrdersPage';
@@ -15,6 +15,7 @@ import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ReportsPage } from './pages/reports/ReportsPage';
 import { ClientsPage } from './pages/clients/ClientsPage';
 import { ContactInquiriesPage } from './pages/contactInquiries/ContactInquiriesPage';
+import { TenantCurrencyPage } from './pages/currencies/TenantCurrencyPage';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -31,6 +32,7 @@ const Sidebar: React.FC = () => {
     { icon: MessageSquareMore, label: 'Contact Inquiries', path: '/contact-inquiries' },
     { icon: ArrowRightLeft, label: 'Transfers', path: '/transfers' },
     { icon: Users, label: 'Users', path: '/users' },
+    { icon: Coins, label: 'Currencies', path: '/currencies' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
   ];
 
@@ -141,6 +143,7 @@ const App: React.FC = () => {
           <Route path="/contact-inquiries" element={<ProtectedRoute><ContactInquiriesPage /></ProtectedRoute>} />
           <Route path="/transfers" element={<ProtectedRoute><TransfersPage /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
+          <Route path="/currencies" element={<ProtectedRoute><TenantCurrencyPage /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
