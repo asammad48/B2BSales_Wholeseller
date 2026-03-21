@@ -13,6 +13,8 @@ import { OrdersPage } from '../pages/orders/OrdersPage';
 import { UsersPage } from '../pages/users/UsersPage';
 import { ClientsPage } from '../pages/clients/ClientsPage';
 import { ContactInquiriesPage } from '../pages/contactInquiries/ContactInquiriesPage';
+import { ProductsPage } from '../pages/products/ProductsPage';
+import { TenantCurrencyPage } from '../pages/currencies/TenantCurrencyPage';
 
 const PagePlaceholder = ({ title }: { title: string }) => (
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}>
@@ -59,13 +61,14 @@ export const AppRoutes = () => {
       <Route path="/" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="products" element={<PagePlaceholder title="Products" />} />
+        <Route path="products" element={<ProductsPage />} />
         <Route path="inventory" element={<PagePlaceholder title="Inventory" />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="transfers" element={<PagePlaceholder title="Transfers" />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="clients" element={<ClientsPage />} />
         <Route path="contact-inquiries" element={<ContactInquiriesPage />} />
+        <Route path="currencies" element={<TenantCurrencyPage />} />
         <Route path="theme" element={<ThemeSettingsPage />} />
         <Route path="settings/account" element={<PagePlaceholder title="Account Settings" />} />
         <Route path="*" element={<NotFoundPage />} />

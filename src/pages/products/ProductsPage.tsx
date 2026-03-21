@@ -3,10 +3,12 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
-import { Plus, Package, CheckCircle2, XCircle, X, DollarSign, GripVertical, ImagePlus, Star } from 'lucide-react';
+import { Plus, Package, CheckCircle2, XCircle, X, DollarSign, GripVertical, ImagePlus, Star, RefreshCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, SearchableSelect, SearchableSelectOption, Button } from '../../components/common/Form';
 import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiClient';
+import { tenantCurrencyRepository, TenantCurrencySettings } from '../../repositories/tenantCurrencyRepository';
+import { useProductPricing } from '../../utils/productPricing';
 
 const trackingOptions: TrackingType[] = ['QuantityBased', 'Serialized'];
 const qualityOptions: QualityType[] = ['Original', 'OEM', 'HighCopy', 'Refurbished'];
@@ -21,10 +23,6 @@ interface ProductImageDraft {
   sortOrder: number;
 }
 
-const getPricingMarkupValue = (pricingMode: PricingMode, currentValue?: number) => (
-  pricingMode === 'PercentageBased' ? currentValue ?? 0 : 0
-);
-
 const reorderImages = (images: ProductImageDraft[], sourceIndex: number, destinationIndex: number) => {
   const nextImages = [...images];
   const [moved] = nextImages.splice(sourceIndex, 1);
@@ -32,13 +30,13 @@ const reorderImages = (images: ProductImageDraft[], sourceIndex: number, destina
   return nextImages.map((image, index) => ({ ...image, sortOrder: index }));
 };
 
-const mapLookupOptions = (items: { id?: string; name?: string; code?: string | undefined }[]): SearchableSelectOption[] =>
+const mapLookupOptions = (items: { id?: string; name?: string; code?: string | undefined; symbol?: string | undefined }[]): SearchableSelectOption[] =>
   items
     .filter((item) => item.id && item.name)
     .map((item) => ({
       value: item.id as string,
-      label: item.name as string,
-      searchText: item.code,
+      label: item.code ? `${item.name as string} (${item.code})` : (item.name as string),
+      searchText: [item.code, item.symbol].filter(Boolean).join(' '),
     }));
 
 const mapEnumOptions = (items: string[]): SearchableSelectOption[] =>
@@ -47,6 +45,8 @@ const mapEnumOptions = (items: string[]): SearchableSelectOption[] =>
     label: item,
   }));
 
+const formatMoney = (value: number, currencyCode?: string) => `${currencyCode || '—'} ${value.toFixed(2)}`;
+
 export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,17 +54,27 @@ export const ProductsPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [lookups, setLookups] = useState<CatalogLookups>({ categories: [], brands: [], models: [], partTypes: [] });
+  const [lookups, setLookups] = useState<CatalogLookups>({ categories: [], brands: [], models: [], partTypes: [], currencies: [] });
   const [lookupsLoading, setLookupsLoading] = useState(false);
+  const [currencySettings, setCurrencySettings] = useState<TenantCurrencySettings | null>(null);
+  const [currencySettingsLoading, setCurrencySettingsLoading] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productImages, setProductImages] = useState<ProductImageDraft[]>([]);
-  const [createPricingMode, setCreatePricingMode] = useState<PricingMode>('Direct');
-  const [createMarkup, setCreateMarkup] = useState<number>(0);
-  const [pricingMode, setPricingMode] = useState<PricingMode>('Direct');
-  const [pricingMarkup, setPricingMarkup] = useState<number>(0);
   const [createError, setCreateError] = useState<string | null>(null);
   const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
+
+  const createPricing = useProductPricing({
+    currencies: lookups.currencies,
+    exchangeRates: currencySettings?.exchangeRates || [],
+    defaultSellingCurrencyId: currencySettings?.defaultSellingCurrencyId,
+  });
+
+  const pricingAdjustment = useProductPricing({
+    currencies: lookups.currencies,
+    exchangeRates: currencySettings?.exchangeRates || [],
+    defaultSellingCurrencyId: currencySettings?.defaultSellingCurrencyId,
+  });
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -92,6 +102,18 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
+  const fetchCurrencySettings = async () => {
+    setCurrencySettingsLoading(true);
+    try {
+      const response = await tenantCurrencyRepository.getTenantCurrencySettings();
+      setCurrencySettings(response);
+    } catch (error) {
+      console.error('Failed to fetch tenant currency settings', error);
+    } finally {
+      setCurrencySettingsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchProducts();
@@ -100,28 +122,37 @@ export const ProductsPage: React.FC = () => {
   }, [search, page]);
 
   useEffect(() => {
+    fetchLookups();
+    fetchCurrencySettings();
+  }, []);
+
+  useEffect(() => {
     if (isCreateModalOpen) {
-      fetchLookups();
-      setCreatePricingMode('Direct');
-      setCreateMarkup(0);
       setCreateError(null);
       setProductImages([]);
+      createPricing.setBaseCurrencyId(currencySettings?.defaultSellingCurrencyId || '');
+      createPricing.setBasePrice(0);
+      createPricing.setPricingMode('Direct');
+      createPricing.setSellingPrice(0);
+      createPricing.setMarkupPercentage(0);
     }
-  }, [isCreateModalOpen]);
+  }, [isCreateModalOpen, currencySettings?.defaultSellingCurrencyId]);
 
   useEffect(() => {
     if (selectedProduct && isPricingModalOpen) {
-      const nextMode = selectedProduct.defaultPricingMode || 'Direct';
-      setPricingMode(nextMode);
-      setPricingMarkup(getPricingMarkupValue(nextMode, selectedProduct.defaultMarkupPercentage));
+      pricingAdjustment.setBaseCurrencyId(selectedProduct.baseCurrencyId || currencySettings?.defaultSellingCurrencyId || '');
+      pricingAdjustment.setBasePrice(selectedProduct.basePrice || selectedProduct.defaultBuyingPrice || 0);
+      pricingAdjustment.setPricingMode(selectedProduct.defaultPricingMode || 'Direct');
+      pricingAdjustment.setMarkupPercentage(selectedProduct.defaultMarkupPercentage || 0);
+      pricingAdjustment.setSellingPrice(selectedProduct.defaultSellingPrice || 0);
     }
-  }, [selectedProduct, isPricingModalOpen]);
-
+  }, [selectedProduct, isPricingModalOpen, currencySettings?.defaultSellingCurrencyId]);
 
   const categoryOptions = useMemo(() => mapLookupOptions(lookups.categories), [lookups.categories]);
   const brandOptions = useMemo(() => mapLookupOptions(lookups.brands), [lookups.brands]);
   const modelOptions = useMemo(() => mapLookupOptions(lookups.models), [lookups.models]);
   const partTypeOptions = useMemo(() => mapLookupOptions(lookups.partTypes), [lookups.partTypes]);
+  const currencyOptions = useMemo(() => mapLookupOptions(lookups.currencies), [lookups.currencies]);
   const trackingTypeOptions = useMemo(() => mapEnumOptions(trackingOptions), []);
   const qualityTypeOptions = useMemo(() => mapEnumOptions(qualityOptions), []);
   const pricingModeOptions = useMemo(() => mapEnumOptions(pricingOptions), []);
@@ -204,6 +235,25 @@ export const ProductsPage: React.FC = () => {
       return;
     }
 
+    if (!createPricing.baseCurrencyId) {
+      alert('Base currency is required');
+      return;
+    }
+
+    if (createPricing.basePrice <= 0) {
+      alert('Base price must be greater than zero');
+      return;
+    }
+
+    const computedSellingPrice = createPricing.pricingMode === 'PercentageBased'
+      ? createPricing.computedSellingPrice
+      : createPricing.sellingPrice;
+
+    if (computedSellingPrice < 0) {
+      alert('Selling price must be non-negative');
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const toOptional = (value: FormDataEntryValue | null) => {
       const str = (value as string | null)?.trim();
@@ -225,9 +275,11 @@ export const ProductsPage: React.FC = () => {
       trackingType: formData.get('trackingType') as TrackingType,
       qualityType: formData.get('qualityType') as QualityType,
       defaultBuyingPrice: toRequiredNumber(formData.get('defaultBuyingPrice')),
-      defaultSellingPrice: toRequiredNumber(formData.get('defaultSellingPrice')),
-      defaultPricingMode: createPricingMode,
-      defaultMarkupPercentage: getPricingMarkupValue(createPricingMode, createMarkup),
+      baseCurrencyId: createPricing.baseCurrencyId,
+      basePrice: createPricing.basePrice,
+      pricingMode: createPricing.pricingMode,
+      sellingPrice: computedSellingPrice,
+      markupPercentage: createPricing.pricingMode === 'PercentageBased' ? createPricing.markupPercentage : 0,
       warrantyDays: toRequiredNumber(formData.get('warrantyDays')),
       lowStockThreshold: toRequiredNumber(formData.get('lowStockThreshold')),
       images: productImages.map((image, index) => ({
@@ -254,20 +306,24 @@ export const ProductsPage: React.FC = () => {
 
     const formData = new FormData(e.currentTarget);
     const buyingPrice = Number(formData.get('buyingPrice'));
-    const sellingPrice = Number(formData.get('sellingPrice'));
     const reasonRaw = (formData.get('reason') as string)?.trim();
+    const effectiveSellingPrice = pricingAdjustment.pricingMode === 'PercentageBased'
+      ? pricingAdjustment.computedSellingPrice
+      : pricingAdjustment.sellingPrice;
 
-    if (buyingPrice < 0 || sellingPrice < 0) {
-      alert('Buying and selling prices must be non-negative');
+    if (buyingPrice < 0 || effectiveSellingPrice < 0 || pricingAdjustment.basePrice < 0) {
+      alert('Base, buying, and selling prices must be non-negative');
       return;
     }
 
     try {
       await productsRepository.adjustProductPricing(selectedProduct.id, {
         buyingPrice,
-        sellingPrice,
-        pricingMode,
-        markupPercentage: pricingMode === 'PercentageBased' ? pricingMarkup : undefined,
+        baseCurrencyId: pricingAdjustment.baseCurrencyId,
+        basePrice: pricingAdjustment.basePrice,
+        pricingMode: pricingAdjustment.pricingMode,
+        sellingPrice: effectiveSellingPrice,
+        markupPercentage: pricingAdjustment.pricingMode === 'PercentageBased' ? pricingAdjustment.markupPercentage : undefined,
         reason: reasonRaw || undefined,
         updateDefaultPrice: true,
       });
@@ -275,7 +331,7 @@ export const ProductsPage: React.FC = () => {
       setSelectedProduct(null);
       fetchProducts();
     } catch (error) {
-      alert('Failed to adjust pricing');
+      alert(error instanceof Error ? error.message : 'Failed to adjust pricing');
     }
   };
 
@@ -304,6 +360,15 @@ export const ProductsPage: React.FC = () => {
         <div>
           <p className="font-medium">{p.brandName}</p>
           <p className="text-xs text-gray-400">{p.modelName}</p>
+        </div>
+      )
+    },
+    {
+      header: 'Pricing',
+      accessor: (p: Product) => (
+        <div>
+          <p className="font-medium text-gray-900">{formatMoney(p.defaultSellingPrice || 0, currencySettings?.defaultSellingCurrencyCode)}</p>
+          <p className="text-xs text-gray-400">Base: {formatMoney(p.basePrice || 0, p.baseCurrencyCode)}</p>
         </div>
       )
     },
@@ -336,21 +401,35 @@ export const ProductsPage: React.FC = () => {
     }
   ];
 
+  const currencyStatusText = currencySettings?.defaultSellingCurrencyCode
+    ? `Default selling currency: ${currencySettings.defaultSellingCurrencyCode}`
+    : 'Default selling currency is not configured yet.';
+
   return (
     <div className="min-h-screen bg-[#f5f5f5] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Products"
-          description="Manage your wholesale product catalog and inventory specifications."
+          description="Manage your wholesale product catalog with tenant currency-aware pricing in the existing admin flow."
           actions={
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
-              style={{ backgroundColor: 'var(--primary-color)' }}
-            >
-              <Plus size={18} />
-              <span>Create Product</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={fetchCurrencySettings}
+                className="bg-white text-gray-700 px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium border border-gray-100 hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <RefreshCcw size={16} className={currencySettingsLoading ? 'animate-spin' : ''} />
+                Refresh rates
+              </button>
+              <button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
+                style={{ backgroundColor: 'var(--primary-color)' }}
+              >
+                <Plus size={18} />
+                <span>Create Product</span>
+              </button>
+            </div>
           }
         />
 
@@ -358,7 +437,14 @@ export const ProductsPage: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="space-y-6"
         >
+          <div className="bg-white rounded-[24px] border border-gray-50 p-5 shadow-sm">
+            <p className="text-sm font-medium text-gray-900">Pricing context</p>
+            <p className="mt-1 text-sm text-gray-500">{currencyStatusText}</p>
+            <p className="mt-1 text-xs text-gray-400">Exchange rates loaded: {currencySettings?.exchangeRates.length || 0}</p>
+          </div>
+
           <SearchToolbar
             search={search}
             onSearchChange={setSearch}
@@ -418,8 +504,8 @@ export const ProductsPage: React.FC = () => {
                 </button>
               </div>
 
-              {lookupsLoading ? (
-                <p className="text-sm text-gray-500">Loading lookups...</p>
+              {lookupsLoading || currencySettingsLoading ? (
+                <p className="text-sm text-gray-500">Loading pricing and lookup data...</p>
               ) : (
                 <form onSubmit={handleCreateProduct} className="grid grid-cols-2 gap-4">
                   <FormField label="Category">
@@ -453,41 +539,90 @@ export const ProductsPage: React.FC = () => {
                   <FormField label="Quality Type">
                     <SearchableSelect name="qualityType" required defaultValue="Original" placeholder="Select quality type" searchPlaceholder="Search quality types" options={qualityTypeOptions} />
                   </FormField>
-                  <FormField label="Pricing Mode">
-                    <SearchableSelect
-                      name="defaultPricingMode"
-                      required
-                      value={createPricingMode}
-                      onChange={(value) => {
-                        const nextMode = value as PricingMode;
-                        setCreatePricingMode(nextMode);
-                        setCreateMarkup(getPricingMarkupValue(nextMode, createMarkup));
-                      }}
-                      placeholder="Select pricing mode"
-                      searchPlaceholder="Search pricing modes"
-                      options={pricingModeOptions}
-                    />
-                  </FormField>
-
                   <FormField label="Buying Price">
                     <Input name="defaultBuyingPrice" type="number" min="0" step="0.01" required />
                   </FormField>
-                  <FormField label="Selling Price">
-                    <Input name="defaultSellingPrice" type="number" min="0" step="0.01" required />
-                  </FormField>
 
-                  {createPricingMode === 'PercentageBased' && (
-                    <FormField label="Markup %">
-                      <Input
-                        name="defaultMarkupPercentage"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={createMarkup}
-                        onChange={(event) => setCreateMarkup(Number(event.target.value || 0))}
-                      />
-                    </FormField>
-                  )}
+                  <div className="col-span-2 rounded-[24px] border border-gray-100 bg-gray-50/60 p-5 space-y-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Selling currency pricing</h3>
+                      <p className="mt-1 text-xs text-gray-500">Capture the product base currency and price, then derive the selling price in the tenant default selling currency.</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField label="Base Currency">
+                        <SearchableSelect
+                          name="baseCurrencyId"
+                          required
+                          value={createPricing.baseCurrencyId}
+                          onChange={createPricing.setBaseCurrencyId}
+                          placeholder="Select base currency"
+                          searchPlaceholder="Search currencies"
+                          options={currencyOptions}
+                        />
+                      </FormField>
+                      <FormField label="Base Price">
+                        <Input
+                          name="basePrice"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={createPricing.basePrice}
+                          onChange={(event) => createPricing.setBasePrice(Number(event.target.value || 0))}
+                          required
+                        />
+                      </FormField>
+
+                      <FormField label="Default Selling Currency">
+                        <Input value={createPricing.defaultSellingCurrency?.code || currencySettings?.defaultSellingCurrencyCode || ''} readOnly disabled />
+                      </FormField>
+                      <FormField label="Converted Amount">
+                        <Input value={createPricing.convertedAmount.toFixed(2)} readOnly disabled />
+                      </FormField>
+
+                      <FormField label="Pricing Mode">
+                        <SearchableSelect
+                          name="pricingMode"
+                          required
+                          value={createPricing.pricingMode}
+                          onChange={(value) => createPricing.setPricingMode(value as PricingMode)}
+                          placeholder="Select pricing mode"
+                          searchPlaceholder="Search pricing modes"
+                          options={pricingModeOptions}
+                        />
+                      </FormField>
+                      <FormField label="Selling Price">
+                        <Input
+                          name="sellingPrice"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={(createPricing.pricingMode === 'PercentageBased' ? createPricing.computedSellingPrice : createPricing.sellingPrice).toFixed(2)}
+                          onChange={(event) => createPricing.setSellingPrice(Number(event.target.value || 0))}
+                          disabled={createPricing.pricingMode === 'PercentageBased'}
+                          required
+                        />
+                      </FormField>
+
+                      {createPricing.pricingMode === 'PercentageBased' && (
+                        <FormField label="Markup %">
+                          <Input
+                            name="markupPercentage"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={createPricing.markupPercentage}
+                            onChange={(event) => createPricing.setMarkupPercentage(Number(event.target.value || 0))}
+                          />
+                        </FormField>
+                      )}
+                    </div>
+
+                    {createPricing.conversionMissing && (
+                      <p className="text-xs text-amber-600">No tenant exchange rate exists for the selected base currency and the default selling currency yet.</p>
+                    )}
+                  </div>
+
                   <FormField label="Warranty Days">
                     <Input name="warrantyDays" type="number" min="0" required />
                   </FormField>
@@ -623,34 +758,74 @@ export const ProductsPage: React.FC = () => {
                 <FormField label="Buying Price">
                   <Input name="buyingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultBuyingPrice || 0} required />
                 </FormField>
-                <FormField label="Selling Price">
-                  <Input name="sellingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultSellingPrice || selectedProduct.basePrice || 0} required />
+                <FormField label="Base Currency">
+                  <SearchableSelect
+                    name="adjustBaseCurrencyId"
+                    required
+                    value={pricingAdjustment.baseCurrencyId}
+                    onChange={pricingAdjustment.setBaseCurrencyId}
+                    placeholder="Select base currency"
+                    searchPlaceholder="Search currencies"
+                    options={currencyOptions}
+                  />
+                </FormField>
+                <FormField label="Base Price">
+                  <Input
+                    name="adjustBasePrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={pricingAdjustment.basePrice}
+                    onChange={(event) => pricingAdjustment.setBasePrice(Number(event.target.value || 0))}
+                    required
+                  />
+                </FormField>
+                <FormField label="Converted Amount">
+                  <Input value={pricingAdjustment.convertedAmount.toFixed(2)} readOnly disabled />
                 </FormField>
                 <FormField label="Pricing Mode">
                   <SearchableSelect
                     name="pricingMode"
-                    value={pricingMode}
-                    onChange={(value) => {
-                      const nextMode = value as PricingMode;
-                      setPricingMode(nextMode);
-                      setPricingMarkup(getPricingMarkupValue(nextMode, pricingMarkup));
-                    }}
+                    value={pricingAdjustment.pricingMode}
+                    onChange={(value) => pricingAdjustment.setPricingMode(value as PricingMode)}
                     placeholder="Select pricing mode"
                     searchPlaceholder="Search pricing modes"
                     options={pricingModeOptions}
                   />
                 </FormField>
-                {pricingMode === 'PercentageBased' && (
+                <FormField label="Selling Price">
+                  <Input
+                    name="sellingPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={(pricingAdjustment.pricingMode === 'PercentageBased' ? pricingAdjustment.computedSellingPrice : pricingAdjustment.sellingPrice).toFixed(2)}
+                    onChange={(event) => pricingAdjustment.setSellingPrice(Number(event.target.value || 0))}
+                    disabled={pricingAdjustment.pricingMode === 'PercentageBased'}
+                    required
+                  />
+                </FormField>
+                {pricingAdjustment.pricingMode === 'PercentageBased' && (
                   <FormField label="Markup %">
                     <Input
                       name="markupPercentage"
                       type="number"
                       min="0"
                       step="0.01"
-                      value={pricingMarkup}
-                      onChange={(event) => setPricingMarkup(Number(event.target.value || 0))}
+                      value={pricingAdjustment.markupPercentage}
+                      onChange={(event) => pricingAdjustment.setMarkupPercentage(Number(event.target.value || 0))}
                     />
                   </FormField>
+                )}
+                <div className="col-span-2">
+                  <FormField label="Default Selling Currency">
+                    <Input value={pricingAdjustment.defaultSellingCurrency?.code || currencySettings?.defaultSellingCurrencyCode || ''} readOnly disabled />
+                  </FormField>
+                </div>
+                {pricingAdjustment.conversionMissing && (
+                  <div className="col-span-2 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-700">
+                    Missing exchange rate for this base currency and the tenant default selling currency.
+                  </div>
                 )}
                 <div className="col-span-2">
                   <FormField label="Reason (Optional)">

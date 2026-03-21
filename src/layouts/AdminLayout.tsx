@@ -17,6 +17,7 @@ import {
   X,
   Building2,
   MessageSquareMore,
+  Coins,
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -67,6 +68,7 @@ export const AdminLayout = () => {
     { to: '/contact-inquiries', icon: MessageSquareMore, label: 'Inquiries' },
     { to: '/transfers', icon: Truck, label: 'Transfers' },
     { to: '/users', icon: Users, label: 'Users' },
+    { to: '/currencies', icon: Coins, label: 'Currencies' },
     { to: '/theme', icon: Palette, label: 'Theme' },
     { to: '/settings/account', icon: Settings, label: 'Settings' },
   ];
