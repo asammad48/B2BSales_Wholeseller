@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './state/AuthContext';
 import { SettingsProvider, useSettings } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
-import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3 } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore } from 'lucide-react';
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { OrdersPage } from './pages/orders/OrdersPage';
@@ -13,6 +13,8 @@ import { UsersPage } from './pages/users/UsersPage';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ReportsPage } from './pages/reports/ReportsPage';
+import { ClientsPage } from './pages/clients/ClientsPage';
+import { ContactInquiriesPage } from './pages/contactInquiries/ContactInquiriesPage';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -25,6 +27,8 @@ const Sidebar: React.FC = () => {
     { icon: Package, label: 'Products', path: '/products' },
     { icon: Box, label: 'Inventory', path: '/inventory' },
     { icon: ShoppingBag, label: 'Orders', path: '/orders' },
+    { icon: Building2, label: 'Clients', path: '/clients' },
+    { icon: MessageSquareMore, label: 'Contact Inquiries', path: '/contact-inquiries' },
     { icon: ArrowRightLeft, label: 'Transfers', path: '/transfers' },
     { icon: Users, label: 'Users', path: '/users' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
@@ -133,6 +137,8 @@ const App: React.FC = () => {
           <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
           <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+          <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
+          <Route path="/contact-inquiries" element={<ProtectedRoute><ContactInquiriesPage /></ProtectedRoute>} />
           <Route path="/transfers" element={<ProtectedRoute><TransfersPage /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
