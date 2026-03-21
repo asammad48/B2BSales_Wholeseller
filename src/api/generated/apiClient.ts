@@ -207,6 +207,8 @@ export interface IApiClient {
      * @param specifications (optional) 
      * @param trackingType (optional) 
      * @param qualityType (optional) 
+     * @param baseCurrencyId (optional) 
+     * @param basePrice (optional) 
      * @param defaultBuyingPrice (optional) 
      * @param defaultSellingPrice (optional) 
      * @param defaultPricingMode (optional) 
@@ -217,7 +219,7 @@ export interface IApiClient {
      * @param imageFiles (optional) 
      * @return OK
      */
-    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined): Promise<GuidApiResponse>;
+    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, baseCurrencyId?: string | undefined, basePrice?: number | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined): Promise<GuidApiResponse>;
     /**
      * @return OK
      */
@@ -334,6 +336,25 @@ export interface IApiClient {
      * @return OK
      */
     lookup(): Promise<ShopLookupItemDtoIEnumerableApiResponse>;
+    /**
+     * @return OK
+     */
+    settings(): Promise<TenantCurrencySettingsDtoApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    defaultSellingCurrency(body?: UpdateDefaultSellingCurrencyRequestDto | undefined): Promise<ObjectApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    exchangeRates(body?: UpsertTenantExchangeRateRequestDto | undefined): Promise<ObjectApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    convert(body?: ConvertCurrencyRequestDto | undefined): Promise<ConvertCurrencyResponseDtoApiResponse>;
     /**
      * @return OK
      */
@@ -2327,6 +2348,8 @@ export class ApiClient implements IApiClient {
      * @param specifications (optional) 
      * @param trackingType (optional) 
      * @param qualityType (optional) 
+     * @param baseCurrencyId (optional) 
+     * @param basePrice (optional) 
      * @param defaultBuyingPrice (optional) 
      * @param defaultSellingPrice (optional) 
      * @param defaultPricingMode (optional) 
@@ -2337,7 +2360,7 @@ export class ApiClient implements IApiClient {
      * @param imageFiles (optional) 
      * @return OK
      */
-    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
+    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, baseCurrencyId?: string | undefined, basePrice?: number | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
         let url_ = this.baseUrl + "/api/Products";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -2390,6 +2413,14 @@ export class ApiClient implements IApiClient {
             throw new Error("The parameter 'qualityType' cannot be null.");
         else
             content_.append("QualityType", qualityType.toString());
+        if (baseCurrencyId === null || baseCurrencyId === undefined)
+            throw new Error("The parameter 'baseCurrencyId' cannot be null.");
+        else
+            content_.append("BaseCurrencyId", baseCurrencyId.toString());
+        if (basePrice === null || basePrice === undefined)
+            throw new Error("The parameter 'basePrice' cannot be null.");
+        else
+            content_.append("BasePrice", basePrice.toString());
         if (defaultBuyingPrice === null || defaultBuyingPrice === undefined)
             throw new Error("The parameter 'defaultBuyingPrice' cannot be null.");
         else
@@ -3590,6 +3621,225 @@ export class ApiClient implements IApiClient {
     /**
      * @return OK
      */
+    settings( cancelToken?: CancelToken): Promise<TenantCurrencySettingsDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/settings";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSettings(_response);
+        });
+    }
+
+    protected processSettings(response: AxiosResponse): Promise<TenantCurrencySettingsDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<TenantCurrencySettingsDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<TenantCurrencySettingsDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    defaultSellingCurrency(body?: UpdateDefaultSellingCurrencyRequestDto | undefined, cancelToken?: CancelToken): Promise<ObjectApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/default-selling-currency";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "PUT",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processDefaultSellingCurrency(_response);
+        });
+    }
+
+    protected processDefaultSellingCurrency(response: AxiosResponse): Promise<ObjectApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ObjectApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ObjectApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    exchangeRates(body?: UpsertTenantExchangeRateRequestDto | undefined, cancelToken?: CancelToken): Promise<ObjectApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/exchange-rates";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processExchangeRates(_response);
+        });
+    }
+
+    protected processExchangeRates(response: AxiosResponse): Promise<ObjectApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ObjectApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ObjectApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    convert(body?: ConvertCurrencyRequestDto | undefined, cancelToken?: CancelToken): Promise<ConvertCurrencyResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/convert";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processConvert(_response);
+        });
+    }
+
+    protected processConvert(response: AxiosResponse): Promise<ConvertCurrencyResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ConvertCurrencyResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ConvertCurrencyResponseDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
     currentGET( cancelToken?: CancelToken): Promise<ThemeResponseDtoApiResponse> {
         let url_ = this.baseUrl + "/api/Themes/current";
         url_ = url_.replace(/[?&]$/, "");
@@ -3879,6 +4129,8 @@ export class ApiClient implements IApiClient {
 }
 
 export interface AdjustProductPricingRequestDto {
+    baseCurrencyId?: string | undefined;
+    basePrice?: number | undefined;
     buyingPrice?: number;
     sellingPrice?: number;
     pricingMode?: PricingMode;
@@ -4066,6 +4318,25 @@ export interface ContactInquiryListItemDtoPageResponseApiResponse {
 }
 
 export type ContactInquiryStatus = "New" | "Read" | "Replied" | "Closed";
+
+export interface ConvertCurrencyRequestDto {
+    fromCurrencyId?: string;
+    toCurrencyId?: string;
+    amount?: number;
+}
+
+export interface ConvertCurrencyResponseDto {
+    convertedAmount?: number;
+    rate?: number;
+    fromCurrencyCode?: string;
+    toCurrencyCode?: string;
+}
+
+export interface ConvertCurrencyResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: ConvertCurrencyResponseDto;
+}
 
 export interface CreateClientRequestDto {
     name: string;
@@ -4351,6 +4622,12 @@ export interface NotificationListItemResponseDtoPageResponseApiResponse {
     data?: NotificationListItemResponseDtoPageResponse;
 }
 
+export interface ObjectApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: any | undefined;
+}
+
 export interface OrderDetailsDto {
     orderId?: string;
     orderNumber?: string;
@@ -4481,6 +4758,9 @@ export interface ProductDetailResponseDto {
     shortDescription?: string | undefined;
     longDescription?: string | undefined;
     specifications?: string | undefined;
+    baseCurrencyId?: string;
+    baseCurrencyCode?: string;
+    basePrice?: number;
     defaultBuyingPrice?: number | undefined;
     defaultPricingMode?: PricingMode;
     defaultMarkupPercentage?: number | undefined;
@@ -4768,6 +5048,28 @@ export interface StringApiResponse {
     data?: string | undefined;
 }
 
+export interface TenantCurrencySettingsDto {
+    defaultSellingCurrencyId?: string;
+    defaultSellingCurrencyCode?: string;
+    availableCurrencies?: CurrencyLookupResponseDto[];
+    exchangeRates?: TenantExchangeRateItemDto[];
+}
+
+export interface TenantCurrencySettingsDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: TenantCurrencySettingsDto;
+}
+
+export interface TenantExchangeRateItemDto {
+    id?: string;
+    fromCurrencyId?: string;
+    fromCurrencyCode?: string;
+    toCurrencyId?: string;
+    toCurrencyCode?: string;
+    rate?: number;
+}
+
 export interface ThemeResponseDto {
     logoPath?: string | undefined;
     primaryColor?: string;
@@ -4817,6 +5119,10 @@ export interface UpdateContactInquiryStatusRequestDto {
     status?: ContactInquiryStatus;
 }
 
+export interface UpdateDefaultSellingCurrencyRequestDto {
+    currencyId?: string;
+}
+
 export interface UpdateThemeRequestDto {
     logoPath?: string | undefined;
     primaryColor?: string;
@@ -4825,6 +5131,12 @@ export interface UpdateThemeRequestDto {
     bannerImagePath?: string | undefined;
     fontFamily?: string | undefined;
     footerText?: string | undefined;
+}
+
+export interface UpsertTenantExchangeRateRequestDto {
+    fromCurrencyId?: string;
+    toCurrencyId?: string;
+    rate?: number;
 }
 
 export interface UserListItemResponseDto {
