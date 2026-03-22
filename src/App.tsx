@@ -8,6 +8,7 @@ import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, Shoppi
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { OrdersPage } from './pages/orders/OrdersPage';
+import PosCreateOrderPage from './pages/orders/PosCreateOrderPage';
 import { TransfersPage } from './pages/transfers/TransfersPage';
 import { UsersPage } from './pages/users/UsersPage';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
@@ -54,7 +55,7 @@ const Sidebar: React.FC = () => {
             key={item.path}
             to={item.path}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-              location.pathname === item.path ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+              (item.path === '/orders' ? location.pathname.startsWith('/orders') : location.pathname === item.path) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
             }`}
           >
             <item.icon size={18} />
@@ -138,6 +139,7 @@ const App: React.FC = () => {
           <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
           <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
+          <Route path="/orders/pos" element={<ProtectedRoute><PosCreateOrderPage /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
           <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
           <Route path="/contact-inquiries" element={<ProtectedRoute><ContactInquiriesPage /></ProtectedRoute>} />
