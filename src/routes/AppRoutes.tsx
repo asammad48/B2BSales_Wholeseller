@@ -10,6 +10,7 @@ import LoginPage from '../pages/public/LoginPage';
 import ProductDetailPage from '../pages/public/ProductDetailPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { OrdersPage } from '../pages/orders/OrdersPage';
+import { PosCreateOrderPage } from '../pages/orders/PosCreateOrderPage';
 import { UsersPage } from '../pages/users/UsersPage';
 import { ClientsPage } from '../pages/clients/ClientsPage';
 import { ContactInquiriesPage } from '../pages/contactInquiries/ContactInquiriesPage';
@@ -63,6 +64,7 @@ export const AppRoutes = () => {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="inventory" element={<PagePlaceholder title="Inventory" />} />
+        <Route path="orders/pos" element={<PosCreateOrderPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="transfers" element={<PagePlaceholder title="Transfers" />} />
         <Route path="users" element={<UsersPage />} />

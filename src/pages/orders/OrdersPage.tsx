@@ -7,60 +7,15 @@ import {
   PackageCheck,
   Plus,
   ShoppingBag,
-  Trash2,
   X,
 } from 'lucide-react';
-import {
-  CreateOrderItemRequestDto,
-  CurrencyLookupResponseDto,
-  ProductLookupResponseDto,
-  ShopLookupResponseDto,
-} from '../../api/generated/apiClient';
-import { Button, FormField, Input, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
+import { Link } from 'react-router-dom';
+import { FormField, Button } from '../../components/common/Form';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { Order, OrderDetails, ordersRepository } from '../../repositories/ordersRepository';
 import { canComplete, canMarkAsReady, canMarkAsUnable, getStatusColor } from '../../utils/orderActions';
-
-interface OrderItemDraft {
-  id: string;
-  productId: string;
-  quantity: string;
-}
-
-const createOrderItemDraft = (): OrderItemDraft => ({
-  id: `order-item-${Math.random().toString(36).slice(2, 11)}`,
-  productId: '',
-  quantity: '1',
-});
-
-const mapProductOptions = (items: ProductLookupResponseDto[]): SearchableSelectOption[] =>
-  items
-    .filter((item) => item.id && item.name)
-    .map((item) => ({
-      value: item.id as string,
-      label: item.name as string,
-      searchText: [item.sku, item.brandName, item.modelName, item.barcode].filter(Boolean).join(' '),
-    }));
-
-const mapShopOptions = (items: ShopLookupResponseDto[]): SearchableSelectOption[] =>
-  items
-    .filter((item) => item.id && item.name)
-    .map((item) => ({
-      value: item.id as string,
-      label: item.name as string,
-      searchText: item.code,
-    }));
-
-const mapCurrencyOptions = (items: CurrencyLookupResponseDto[]): SearchableSelectOption[] =>
-  items
-    .filter((item) => item.id && item.name)
-    .map((item) => ({
-      value: item.id as string,
-      label: `${item.name}${item.code ? ` (${item.code})` : ''}`,
-      searchText: [item.code, item.symbol].filter(Boolean).join(' '),
-    }));
 
 const formatMoney = (value: number, currencyCode?: string) => `${currencyCode ? `${currencyCode} ` : '$'}${value.toFixed(2)}`;
 
@@ -74,26 +29,8 @@ export const OrdersPage: React.FC = () => {
   const [isUnableModalOpen, setIsUnableModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [lookupLoading, setLookupLoading] = useState(false);
-  const [clients, setClients] = useState<Array<{ id: string; name: string }>>([]);
-  const [shops, setShops] = useState<ShopLookupResponseDto[]>([]);
-  const [products, setProducts] = useState<ProductLookupResponseDto[]>([]);
-  const [currencies, setCurrencies] = useState<CurrencyLookupResponseDto[]>([]);
-  const [clientId, setClientId] = useState('');
-  const [shopId, setShopId] = useState('');
-  const [currencyId, setCurrencyId] = useState('');
-  const [exchangeRate, setExchangeRate] = useState('1');
-  const [notes, setNotes] = useState('');
-  const [orderItems, setOrderItems] = useState<OrderItemDraft[]>([createOrderItemDraft()]);
-
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
-
-  const productOptions = useMemo(() => mapProductOptions(products), [products]);
-  const shopOptions = useMemo(() => mapShopOptions(shops), [shops]);
-  const currencyOptions = useMemo(() => mapCurrencyOptions(currencies), [currencies]);
-  const clientOptions = useMemo<SearchableSelectOption[]>(() => clients.map((client) => ({ value: client.id, label: client.name })), [clients]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -105,31 +42,6 @@ export const OrdersPage: React.FC = () => {
       console.error('Failed to fetch orders', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const resetCreateForm = () => {
-    setClientId('');
-    setShopId('');
-    setCurrencyId('');
-    setExchangeRate('1');
-    setNotes('');
-    setOrderItems([createOrderItemDraft()]);
-  };
-
-  const fetchCreateLookups = async () => {
-    setLookupLoading(true);
-    try {
-      const response = await ordersRepository.getCreateOrderLookups();
-      setClients(response.clients);
-      setShops(response.shops);
-      setProducts(response.products);
-      setCurrencies(response.currencies);
-    } catch (error) {
-      console.error('Failed to fetch order lookups', error);
-      alert('Failed to load order lookups');
-    } finally {
-      setLookupLoading(false);
     }
   };
 
@@ -205,44 +117,6 @@ export const OrdersPage: React.FC = () => {
     }
   };
 
-  const updateOrderItem = (itemId: string, updates: Partial<OrderItemDraft>) => {
-    setOrderItems((current) => current.map((item) => item.id === itemId ? { ...item, ...updates } : item));
-  };
-
-  const addOrderItem = () => setOrderItems((current) => [...current, createOrderItemDraft()]);
-  const removeOrderItem = (itemId: string) => setOrderItems((current) => current.length === 1 ? current : current.filter((item) => item.id !== itemId));
-
-  const handleCreateOrder = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const parsedExchangeRate = Number(exchangeRate);
-    const items: CreateOrderItemRequestDto[] = orderItems
-      .map((item) => ({ productId: item.productId, quantity: Number(item.quantity) }))
-      .filter((item) => item.productId && Number.isFinite(item.quantity) && item.quantity > 0);
-
-    if (!clientId) return alert('Client is required');
-    if (!shopId) return alert('Shop is required');
-    if (!currencyId) return alert('Currency is required');
-    if (!Number.isFinite(parsedExchangeRate) || parsedExchangeRate <= 0) return alert('Exchange rate must be greater than 0');
-    if (items.length !== orderItems.length) return alert('Every product row must have a product and quantity greater than 0');
-
-    try {
-      await ordersRepository.createOrder({
-        clientId,
-        shopId,
-        currencyId,
-        exchangeRate: parsedExchangeRate,
-        notes: notes.trim() || undefined,
-        items,
-      });
-      setIsCreateModalOpen(false);
-      resetCreateForm();
-      await fetchOrders();
-    } catch (error) {
-      alert('Failed to create order');
-    }
-  };
-
   const columns = useMemo(() => [
     { header: 'ID', accessor: (o: Order) => <span className="text-[10px] font-mono text-gray-400">{o.id}</span> },
     {
@@ -298,11 +172,11 @@ export const OrdersPage: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Orders"
-          description="Manage wholesale orders, track fulfillment status, and inspect full order details."
+          description="Manage wholesale orders, track fulfillment status, inspect full order details, and launch the POS page for new sales."
           actions={
-            <button onClick={() => { setIsCreateModalOpen(true); resetCreateForm(); fetchCreateLookups(); }} className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800">
+            <Link to="/orders/pos" className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800">
               <Plus size={16} /> Create Order
-            </button>
+            </Link>
           }
         />
 
@@ -321,77 +195,6 @@ export const OrdersPage: React.FC = () => {
           </div>
         </motion.div>
       </div>
-
-      <AnimatePresence>
-        {isCreateModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCreateModalOpen(false)} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-4xl bg-white rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-light">Create Order</h2>
-                <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
-              </div>
-              {lookupLoading ? (
-                <p className="text-sm text-gray-500">Loading order form data...</p>
-              ) : (
-                <form onSubmit={handleCreateOrder} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField label="Client">
-                      <SearchableSelect name="clientId" required value={clientId} onChange={setClientId} placeholder="Select client" searchPlaceholder="Search clients" options={clientOptions} />
-                    </FormField>
-                    <FormField label="Shop">
-                      <SearchableSelect name="shopId" required value={shopId} onChange={setShopId} placeholder="Select shop" searchPlaceholder="Search shops" options={shopOptions} />
-                    </FormField>
-                    <FormField label="Currency">
-                      <SearchableSelect name="currencyId" required value={currencyId} onChange={setCurrencyId} placeholder="Select currency" searchPlaceholder="Search currencies" options={currencyOptions} />
-                    </FormField>
-                    <FormField label="Exchange Rate">
-                      <Input name="exchangeRate" type="number" min="0.000001" step="0.000001" required value={exchangeRate} onChange={(event) => setExchangeRate(event.target.value)} />
-                    </FormField>
-                  </div>
-
-                  <FormField label="Notes">
-                    <Input name="notes" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Optional order notes" />
-                  </FormField>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-gray-900">Products & Quantity</h3>
-                        <p className="text-xs text-gray-400">Add one or more products in a single order.</p>
-                      </div>
-                      <button type="button" onClick={addOrderItem} className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800">
-                        <Plus size={14} /> Add Product
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {orderItems.map((item, index) => (
-                        <div key={item.id} className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_160px_44px] gap-3 items-end rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
-                          <FormField label={`Product ${index + 1}`}>
-                            <SearchableSelect name={`productId-${index}`} required value={item.productId} onChange={(value) => updateOrderItem(item.id, { productId: value })} placeholder="Select product" searchPlaceholder="Search products" options={productOptions} />
-                          </FormField>
-                          <FormField label="Quantity">
-                            <Input name={`quantity-${index}`} type="number" min="1" step="1" required value={item.quantity} onChange={(event) => updateOrderItem(item.id, { quantity: event.target.value })} />
-                          </FormField>
-                          <button type="button" onClick={() => removeOrderItem(item.id)} className="h-12 w-11 rounded-xl bg-white border border-gray-100 text-gray-500 hover:text-red-600 hover:border-red-100 hover:bg-red-50 transition-colors flex items-center justify-center">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-3">
-                    <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-5 py-3 rounded-xl bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">Cancel</button>
-                    <Button type="submit" className="!w-auto px-6">Create Order</Button>
-                  </div>
-                </form>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {isUnableModalOpen && selectedOrder && (
