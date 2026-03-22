@@ -8,6 +8,7 @@ import {
   ShopLookupResponseDto,
 } from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
+import { adminHttp, getApiErrorMessage } from './adminHttp';
 
 export type OrderStatus = 'Pending' | 'ReadyForPickup' | 'Completed' | 'Cancelled' | 'UnableToFulfill';
 
@@ -82,6 +83,11 @@ export interface OrdersResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface OrderInvoicePdf {
+  blob: Blob;
+  fileName: string;
 }
 
 const mapOrderDetails = (item: OrderDetailsDto): OrderDetails => ({
@@ -194,6 +200,24 @@ export const ordersRepository = {
     }
 
     return response.data;
+  },
+
+  async downloadOrderInvoicePdf(orderId: string): Promise<OrderInvoicePdf> {
+    try {
+      const response = await adminHttp.get(`/api/pos/orders/${encodeURIComponent(orderId)}/invoice-pdf`, {
+        responseType: 'blob',
+      });
+
+      const disposition = response.headers['content-disposition'] as string | undefined;
+      const fileName = disposition?.match(/filename\*=UTF-8''([^;]+)|filename=\"?([^\";]+)\"?/i)?.slice(1).find(Boolean);
+
+      return {
+        blob: response.data as Blob,
+        fileName: fileName ? decodeURIComponent(fileName) : `order-${orderId}-invoice.pdf`,
+      };
+    } catch (error) {
+      throw new Error(getApiErrorMessage(error, 'Failed to download invoice PDF'));
+    }
   },
 
   async getCreateOrderLookups(): Promise<OrderFormLookups> {
