@@ -45,7 +45,7 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    orders(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ClientOrderListItemDtoPageResponseApiResponse>;
+    ordersGET(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ClientOrderListItemDtoPageResponseApiResponse>;
     /**
      * @return OK
      */
@@ -173,6 +173,25 @@ export interface IApiClient {
      */
     unableToFulfill(id: string, body?: UnableToFulfillRequest | undefined): Promise<StringApiResponse>;
     /**
+     * @param shopId (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    products(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PosProductListItemDtoPageResponseApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    ordersPOST(body?: CreatePosOrderRequestDto | undefined): Promise<CreatePosOrderResponseDtoApiResponse>;
+    /**
+     * @return OK
+     */
+    invoicePdf(id: string): Promise<void>;
+    /**
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
      * @param search (optional) 
@@ -207,6 +226,8 @@ export interface IApiClient {
      * @param specifications (optional) 
      * @param trackingType (optional) 
      * @param qualityType (optional) 
+     * @param baseCurrencyId (optional) 
+     * @param basePrice (optional) 
      * @param defaultBuyingPrice (optional) 
      * @param defaultSellingPrice (optional) 
      * @param defaultPricingMode (optional) 
@@ -217,7 +238,7 @@ export interface IApiClient {
      * @param imageFiles (optional) 
      * @return OK
      */
-    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined): Promise<GuidApiResponse>;
+    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, baseCurrencyId?: string | undefined, basePrice?: number | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined): Promise<GuidApiResponse>;
     /**
      * @return OK
      */
@@ -243,11 +264,11 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ProductListItemResponseDtoPageResponseApiResponse>;
+    products2(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ProductListItemResponseDtoPageResponseApiResponse>;
     /**
      * @return OK
      */
-    products2(id: string): Promise<ProductDetailResponseDtoApiResponse>;
+    products3(id: string): Promise<ProductDetailResponseDtoApiResponse>;
     /**
      * @return OK
      */
@@ -268,7 +289,7 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products3(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
+    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
     /**
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
@@ -334,6 +355,25 @@ export interface IApiClient {
      * @return OK
      */
     lookup(): Promise<ShopLookupItemDtoIEnumerableApiResponse>;
+    /**
+     * @return OK
+     */
+    settings(): Promise<TenantCurrencySettingsDtoApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    defaultSellingCurrency(body?: UpdateDefaultSellingCurrencyRequestDto | undefined): Promise<ObjectApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    exchangeRates(body?: UpsertTenantExchangeRateRequestDto | undefined): Promise<ObjectApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    convert(body?: ConvertCurrencyRequestDto | undefined): Promise<ConvertCurrencyResponseDtoApiResponse>;
     /**
      * @return OK
      */
@@ -664,7 +704,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    orders(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
+    ordersGET(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/client/clients/{clientId}/orders?";
         if (clientId === undefined || clientId === null)
             throw new Error("The parameter 'clientId' must be defined.");
@@ -707,11 +747,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processOrders(_response);
+            return this.processOrdersGET(_response);
         });
     }
 
-    protected processOrders(response: AxiosResponse): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
+    protected processOrdersGET(response: AxiosResponse): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -2109,6 +2149,193 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param shopId (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    products(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PosProductListItemDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/pos/products?";
+        if (shopId === null)
+            throw new Error("The parameter 'shopId' cannot be null.");
+        else if (shopId !== undefined)
+            url_ += "ShopId=" + encodeURIComponent("" + shopId) + "&";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processProducts(_response);
+        });
+    }
+
+    protected processProducts(response: AxiosResponse): Promise<PosProductListItemDtoPageResponseApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<PosProductListItemDtoPageResponseApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<PosProductListItemDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    ordersPOST(body?: CreatePosOrderRequestDto | undefined, cancelToken?: CancelToken): Promise<CreatePosOrderResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/pos/orders";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processOrdersPOST(_response);
+        });
+    }
+
+    protected processOrdersPOST(response: AxiosResponse): Promise<CreatePosOrderResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<CreatePosOrderResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<CreatePosOrderResponseDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    invoicePdf(id: string, cancelToken?: CancelToken): Promise<void> {
+        let url_ = this.baseUrl + "/api/pos/orders/{id}/invoice-pdf";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processInvoicePdf(_response);
+        });
+    }
+
+    protected processInvoicePdf(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(null as any);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
      * @param search (optional) 
@@ -2327,6 +2554,8 @@ export class ApiClient implements IApiClient {
      * @param specifications (optional) 
      * @param trackingType (optional) 
      * @param qualityType (optional) 
+     * @param baseCurrencyId (optional) 
+     * @param basePrice (optional) 
      * @param defaultBuyingPrice (optional) 
      * @param defaultSellingPrice (optional) 
      * @param defaultPricingMode (optional) 
@@ -2337,7 +2566,7 @@ export class ApiClient implements IApiClient {
      * @param imageFiles (optional) 
      * @return OK
      */
-    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
+    productsPOST(categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, sku?: string | undefined, barcode?: string | undefined, name?: string | undefined, shortDescription?: string | undefined, longDescription?: string | undefined, specifications?: string | undefined, trackingType?: TrackingType | undefined, qualityType?: QualityType | undefined, baseCurrencyId?: string | undefined, basePrice?: number | undefined, defaultBuyingPrice?: number | undefined, defaultSellingPrice?: number | undefined, defaultPricingMode?: PricingMode | undefined, defaultMarkupPercentage?: number | undefined, warrantyDays?: number | undefined, lowStockThreshold?: number | undefined, images?: CreateProductImageRequestDto[] | undefined, imageFiles?: FileParameter[] | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
         let url_ = this.baseUrl + "/api/Products";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -2390,6 +2619,14 @@ export class ApiClient implements IApiClient {
             throw new Error("The parameter 'qualityType' cannot be null.");
         else
             content_.append("QualityType", qualityType.toString());
+        if (baseCurrencyId === null || baseCurrencyId === undefined)
+            throw new Error("The parameter 'baseCurrencyId' cannot be null.");
+        else
+            content_.append("BaseCurrencyId", baseCurrencyId.toString());
+        if (basePrice === null || basePrice === undefined)
+            throw new Error("The parameter 'basePrice' cannot be null.");
+        else
+            content_.append("BasePrice", basePrice.toString());
         if (defaultBuyingPrice === null || defaultBuyingPrice === undefined)
             throw new Error("The parameter 'defaultBuyingPrice' cannot be null.");
         else
@@ -2694,7 +2931,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
+    products2(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/public/storefront/products?";
         if (pageNumber === null)
             throw new Error("The parameter 'pageNumber' cannot be null.");
@@ -2734,11 +2971,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProducts(_response);
+            return this.processProducts2(_response);
         });
     }
 
-    protected processProducts(response: AxiosResponse): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
+    protected processProducts2(response: AxiosResponse): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -2765,7 +3002,7 @@ export class ApiClient implements IApiClient {
     /**
      * @return OK
      */
-    products2(id: string, cancelToken?: CancelToken): Promise<ProductDetailResponseDtoApiResponse> {
+    products3(id: string, cancelToken?: CancelToken): Promise<ProductDetailResponseDtoApiResponse> {
         let url_ = this.baseUrl + "/api/public/storefront/products/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -2788,11 +3025,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProducts2(_response);
+            return this.processProducts3(_response);
         });
     }
 
-    protected processProducts2(response: AxiosResponse): Promise<ProductDetailResponseDtoApiResponse> {
+    protected processProducts3(response: AxiosResponse): Promise<ProductDetailResponseDtoApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -2930,7 +3167,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products3(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
+    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/public/catalog/products?";
         if (search === null)
             throw new Error("The parameter 'search' cannot be null.");
@@ -2986,11 +3223,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProducts3(_response);
+            return this.processProducts4(_response);
         });
     }
 
-    protected processProducts3(response: AxiosResponse): Promise<PublicProductListItemDtoPageResponseApiResponse> {
+    protected processProducts4(response: AxiosResponse): Promise<PublicProductListItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3590,6 +3827,225 @@ export class ApiClient implements IApiClient {
     /**
      * @return OK
      */
+    settings( cancelToken?: CancelToken): Promise<TenantCurrencySettingsDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/settings";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSettings(_response);
+        });
+    }
+
+    protected processSettings(response: AxiosResponse): Promise<TenantCurrencySettingsDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<TenantCurrencySettingsDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<TenantCurrencySettingsDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    defaultSellingCurrency(body?: UpdateDefaultSellingCurrencyRequestDto | undefined, cancelToken?: CancelToken): Promise<ObjectApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/default-selling-currency";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "PUT",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processDefaultSellingCurrency(_response);
+        });
+    }
+
+    protected processDefaultSellingCurrency(response: AxiosResponse): Promise<ObjectApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ObjectApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ObjectApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    exchangeRates(body?: UpsertTenantExchangeRateRequestDto | undefined, cancelToken?: CancelToken): Promise<ObjectApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/exchange-rates";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processExchangeRates(_response);
+        });
+    }
+
+    protected processExchangeRates(response: AxiosResponse): Promise<ObjectApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ObjectApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ObjectApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    convert(body?: ConvertCurrencyRequestDto | undefined, cancelToken?: CancelToken): Promise<ConvertCurrencyResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/tenant-currency/convert";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processConvert(_response);
+        });
+    }
+
+    protected processConvert(response: AxiosResponse): Promise<ConvertCurrencyResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ConvertCurrencyResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ConvertCurrencyResponseDtoApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
     currentGET( cancelToken?: CancelToken): Promise<ThemeResponseDtoApiResponse> {
         let url_ = this.baseUrl + "/api/Themes/current";
         url_ = url_.replace(/[?&]$/, "");
@@ -3879,6 +4335,8 @@ export class ApiClient implements IApiClient {
 }
 
 export interface AdjustProductPricingRequestDto {
+    baseCurrencyId?: string | undefined;
+    basePrice?: number | undefined;
     buyingPrice?: number;
     sellingPrice?: number;
     pricingMode?: PricingMode;
@@ -4067,6 +4525,25 @@ export interface ContactInquiryListItemDtoPageResponseApiResponse {
 
 export type ContactInquiryStatus = "New" | "Read" | "Replied" | "Closed";
 
+export interface ConvertCurrencyRequestDto {
+    fromCurrencyId?: string;
+    toCurrencyId?: string;
+    amount?: number;
+}
+
+export interface ConvertCurrencyResponseDto {
+    convertedAmount?: number;
+    rate?: number;
+    fromCurrencyCode?: string;
+    toCurrencyCode?: string;
+}
+
+export interface ConvertCurrencyResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: ConvertCurrencyResponseDto;
+}
+
 export interface CreateClientRequestDto {
     name: string;
     businessName: string;
@@ -4111,6 +4588,54 @@ export interface CreateOrderRequestDto {
     exchangeRate?: number;
     notes?: string | undefined;
     items?: CreateOrderItemRequestDto[];
+}
+
+export interface CreatePosOrderItemDto {
+    productId?: string;
+    quantity?: number;
+}
+
+export interface CreatePosOrderRequestDto {
+    shopId?: string;
+    clientId?: string | undefined;
+    notes?: string | undefined;
+    items?: CreatePosOrderItemDto[];
+}
+
+export interface CreatePosOrderResponseDto {
+    orderId?: string;
+    orderNumber?: string;
+    status?: string;
+    createdAt?: Date;
+    completedAt?: Date | undefined;
+    shopName?: string;
+    clientName?: string | undefined;
+    currencyCode?: string;
+    subtotal?: number;
+    discountAmount?: number;
+    taxAmount?: number;
+    totalAmount?: number;
+    invoicePdfUrl?: string;
+    barcodeValue?: string;
+    logoUrl?: string | undefined;
+    disclaimerText?: string;
+    attestedStampText?: string;
+    items?: CreatePosOrderResponseItemDto[];
+}
+
+export interface CreatePosOrderResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: CreatePosOrderResponseDto;
+}
+
+export interface CreatePosOrderResponseItemDto {
+    productId?: string;
+    productName?: string;
+    sku?: string;
+    quantity?: number;
+    unitPrice?: number;
+    lineTotal?: number;
 }
 
 export interface CreateProductImageRequestDto {
@@ -4351,6 +4876,12 @@ export interface NotificationListItemResponseDtoPageResponseApiResponse {
     data?: NotificationListItemResponseDtoPageResponse;
 }
 
+export interface ObjectApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: any | undefined;
+}
+
 export interface OrderDetailsDto {
     orderId?: string;
     orderNumber?: string;
@@ -4456,6 +4987,35 @@ export interface PlaceClientOrderResponseDtoApiResponse {
     data?: PlaceClientOrderResponseDto;
 }
 
+export interface PosProductListItemDto {
+    productId?: string;
+    productName?: string;
+    sku?: string;
+    barcode?: string | undefined;
+    brandName?: string | undefined;
+    modelName?: string | undefined;
+    partTypeName?: string | undefined;
+    primaryImageUrl?: string | undefined;
+    sellingPrice?: number;
+    currencyCode?: string;
+    quantityInHand?: number;
+    lowStockThreshold?: number;
+    isLowStock?: boolean;
+}
+
+export interface PosProductListItemDtoPageResponse {
+    items?: PosProductListItemDto[];
+    totalCount?: number;
+    pageNumber?: number;
+    pageSize?: number;
+}
+
+export interface PosProductListItemDtoPageResponseApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: PosProductListItemDtoPageResponse;
+}
+
 export type PricingMode = "Direct" | "PercentageBased";
 
 export interface ProductDetailResponseDto {
@@ -4475,12 +5035,16 @@ export interface ProductDetailResponseDto {
     qualityType?: QualityType;
     defaultSellingPrice?: number | undefined;
     primaryImageUrl?: string | undefined;
+    quantityInHand?: number;
     isActive?: boolean;
     isPriceLocked?: boolean;
     canOrder?: boolean;
     shortDescription?: string | undefined;
     longDescription?: string | undefined;
     specifications?: string | undefined;
+    baseCurrencyId?: string;
+    baseCurrencyCode?: string;
+    basePrice?: number;
     defaultBuyingPrice?: number | undefined;
     defaultPricingMode?: PricingMode;
     defaultMarkupPercentage?: number | undefined;
@@ -4521,6 +5085,7 @@ export interface ProductListItemResponseDto {
     qualityType?: QualityType;
     defaultSellingPrice?: number | undefined;
     primaryImageUrl?: string | undefined;
+    quantityInHand?: number;
     isActive?: boolean;
     isPriceLocked?: boolean;
     canOrder?: boolean;
@@ -4615,6 +5180,7 @@ export interface PublicNewArrivalProductItemDto {
     price?: number;
     currencyCode?: string;
     stockQuantity?: number;
+    quantityInHand?: number;
     isInStock?: boolean;
     isPriceLocked?: boolean;
     canOrder?: boolean;
@@ -4653,6 +5219,7 @@ export interface PublicProductListItemDto {
     price?: number;
     currencyCode?: string;
     stockQuantity?: number;
+    quantityInHand?: number;
     isInStock?: boolean;
     isPriceLocked?: boolean;
     canOrder?: boolean;
@@ -4768,6 +5335,28 @@ export interface StringApiResponse {
     data?: string | undefined;
 }
 
+export interface TenantCurrencySettingsDto {
+    defaultSellingCurrencyId?: string;
+    defaultSellingCurrencyCode?: string;
+    availableCurrencies?: CurrencyLookupResponseDto[];
+    exchangeRates?: TenantExchangeRateItemDto[];
+}
+
+export interface TenantCurrencySettingsDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: TenantCurrencySettingsDto;
+}
+
+export interface TenantExchangeRateItemDto {
+    id?: string;
+    fromCurrencyId?: string;
+    fromCurrencyCode?: string;
+    toCurrencyId?: string;
+    toCurrencyCode?: string;
+    rate?: number;
+}
+
 export interface ThemeResponseDto {
     logoPath?: string | undefined;
     primaryColor?: string;
@@ -4817,6 +5406,10 @@ export interface UpdateContactInquiryStatusRequestDto {
     status?: ContactInquiryStatus;
 }
 
+export interface UpdateDefaultSellingCurrencyRequestDto {
+    currencyId?: string;
+}
+
 export interface UpdateThemeRequestDto {
     logoPath?: string | undefined;
     primaryColor?: string;
@@ -4825,6 +5418,12 @@ export interface UpdateThemeRequestDto {
     bannerImagePath?: string | undefined;
     fontFamily?: string | undefined;
     footerText?: string | undefined;
+}
+
+export interface UpsertTenantExchangeRateRequestDto {
+    fromCurrencyId?: string;
+    toCurrencyId?: string;
+    rate?: number;
 }
 
 export interface UserListItemResponseDto {
