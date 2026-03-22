@@ -203,7 +203,7 @@ export const DashboardPage: React.FC = () => {
                       <div key={`${item.productId || 'product'}-${index}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{item.productName || 'Unnamed product'}</p>
-                          <p className="text-xs text-gray-400">Qty sold: {item.totalQuantitySold || 0}</p>
+                                <p className="text-xs text-gray-400">Qty sold: {item.quantitySold || 0}</p>
                         </div>
                         <p className="text-sm font-semibold text-gray-900">{formatCurrency(item.totalSales || 0)}</p>
                       </div>
