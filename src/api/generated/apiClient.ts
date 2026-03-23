@@ -4651,6 +4651,7 @@ export interface CreateProductImageRequestDto {
 export interface CreateStockTransferItemRequestDto {
     productId?: string;
     quantity?: number;
+    barcodes?: string[];
 }
 
 export interface CreateStockTransferRequestDto {
