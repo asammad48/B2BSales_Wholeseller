@@ -519,6 +519,11 @@ export const InventoryPage: React.FC = () => {
       return;
     }
 
+    if (quantityChange < 0 && Math.abs(quantityChange) > selectedItem.availableQuantity) {
+      alert(`Only ${selectedItem.availableQuantity} item${selectedItem.availableQuantity === 1 ? '' : 's'} available to remove from ${selectedItem.productName}.`);
+      return;
+    }
+
     if (isSelectedItemSerialized && quantityChange > 0) {
       const hasInvalidUnit = adjustSerializedUnits.some((unit) => !unit.barcode.trim() || !unit.imei1.trim() || !unit.imei2.trim());
       if (hasInvalidUnit || adjustSerializedUnits.length !== quantityChange) {

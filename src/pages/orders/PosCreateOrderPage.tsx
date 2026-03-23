@@ -13,6 +13,7 @@ export interface PosCartItem {
   product: PosProduct;
   quantity: number;
   lineTotal: number;
+  selectedBarcodes: string[];
 }
 
 export interface PosOrderReceipt {
@@ -114,7 +115,8 @@ export const PosCreateOrderPage: React.FC = () => {
     setCart((current) => {
       const existing = current[product.productId];
       const currentQuantity = existing?.quantity || 0;
-      const nextQuantity = Math.max(0, Math.min(product.quantityInHand, currentQuantity + delta));
+      const maxQuantity = product.barcodes.length > 0 ? product.barcodes.length : product.quantityInHand;
+      const nextQuantity = Math.max(0, Math.min(maxQuantity, currentQuantity + delta));
 
       if (nextQuantity <= 0) {
         const { [product.productId]: _removed, ...rest } = current;
@@ -127,6 +129,7 @@ export const PosCreateOrderPage: React.FC = () => {
           product,
           quantity: nextQuantity,
           lineTotal: product.sellingPrice * nextQuantity,
+          selectedBarcodes: (existing?.selectedBarcodes || []).slice(0, nextQuantity),
         },
       };
     });
@@ -151,6 +154,23 @@ export const PosCreateOrderPage: React.FC = () => {
     setSubmitError('');
   };
 
+  const updateSerializedSelections = (productId: string, selectedBarcodes: string[]) => {
+    setCart((current) => {
+      const existing = current[productId];
+      if (!existing) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [productId]: {
+          ...existing,
+          selectedBarcodes: selectedBarcodes.slice(0, existing.quantity),
+        },
+      };
+    });
+  };
+
   const handleSubmit = async () => {
     if (!shopId) {
       setSubmitError('Shop is required to create a POS order.');
@@ -159,6 +179,15 @@ export const PosCreateOrderPage: React.FC = () => {
 
     if (!cartItems.length) {
       setSubmitError('Add at least one stocked product before creating the order.');
+      return;
+    }
+
+    const serializedItemMissingSelection = cartItems.find(
+      (item) => item.product.barcodes.length > 0 && item.selectedBarcodes.filter(Boolean).length !== item.quantity
+    );
+
+    if (serializedItemMissingSelection) {
+      setSubmitError(`Select ${serializedItemMissingSelection.quantity} IMEI/barcode entr${serializedItemMissingSelection.quantity === 1 ? 'y' : 'ies'} for ${serializedItemMissingSelection.product.productName}.`);
       return;
     }
 
@@ -173,6 +202,7 @@ export const PosCreateOrderPage: React.FC = () => {
         items: cartItems.map((item) => ({
           productId: item.product.productId,
           quantity: item.quantity,
+          barcodes: item.product.barcodes.length > 0 ? item.selectedBarcodes.filter(Boolean) : undefined,
         })),
       });
 
@@ -271,6 +301,7 @@ export const PosCreateOrderPage: React.FC = () => {
             onNotesChange={setNotes}
             onIncrementItem={incrementItem}
             onDecrementItem={decrementItem}
+            onSerializedSelectionChange={updateSerializedSelections}
             onSubmit={handleSubmit}
             submitting={submitting || lookupsLoading}
             receipt={receipt}

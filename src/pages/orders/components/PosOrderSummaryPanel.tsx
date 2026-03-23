@@ -20,6 +20,7 @@ interface PosOrderSummaryPanelProps {
   onNotesChange: (value: string) => void;
   onIncrementItem: (product: PosProduct) => void;
   onDecrementItem: (product: PosProduct) => void;
+  onSerializedSelectionChange: (productId: string, barcodes: string[]) => void;
   onSubmit: () => void;
   submitting: boolean;
   receipt: PosOrderReceipt | null;
@@ -42,6 +43,17 @@ const mapClientOptions = (items: ClientLookupItem[]): SearchableSelectOption[] =
     label: item.name,
   }));
 
+const buildSerializedOptionLabel = (product: PosProduct, barcodeValue: string) => {
+  const matchedUnit = product.barcodes.find((unit) => unit.barcode === barcodeValue);
+  const parts = [
+    matchedUnit?.imei1 ? `IMEI 1: ${matchedUnit.imei1}` : undefined,
+    matchedUnit?.imei2 ? `IMEI 2: ${matchedUnit.imei2}` : undefined,
+    matchedUnit?.barcode ? `Barcode: ${matchedUnit.barcode}` : barcodeValue,
+  ].filter(Boolean);
+
+  return parts.join(' • ');
+};
+
 export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
   cartItems,
   subtotal,
@@ -56,6 +68,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
   onNotesChange,
   onIncrementItem,
   onDecrementItem,
+  onSerializedSelectionChange,
   onSubmit,
   submitting,
   receipt,
@@ -66,6 +79,18 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
   const discountAmount = receipt?.discountAmount || 0;
   const taxAmount = receipt?.taxAmount || 0;
   const grandTotal = receipt?.totalAmount ?? total;
+
+  const buildSerializedOptions = (product: PosProduct, selectedBarcodes: string[], currentValue: string) => {
+    const selectedSet = new Set(selectedBarcodes.filter((value) => value && value !== currentValue));
+
+    return product.barcodes
+      .filter((unit) => unit.barcode && (!selectedSet.has(unit.barcode) || unit.barcode === currentValue))
+      .map((unit) => ({
+        value: unit.barcode,
+        label: buildSerializedOptionLabel(product, unit.barcode),
+        searchText: [product.productName, product.sku, unit.imei1, unit.imei2, unit.barcode].filter(Boolean).join(' '),
+      }));
+  };
 
   return (
     <aside className="rounded-[28px] bg-white border border-gray-100 shadow-sm overflow-hidden">
@@ -137,7 +162,36 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
                       <p className="text-sm font-medium text-gray-900">{item.product.productName}</p>
                       <p className="mt-1 text-xs text-gray-500">{item.product.sku || item.product.barcode || 'POS item'}</p>
                       {item.product.barcodes.length ? (
-                        <p className="mt-1 text-[11px] text-gray-400">Serialized stock available: {item.product.barcodes.length}</p>
+                        <div className="mt-2 space-y-3">
+                          <p className="text-[11px] text-gray-400">
+                            Serialized stock available: {item.product.barcodes.length}. Select {item.quantity} IMEI/barcode entr{item.quantity === 1 ? 'y' : 'ies'} below.
+                          </p>
+                          <div className="space-y-2">
+                            {Array.from({ length: item.quantity }, (_, index) => {
+                              const selectedValue = item.selectedBarcodes[index] || '';
+                              const options = buildSerializedOptions(item.product, item.selectedBarcodes, selectedValue);
+
+                              return (
+                                <FormField key={`${item.product.productId}-serialized-${index}`} label={`Serialized unit ${index + 1}`}>
+                                  <SearchableSelect
+                                    name={`${item.product.productId}-barcode-${index}`}
+                                    value={selectedValue}
+                                    onChange={(value) => {
+                                      const nextSelections = [...item.selectedBarcodes];
+                                      nextSelections[index] = value;
+                                      onSerializedSelectionChange(item.product.productId, nextSelections);
+                                    }}
+                                    options={options}
+                                    placeholder="Select IMEI / barcode"
+                                    searchPlaceholder="Search IMEI 1, IMEI 2, or barcode"
+                                    disabled={submitting || Boolean(receipt)}
+                                    noResultsText="No serialized units left to select"
+                                  />
+                                </FormField>
+                              );
+                            })}
+                          </div>
+                        </div>
                       ) : null}
                     </div>
                     <p className="text-sm font-semibold text-gray-900">{formatMoney(item.lineTotal, item.product.currencyCode)}</p>
@@ -157,7 +211,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => onIncrementItem(item.product)}
-                        disabled={submitting || Boolean(receipt) || item.quantity >= item.product.quantityInHand}
+                        disabled={submitting || Boolean(receipt) || item.quantity >= (item.product.barcodes.length > 0 ? item.product.barcodes.length : item.product.quantityInHand)}
                         className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
                       >
                         <Plus size={14} />
