@@ -120,7 +120,7 @@ const InventoryDetailsModal: React.FC<{
   item: InventoryItem;
   onClose: () => void;
 }> = ({ item, onClose }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -132,7 +132,7 @@ const InventoryDetailsModal: React.FC<{
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: 20 }}
-      className="relative w-full max-w-3xl rounded-[32px] bg-white p-8 shadow-xl"
+      className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-white p-8 shadow-xl"
     >
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
@@ -144,8 +144,9 @@ const InventoryDetailsModal: React.FC<{
         </button>
       </div>
 
+      <div className="flex-1 overflow-y-auto pr-1">
       {item.barcodes.length ? (
-        <div className="max-h-[60vh] overflow-y-auto rounded-3xl border border-gray-100">
+        <div className="max-h-full overflow-y-auto rounded-3xl border border-gray-100">
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/70">
@@ -172,6 +173,7 @@ const InventoryDetailsModal: React.FC<{
           No serialized unit details are available for this inventory record.
         </div>
       )}
+      </div>
     </motion.div>
   </div>
 );
@@ -613,7 +615,7 @@ export const InventoryPage: React.FC = () => {
 
       <AnimatePresence>
         {isStockInOpen ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -625,7 +627,7 @@ export const InventoryPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl rounded-[32px] bg-white p-8 shadow-xl"
+              className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-white p-8 shadow-xl"
             >
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -640,7 +642,7 @@ export const InventoryPage: React.FC = () => {
               {lookupLoading ? (
                 <p className="text-sm text-gray-500">Loading lookups...</p>
               ) : (
-                <form onSubmit={handleStockIn} className="space-y-5">
+                <form onSubmit={handleStockIn} className="flex-1 space-y-5 overflow-y-auto pr-1">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField label="Product">
                       <SearchableSelect
@@ -711,7 +713,7 @@ export const InventoryPage: React.FC = () => {
 
       <AnimatePresence>
         {isAdjustOpen && selectedItem ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -723,7 +725,7 @@ export const InventoryPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl rounded-[32px] bg-white p-8 shadow-xl"
+              className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-white p-8 shadow-xl"
             >
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -738,7 +740,7 @@ export const InventoryPage: React.FC = () => {
               {lookupLoading ? (
                 <p className="text-sm text-gray-500">Loading lookups...</p>
               ) : (
-                <form onSubmit={handleAdjustment} className="space-y-5">
+                <form onSubmit={handleAdjustment} className="flex-1 space-y-5 overflow-y-auto pr-1">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField label="Product">
                       <SearchableSelect

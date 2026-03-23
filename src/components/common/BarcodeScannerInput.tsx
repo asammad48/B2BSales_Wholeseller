@@ -157,7 +157,7 @@ export const BarcodeScannerInput: React.FC<BarcodeScannerInputProps> = ({
 
       <AnimatePresence>
         {isScannerOpen ? (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -169,7 +169,7 @@ export const BarcodeScannerInput: React.FC<BarcodeScannerInputProps> = ({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg overflow-hidden rounded-[32px] bg-white shadow-xl"
+              className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[32px] bg-white shadow-xl"
             >
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
                 <div>
@@ -185,7 +185,7 @@ export const BarcodeScannerInput: React.FC<BarcodeScannerInputProps> = ({
                 </button>
               </div>
 
-              <div className="space-y-4 p-6">
+              <div className="flex-1 space-y-4 overflow-y-auto p-6">
                 <div className="overflow-hidden rounded-3xl bg-gray-950">
                   <video ref={videoRef} className="aspect-[4/3] w-full object-cover" muted playsInline />
                 </div>
