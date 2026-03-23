@@ -2,15 +2,23 @@ import {
   CreatePosOrderRequestDto,
   CreatePosOrderResponseDto,
   PosProductListItemDto,
+  ProductBarcodeDto,
 } from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
 import { adminHttp, getApiErrorMessage, unwrapApiResponse } from './adminHttp';
+
+export interface PosSerializedUnit {
+  barcode: string;
+  imei1: string;
+  imei2: string;
+}
 
 export interface PosProduct {
   productId: string;
   productName: string;
   sku: string;
   barcode?: string;
+  barcodes: PosSerializedUnit[];
   brandName?: string;
   modelName?: string;
   partTypeName?: string;
@@ -36,6 +44,8 @@ export interface PosProductsResponse {
   total: number;
   page: number;
   limit: number;
+  success: boolean;
+  message: string;
 }
 
 export interface CreatePosOrderBody extends CreatePosOrderRequestDto {
@@ -48,11 +58,18 @@ export interface CreatePosOrderBody extends CreatePosOrderRequestDto {
   }>;
 }
 
+const mapSerializedUnit = (item?: ProductBarcodeDto | null): PosSerializedUnit => ({
+  barcode: item?.barcode || '',
+  imei1: item?.imei1 || '',
+  imei2: item?.imei2 || '',
+});
+
 const mapPosProduct = (item: PosProductListItemDto): PosProduct => ({
   productId: item.productId || '',
   productName: item.productName || '',
   sku: item.sku || '',
   barcode: item.barcode,
+  barcodes: (item.barcodes || []).map(mapSerializedUnit),
   brandName: item.brandName,
   modelName: item.modelName,
   partTypeName: item.partTypeName,
@@ -84,6 +101,8 @@ export const posOrdersRepository = {
       total: response.data.totalCount || 0,
       page: response.data.pageNumber || params.page || 1,
       limit: response.data.pageSize || params.limit || 100,
+      success: Boolean(response.success),
+      message: response.message || '',
     };
   },
 

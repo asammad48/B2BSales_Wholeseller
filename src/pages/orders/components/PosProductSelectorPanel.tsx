@@ -82,7 +82,21 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
                       <span className="rounded-full bg-gray-100 px-2.5 py-1 font-medium text-gray-600">{formatMoney(product.sellingPrice, product.currencyCode)}</span>
                       <span>In hand: <strong className="text-gray-800">{product.quantityInHand}</strong></span>
                       {product.lowStockThreshold > 0 ? <span>Low stock at: <strong className="text-gray-800">{product.lowStockThreshold}</strong></span> : null}
+                      {product.barcodes.length ? <span>Serialized units: <strong className="text-gray-800">{product.barcodes.length}</strong></span> : null}
                     </div>
+                    {product.barcodes.length ? (
+                      <div className="mt-3 rounded-2xl bg-gray-50 px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Serialized preview</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {product.barcodes
+                            .slice(0, 2)
+                            .map((unit) => [unit.imei1, unit.imei2, unit.barcode].filter(Boolean).join(' • '))
+                            .filter(Boolean)
+                            .join('  |  ')}
+                          {product.barcodes.length > 2 ? '  |  …' : ''}
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="flex items-center gap-2 rounded-2xl bg-gray-50 p-2">
