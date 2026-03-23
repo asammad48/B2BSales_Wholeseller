@@ -4350,6 +4350,7 @@ export interface AdjustStockRequestDto {
     productId?: string;
     quantityChange?: number;
     reason?: string;
+    serializedUnits?: SerializedStockInUnitRequestDto[];
 }
 
 export interface BestPerformingClientReportItemDto {
@@ -4759,6 +4760,7 @@ export interface InventoryListItemResponseDto {
     modelName?: string | undefined;
     sku?: string;
     barcode?: string | undefined;
+    barcodes?: ProductBarcodeDto[];
     trackingType?: string;
     quantityOnHand?: number;
     reservedQuantity?: number;
@@ -4992,6 +4994,7 @@ export interface PosProductListItemDto {
     productName?: string;
     sku?: string;
     barcode?: string | undefined;
+    barcodes?: ProductBarcodeDto[];
     brandName?: string | undefined;
     modelName?: string | undefined;
     partTypeName?: string | undefined;
@@ -5017,6 +5020,12 @@ export interface PosProductListItemDtoPageResponseApiResponse {
 }
 
 export type PricingMode = "Direct" | "PercentageBased";
+
+export interface ProductBarcodeDto {
+    barcode?: string;
+    imei1?: string;
+    imei2?: string;
+}
 
 export interface ProductDetailResponseDto {
     id?: string;
