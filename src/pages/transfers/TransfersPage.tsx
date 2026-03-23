@@ -2,11 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
-import { ProductLookupResponseDto } from '../../api/generated/apiClient';
-import { transfersRepository, Transfer } from '../../repositories/transfersRepository';
+import { transfersRepository, Transfer, TransferProductLookup } from '../../repositories/transfersRepository';
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FormField, Input, SearchableSelect, SearchableSelectOption, Button } from '../../components/common/Form';
+import { Button, FormField, Input, MultiSearchableSelect, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
 import { ShopLookupItem } from '../../repositories/shopsRepository';
 
 const mapShopOptions = (items: ShopLookupItem[]): SearchableSelectOption[] =>
@@ -18,14 +17,33 @@ const mapShopOptions = (items: ShopLookupItem[]): SearchableSelectOption[] =>
       searchText: item.code,
     }));
 
-const mapProductOptions = (items: ProductLookupResponseDto[]): SearchableSelectOption[] =>
+const mapProductOptions = (items: TransferProductLookup[]): SearchableSelectOption[] =>
   items
     .filter((item) => item.id && item.name)
     .map((item) => ({
       value: item.id as string,
       label: item.name as string,
-      searchText: [item.sku, item.brandName, item.modelName, item.barcode].filter(Boolean).join(' '),
+      searchText: [
+        item.sku,
+        item.brandName,
+        item.modelName,
+        item.barcode,
+        item.sourceShopName,
+        item.trackingType,
+      ]
+        .filter(Boolean)
+        .join(' '),
     }));
+
+const mapSerializedOptions = (product?: TransferProductLookup | null): SearchableSelectOption[] =>
+  (product?.serializedBarcodes || []).map((barcode, index) => ({
+    value: barcode,
+    label: barcode,
+    searchText: `${product?.name || ''} ${product?.sku || ''} serialized ${index + 1}`,
+  }));
+
+const isSerializedProduct = (product?: TransferProductLookup | null) =>
+  (product?.trackingType || '').toLowerCase() === 'serialized' || Boolean(product?.serializedBarcodes.length);
 
 export const TransfersPage: React.FC = () => {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
@@ -36,13 +54,27 @@ export const TransfersPage: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [shops, setShops] = useState<ShopLookupItem[]>([]);
-  const [products, setProducts] = useState<ProductLookupResponseDto[]>([]);
+  const [products, setProducts] = useState<TransferProductLookup[]>([]);
   const [sourceShopId, setSourceShopId] = useState('');
   const [destinationShopId, setDestinationShopId] = useState('');
   const [productId, setProductId] = useState('');
+  const [quantity, setQuantity] = useState('1');
+  const [notes, setNotes] = useState('');
+  const [selectedSerializedBarcodes, setSelectedSerializedBarcodes] = useState<string[]>([]);
 
   const shopOptions = useMemo(() => mapShopOptions(shops), [shops]);
-  const productOptions = useMemo(() => mapProductOptions(products), [products]);
+  const sourceProducts = useMemo(
+    () => products.filter((item) => item.sourceShopId === sourceShopId && item.availableQuantity > 0),
+    [products, sourceShopId]
+  );
+  const productOptions = useMemo(() => mapProductOptions(sourceProducts), [sourceProducts]);
+  const selectedProduct = useMemo(
+    () => sourceProducts.find((item) => item.id === productId) || null,
+    [productId, sourceProducts]
+  );
+  const serializedOptions = useMemo(() => mapSerializedOptions(selectedProduct), [selectedProduct]);
+  const selectedProductIsSerialized = isSerializedProduct(selectedProduct);
+  const effectiveQuantity = selectedProductIsSerialized ? selectedSerializedBarcodes.length : Number(quantity);
 
   const fetchTransfers = async () => {
     setLoading(true);
@@ -63,6 +95,29 @@ export const TransfersPage: React.FC = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [search, page]);
+
+  useEffect(() => {
+    setProductId('');
+    setQuantity('1');
+    setSelectedSerializedBarcodes([]);
+  }, [sourceShopId]);
+
+  useEffect(() => {
+    setSelectedSerializedBarcodes([]);
+
+    if (!selectedProductIsSerialized) {
+      setQuantity('1');
+      return;
+    }
+
+    setQuantity(String(selectedSerializedBarcodes.length || 0));
+  }, [productId]);
+
+  useEffect(() => {
+    if (selectedProductIsSerialized) {
+      setQuantity(String(selectedSerializedBarcodes.length));
+    }
+  }, [selectedProductIsSerialized, selectedSerializedBarcodes]);
 
   const handleDispatch = async (id: string) => {
     try {
@@ -86,6 +141,9 @@ export const TransfersPage: React.FC = () => {
     setSourceShopId('');
     setDestinationShopId('');
     setProductId('');
+    setQuantity('1');
+    setNotes('');
+    setSelectedSerializedBarcodes([]);
   };
 
   const fetchCreateLookups = async () => {
@@ -104,9 +162,7 @@ export const TransfersPage: React.FC = () => {
 
   const handleCreateTransfer = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const quantity = Number(formData.get('quantity'));
-    const notesValue = (formData.get('notes') as string | null)?.trim();
+    const notesValue = notes.trim();
 
     try {
       if (!sourceShopId || !destinationShopId || !productId) {
@@ -119,8 +175,26 @@ export const TransfersPage: React.FC = () => {
         return;
       }
 
-      if (!Number.isFinite(quantity) || quantity <= 0) {
+      if (!selectedProduct) {
+        alert('Select a valid source product');
+        return;
+      }
+
+      if (selectedProductIsSerialized) {
+        if (!selectedSerializedBarcodes.length) {
+          alert('Select at least one serialized unit to transfer');
+          return;
+        }
+
+        if (selectedSerializedBarcodes.length > selectedProduct.availableQuantity) {
+          alert('Selected serialized units exceed available stock');
+          return;
+        }
+      } else if (!Number.isFinite(effectiveQuantity) || effectiveQuantity <= 0) {
         alert('Quantity must be greater than 0');
+        return;
+      } else if (effectiveQuantity > selectedProduct.availableQuantity) {
+        alert(`Only ${selectedProduct.availableQuantity} unit${selectedProduct.availableQuantity === 1 ? '' : 's'} available in the source shop`);
         return;
       }
 
@@ -128,13 +202,18 @@ export const TransfersPage: React.FC = () => {
         sourceShopId,
         destinationShopId,
         notes: notesValue || undefined,
-        items: [{ productId, quantity }],
+        items: [{
+          productId,
+          quantity: effectiveQuantity,
+          barcodes: selectedProductIsSerialized ? selectedSerializedBarcodes : undefined,
+        }],
       });
       setIsCreateModalOpen(false);
       resetCreateForm();
       fetchTransfers();
     } catch (error) {
-      alert('Failed to create transfer');
+      console.error('Failed to create transfer', error);
+      alert(error instanceof Error ? error.message : 'Failed to create transfer');
     }
   };
 
@@ -297,10 +376,13 @@ export const TransfersPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-[32px] shadow-xl p-8"
+              className="relative w-full max-w-2xl bg-white rounded-[32px] shadow-xl p-8"
             >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-light">New Transfer</h2>
+              <div className="flex items-center justify-between mb-6 gap-4">
+                <div>
+                  <h2 className="text-2xl font-light">New Transfer</h2>
+                  <p className="mt-1 text-sm text-gray-500">Choose the source stock first. Serialized products will ask for specific barcode selections.</p>
+                </div>
                 <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                   <X size={24} />
                 </button>
@@ -310,44 +392,109 @@ export const TransfersPage: React.FC = () => {
                 <p className="text-sm text-gray-500">Loading lookups...</p>
               ) : (
                 <form onSubmit={handleCreateTransfer} className="space-y-4">
-                  <FormField label="From Shop">
-                    <SearchableSelect
-                      name="sourceShopId"
-                      required
-                      value={sourceShopId}
-                      onChange={setSourceShopId}
-                      placeholder="Select source shop"
-                      searchPlaceholder="Search shops"
-                      options={shopOptions}
-                    />
-                  </FormField>
-                  <FormField label="To Shop">
-                    <SearchableSelect
-                      name="destinationShopId"
-                      required
-                      value={destinationShopId}
-                      onChange={setDestinationShopId}
-                      placeholder="Select destination shop"
-                      searchPlaceholder="Search shops"
-                      options={shopOptions}
-                    />
-                  </FormField>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField label="From Shop">
+                      <SearchableSelect
+                        name="sourceShopId"
+                        required
+                        value={sourceShopId}
+                        onChange={setSourceShopId}
+                        placeholder="Select source shop"
+                        searchPlaceholder="Search shops"
+                        options={shopOptions}
+                      />
+                    </FormField>
+                    <FormField label="To Shop">
+                      <SearchableSelect
+                        name="destinationShopId"
+                        required
+                        value={destinationShopId}
+                        onChange={setDestinationShopId}
+                        placeholder="Select destination shop"
+                        searchPlaceholder="Search shops"
+                        options={shopOptions}
+                      />
+                    </FormField>
+                  </div>
+
                   <FormField label="Product">
                     <SearchableSelect
                       name="productId"
                       required
                       value={productId}
                       onChange={setProductId}
-                      placeholder="Select product"
+                      placeholder={sourceShopId ? 'Select product' : 'Select source shop first'}
                       searchPlaceholder="Search products"
                       options={productOptions}
+                      disabled={!sourceShopId}
+                      noResultsText={sourceShopId ? 'No transferable stock found for this shop' : 'Select source shop first'}
                     />
                   </FormField>
-                  <FormField label="Quantity">
-                    <Input name="quantity" type="number" required min="1" placeholder="0" defaultValue="1" />
-                  </FormField>
+
+                  {selectedProduct ? (
+                    <div className="rounded-3xl border border-gray-100 bg-gray-50/60 p-4 text-sm text-gray-600 space-y-1">
+                      <p>
+                        <span className="font-medium text-gray-900">Available:</span> {selectedProduct.availableQuantity} unit{selectedProduct.availableQuantity === 1 ? '' : 's'} in {selectedProduct.sourceShopName}
+                      </p>
+                      <p>
+                        <span className="font-medium text-gray-900">Tracking:</span> {selectedProduct.trackingType || 'QuantityBased'}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {selectedProductIsSerialized ? (
+                    <div className="space-y-4 rounded-3xl border border-gray-100 bg-gray-50/60 p-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">Serialized units to transfer</h3>
+                        <p className="mt-1 text-xs text-gray-500">Use the multi-select dropdown to choose every serialized unit. If you pick 2 serialized products, the transfer quantity will automatically become 2.</p>
+                      </div>
+                      <FormField label="Serialized units">
+                        <MultiSearchableSelect
+                          values={selectedSerializedBarcodes}
+                          onChange={setSelectedSerializedBarcodes}
+                          options={serializedOptions}
+                          placeholder="Select serialized units"
+                          searchPlaceholder="Search barcode or IMEI"
+                          noResultsText="No serialized units left to select"
+                          emptyStateText="No serialized units selected yet."
+                        />
+                      </FormField>
+                    </div>
+                  ) : (
+                    <FormField label="Quantity">
+                      <Input
+                        name="quantity"
+                        type="number"
+                        required
+                        min="1"
+                        max={selectedProduct?.availableQuantity || undefined}
+                        placeholder="0"
+                        value={quantity}
+                        onChange={(event) => setQuantity(event.target.value)}
+                        disabled={!selectedProduct}
+                      />
+                    </FormField>
+                  )}
+
+                  {selectedProductIsSerialized ? (
+                    <FormField label="Transfer Quantity">
+                      <Input
+                        name="resolvedQuantity"
+                        type="number"
+                        value={String(selectedSerializedBarcodes.length)}
+                        readOnly
+                        className="bg-gray-100 text-gray-500"
+                      />
+                    </FormField>
+                  ) : null}
+
                   <FormField label="Notes">
-                    <Input name="notes" placeholder="Optional note" />
+                    <Input
+                      name="notes"
+                      placeholder="Optional note"
+                      value={notes}
+                      onChange={(event) => setNotes(event.target.value)}
+                    />
                   </FormField>
                   <Button type="submit" style={{ backgroundColor: 'var(--primary-color)' }}>
                     Create Transfer

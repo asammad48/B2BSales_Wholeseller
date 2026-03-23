@@ -3,6 +3,7 @@ import {
   ProductLookupResponseDto,
 } from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
+import { InventoryItem, inventoryRepository } from './inventoryRepository';
 import { shopsRepository, ShopLookupItem } from './shopsRepository';
 
 export type TransferStatus = 'Pending' | 'Dispatched' | 'Received' | 'Cancelled';
@@ -26,22 +27,53 @@ export interface Transfer {
   quantity?: number;
 }
 
+export interface CreateTransferItemRequest {
+  productId: string;
+  quantity: number;
+  barcodes?: string[];
+}
+
 export interface CreateTransferRequest extends CreateStockTransferRequestDto {
   sourceShopId: string;
   destinationShopId: string;
   notes?: string;
-  items: Array<{ productId: string; quantity: number }>;
+  items: CreateTransferItemRequest[];
+}
+
+export interface TransferProductLookup extends ProductLookupResponseDto {
+  trackingType: string;
+  quantityInHand: number;
+  availableQuantity: number;
+  sourceShopId: string;
+  sourceShopName: string;
+  serializedBarcodes: string[];
 }
 
 export interface TransferFormLookups {
   shops: ShopLookupItem[];
-  products: ProductLookupResponseDto[];
+  products: TransferProductLookup[];
 }
 
 export interface TransfersResponse {
   data: Transfer[];
   total: number;
 }
+
+const mapTransferProduct = (item: InventoryItem): TransferProductLookup => ({
+  id: item.productId,
+  name: item.productName,
+  sku: item.sku,
+  brandName: item.brandName,
+  modelName: item.modelName,
+  barcode: item.barcode,
+  isActive: true,
+  trackingType: item.trackingType,
+  quantityInHand: item.quantityOnHand,
+  availableQuantity: item.availableQuantity,
+  sourceShopId: item.shopId,
+  sourceShopName: item.shopName,
+  serializedBarcodes: item.barcodes.map((barcode) => barcode.barcode).filter(Boolean),
+});
 
 export const transfersRepository = {
   async getTransfers(_page: number = 1, _limit: number = 10, _search: string = ''): Promise<TransfersResponse> {
@@ -56,18 +88,16 @@ export const transfersRepository = {
   },
 
   async getCreateTransferLookups(): Promise<TransferFormLookups> {
-    const [shops, bundleResponse] = await Promise.all([
+    const [shops, inventoryResponse] = await Promise.all([
       this.getShopsLookup(),
-      apiClient.bundle(),
+      inventoryRepository.getInventory(1, 1000, ''),
     ]);
-
-    if (!bundleResponse.success || !bundleResponse.data) {
-      throw new Error(bundleResponse.message || 'Failed to fetch transfer lookups');
-    }
 
     return {
       shops,
-      products: bundleResponse.data.products || [],
+      products: inventoryResponse.data
+        .filter((item) => item.productId && item.shopId && item.availableQuantity > 0)
+        .map(mapTransferProduct),
     };
   },
 
