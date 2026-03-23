@@ -165,6 +165,10 @@ export const ordersRepository = {
   async markReady(id: string): Promise<string> {
     const response = await apiClient.ready(id);
 
+    if (!response) {
+      return 'Order marked as ready';
+    }
+
     if (!response.success) {
       throw new Error(response.message || 'Failed to mark order as ready');
     }
@@ -175,6 +179,10 @@ export const ordersRepository = {
   async completeOrder(id: string): Promise<string> {
     const response = await apiClient.complete(id);
 
+    if (!response) {
+      return 'Order completed';
+    }
+
     if (!response.success) {
       throw new Error(response.message || 'Failed to complete order');
     }
@@ -184,6 +192,10 @@ export const ordersRepository = {
 
   async markUnableToFulfill(id: string, reason: string): Promise<string> {
     const response = await apiClient.unableToFulfill(id, { reason } as any);
+
+    if (!response) {
+      return 'Order updated';
+    }
 
     if (!response.success) {
       throw new Error(response.message || 'Failed to mark order as unable to fulfill');

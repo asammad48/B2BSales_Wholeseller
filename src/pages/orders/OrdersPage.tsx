@@ -45,6 +45,11 @@ export const OrdersPage: React.FC = () => {
     }
   };
 
+  const closeUnableModal = () => {
+    setIsUnableModalOpen(false);
+    setSelectedOrder(null);
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchOrders();
@@ -75,7 +80,7 @@ export const OrdersPage: React.FC = () => {
         setOrderDetails(refreshed);
       }
     } catch (error) {
-      alert('Failed to mark order as ready');
+      alert(error instanceof Error ? error.message : 'Failed to mark order as ready');
     }
   };
 
@@ -88,7 +93,7 @@ export const OrdersPage: React.FC = () => {
         setOrderDetails(refreshed);
       }
     } catch (error) {
-      alert('Failed to complete order');
+      alert(error instanceof Error ? error.message : 'Failed to complete order');
     }
   };
 
@@ -105,15 +110,14 @@ export const OrdersPage: React.FC = () => {
 
     try {
       await ordersRepository.unableToFulfill(selectedOrder.id, reason);
-      setIsUnableModalOpen(false);
-      setSelectedOrder(null);
+      closeUnableModal();
       await fetchOrders();
       if (orderDetails?.orderId === selectedOrder.id) {
         const refreshed = await ordersRepository.getOrderDetails(selectedOrder.id);
         setOrderDetails(refreshed);
       }
     } catch (error) {
-      alert('Failed to mark order as unable to fulfill');
+      alert(error instanceof Error ? error.message : 'Failed to mark order as unable to fulfill');
     }
   };
 
@@ -199,14 +203,14 @@ export const OrdersPage: React.FC = () => {
       <AnimatePresence>
         {isUnableModalOpen && selectedOrder && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsUnableModalOpen(false)} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeUnableModal} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-lg bg-white rounded-[32px] shadow-xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-light text-gray-900">Unable to Fulfill</h2>
                   <p className="text-sm text-gray-400">Provide a reason for order {selectedOrder.orderNumber}.</p>
                 </div>
-                <button onClick={() => setIsUnableModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+                <button onClick={closeUnableModal} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
               </div>
 
               <form onSubmit={handleUnableToFulfill} className="space-y-4">
@@ -214,7 +218,7 @@ export const OrdersPage: React.FC = () => {
                   <textarea name="reason" required rows={4} className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all resize-none" placeholder="Explain why this order cannot be fulfilled" />
                 </FormField>
                 <div className="flex justify-end gap-3">
-                  <button type="button" onClick={() => setIsUnableModalOpen(false)} className="px-5 py-3 rounded-xl bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">Cancel</button>
+                  <button type="button" onClick={closeUnableModal} className="px-5 py-3 rounded-xl bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">Cancel</button>
                   <Button type="submit" variant="danger" className="!w-auto px-6">Confirm</Button>
                 </div>
               </form>

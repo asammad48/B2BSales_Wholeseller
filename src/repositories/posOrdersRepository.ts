@@ -55,6 +55,7 @@ export interface CreatePosOrderBody extends CreatePosOrderRequestDto {
   items: Array<{
     productId: string;
     quantity: number;
+    barcodes?: string[];
   }>;
 }
 

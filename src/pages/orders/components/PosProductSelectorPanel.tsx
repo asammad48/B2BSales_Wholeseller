@@ -61,7 +61,8 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
         ) : products.length ? (
           products.map((product) => {
             const selectedQty = quantities[product.productId] || 0;
-            const isSoldOut = product.quantityInHand <= 0;
+            const maxQuantity = product.barcodes.length > 0 ? product.barcodes.length : product.quantityInHand;
+            const isSoldOut = maxQuantity <= 0;
 
             return (
               <div key={product.productId} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-colors hover:border-gray-200">
@@ -80,7 +81,7 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
                       <span className="rounded-full bg-gray-100 px-2.5 py-1 font-medium text-gray-600">{formatMoney(product.sellingPrice, product.currencyCode)}</span>
-                      <span>In hand: <strong className="text-gray-800">{product.quantityInHand}</strong></span>
+                      <span>In hand: <strong className="text-gray-800">{maxQuantity}</strong></span>
                       {product.lowStockThreshold > 0 ? <span>Low stock at: <strong className="text-gray-800">{product.lowStockThreshold}</strong></span> : null}
                       {product.barcodes.length ? <span>Serialized units: <strong className="text-gray-800">{product.barcodes.length}</strong></span> : null}
                     </div>
@@ -115,7 +116,7 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
                     <button
                       type="button"
                       onClick={() => onIncrement(product)}
-                      disabled={disabled || isSoldOut || selectedQty >= product.quantityInHand}
+                      disabled={disabled || isSoldOut || selectedQty >= maxQuantity}
                       className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Plus size={15} />
