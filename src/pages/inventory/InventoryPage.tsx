@@ -519,6 +519,18 @@ export const InventoryPage: React.FC = () => {
       return;
     }
 
+    if (quantityChange < 0) {
+      const requestedRemovalCount = Math.abs(quantityChange);
+      const availableRemovalCount = isSelectedItemSerialized
+        ? selectedItem.barcodes.length
+        : selectedItem.availableQuantity;
+
+      if (requestedRemovalCount > availableRemovalCount) {
+        alert(`Cannot remove ${requestedRemovalCount} product${requestedRemovalCount === 1 ? '' : 's'}. Only ${availableRemovalCount} available in stock.`);
+        return;
+      }
+    }
+
     if (isSelectedItemSerialized && quantityChange > 0) {
       const hasInvalidUnit = adjustSerializedUnits.some((unit) => !unit.barcode.trim() || !unit.imei1.trim() || !unit.imei2.trim());
       if (hasInvalidUnit || adjustSerializedUnits.length !== quantityChange) {

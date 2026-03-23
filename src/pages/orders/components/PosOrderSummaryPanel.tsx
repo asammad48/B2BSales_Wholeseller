@@ -1,8 +1,8 @@
 import React from 'react';
-import { CheckCircle2, Download, Minus, PackageCheck, Plus, Printer, ReceiptText, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Download, Minus, PackageCheck, Plus, Printer, ReceiptText, RotateCcw, X } from 'lucide-react';
 import { Button, FormField, Input, SearchableSelect, SearchableSelectOption } from '../../../components/common/Form';
 import { ClientLookupItem } from '../../../repositories/clientsRepository';
-import { PosProduct } from '../../../repositories/posOrdersRepository';
+import { PosProduct, PosSerializedUnit } from '../../../repositories/posOrdersRepository';
 import { ShopLookupItem } from '../../../repositories/shopsRepository';
 import { PosCartItem, PosOrderReceipt } from '../PosCreateOrderPage';
 
@@ -20,6 +20,7 @@ interface PosOrderSummaryPanelProps {
   onNotesChange: (value: string) => void;
   onIncrementItem: (product: PosProduct) => void;
   onDecrementItem: (product: PosProduct) => void;
+  onSerializedUnitsChange: (product: PosProduct, units: PosSerializedUnit[]) => void;
   onSubmit: () => void;
   submitting: boolean;
   receipt: PosOrderReceipt | null;
@@ -42,6 +43,13 @@ const mapClientOptions = (items: ClientLookupItem[]): SearchableSelectOption[] =
     label: item.name,
   }));
 
+const unitKey = (unit: PosSerializedUnit) => [unit.barcode, unit.imei1, unit.imei2].join('|');
+
+const buildSerializedUnitLabel = (unit: PosSerializedUnit) =>
+  [unit.imei1 ? `IMEI 1: ${unit.imei1}` : undefined, unit.imei2 ? `IMEI 2: ${unit.imei2}` : undefined, unit.barcode ? `Barcode: ${unit.barcode}` : undefined]
+    .filter(Boolean)
+    .join(' • ');
+
 export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
   cartItems,
   subtotal,
@@ -56,6 +64,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
   onNotesChange,
   onIncrementItem,
   onDecrementItem,
+  onSerializedUnitsChange,
   onSubmit,
   submitting,
   receipt,
@@ -157,13 +166,71 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => onIncrementItem(item.product)}
-                        disabled={submitting || Boolean(receipt) || item.quantity >= item.product.quantityInHand}
+                        disabled={submitting || Boolean(receipt) || item.quantity >= (item.product.barcodes.length ? Math.min(item.product.quantityInHand, item.product.barcodes.length) : item.product.quantityInHand)}
                         className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
                       >
                         <Plus size={14} />
                       </button>
                     </div>
                   </div>
+                  {item.product.barcodes.length ? (
+                    <div className="mt-4 rounded-2xl border border-gray-200 bg-white/70 p-3">
+                      <FormField label={`Serialized units (${item.selectedSerializedUnits.length}/${item.quantity})`}>
+                        <SearchableSelect
+                          name={`serialized-unit-${item.product.productId}`}
+                          value=""
+                          onChange={(value) => {
+                            const matchedUnit = item.product.barcodes.find((unit) => unitKey(unit) === value);
+                            if (!matchedUnit) {
+                              return;
+                            }
+
+                            const existingKeys = new Set(item.selectedSerializedUnits.map(unitKey));
+                            if (existingKeys.has(value) || item.selectedSerializedUnits.length >= item.quantity) {
+                              return;
+                            }
+
+                            onSerializedUnitsChange(item.product, [...item.selectedSerializedUnits, matchedUnit]);
+                          }}
+                          placeholder="Select IMEI / barcode"
+                          searchPlaceholder="Search IMEI 1, IMEI 2, or barcode"
+                          disabled={submitting || Boolean(receipt) || item.selectedSerializedUnits.length >= item.quantity}
+                          options={item.product.barcodes
+                            .filter((unit) => !item.selectedSerializedUnits.some((selected) => unitKey(selected) === unitKey(unit)))
+                            .map((unit) => ({
+                              value: unitKey(unit),
+                              label: buildSerializedUnitLabel(unit),
+                              searchText: [unit.imei1, unit.imei2, unit.barcode].filter(Boolean).join(' '),
+                            }))}
+                          noResultsText={item.selectedSerializedUnits.length >= item.quantity ? 'Selected units match quantity' : 'No more serialized units available'}
+                        />
+                      </FormField>
+                      <p className="mt-2 text-[11px] text-gray-500">
+                        Select exactly {item.quantity} serialized unit{item.quantity === 1 ? '' : 's'} for this item.
+                      </p>
+
+                      <div className="mt-3 space-y-2">
+                        {item.selectedSerializedUnits.length ? (
+                          item.selectedSerializedUnits.map((unit, index) => (
+                            <div key={`${unitKey(unit)}-${index}`} className="flex items-start justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2">
+                              <p className="text-xs text-gray-700">{buildSerializedUnitLabel(unit)}</p>
+                              <button
+                                type="button"
+                                onClick={() => onSerializedUnitsChange(item.product, item.selectedSerializedUnits.filter((_, currentIndex) => currentIndex !== index))}
+                                disabled={submitting || Boolean(receipt)}
+                                className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-white hover:text-gray-700 disabled:opacity-40"
+                                title="Remove serialized unit"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-gray-500">No serialized units selected yet.</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               ))
             ) : (

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { PageHeader } from '../../components/common/PageHeader';
 import { clientsRepository, ClientLookupItem } from '../../repositories/clientsRepository';
 import { ordersRepository } from '../../repositories/ordersRepository';
-import { posOrdersRepository, PosProduct } from '../../repositories/posOrdersRepository';
+import { posOrdersRepository, PosProduct, PosSerializedUnit } from '../../repositories/posOrdersRepository';
 import { shopsRepository, ShopLookupItem } from '../../repositories/shopsRepository';
 import { PosOrderSummaryPanel } from './components/PosOrderSummaryPanel';
 import { PosProductSelectorPanel } from './components/PosProductSelectorPanel';
@@ -13,6 +13,7 @@ export interface PosCartItem {
   product: PosProduct;
   quantity: number;
   lineTotal: number;
+  selectedSerializedUnits: PosSerializedUnit[];
 }
 
 export interface PosOrderReceipt {
@@ -36,6 +37,13 @@ const buildCartItems = (cart: Record<string, PosCartItem>): PosCartItem[] =>
     ...item,
     lineTotal: item.product.sellingPrice * item.quantity,
   }));
+
+const isSerializedProduct = (product: PosProduct) => product.barcodes.length > 0;
+
+const getProductMaxQuantity = (product: PosProduct) =>
+  isSerializedProduct(product)
+    ? Math.min(product.quantityInHand, product.barcodes.length)
+    : product.quantityInHand;
 
 export const PosCreateOrderPage: React.FC = () => {
   const [products, setProducts] = useState<PosProduct[]>([]);
@@ -114,12 +122,16 @@ export const PosCreateOrderPage: React.FC = () => {
     setCart((current) => {
       const existing = current[product.productId];
       const currentQuantity = existing?.quantity || 0;
-      const nextQuantity = Math.max(0, Math.min(product.quantityInHand, currentQuantity + delta));
+      const nextQuantity = Math.max(0, Math.min(getProductMaxQuantity(product), currentQuantity + delta));
 
       if (nextQuantity <= 0) {
         const { [product.productId]: _removed, ...rest } = current;
         return rest;
       }
+
+      const selectedSerializedUnits = isSerializedProduct(product)
+        ? (existing?.selectedSerializedUnits || []).slice(0, nextQuantity)
+        : [];
 
       return {
         ...current,
@@ -127,6 +139,7 @@ export const PosCreateOrderPage: React.FC = () => {
           product,
           quantity: nextQuantity,
           lineTotal: product.sellingPrice * nextQuantity,
+          selectedSerializedUnits,
         },
       };
     });
@@ -134,6 +147,23 @@ export const PosCreateOrderPage: React.FC = () => {
 
   const incrementItem = (product: PosProduct) => changeQuantity(product, 1);
   const decrementItem = (product: PosProduct) => changeQuantity(product, -1);
+
+  const handleSerializedUnitsChange = (product: PosProduct, units: PosSerializedUnit[]) => {
+    setCart((current) => {
+      const existing = current[product.productId];
+      if (!existing) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [product.productId]: {
+          ...existing,
+          selectedSerializedUnits: units.slice(0, existing.quantity),
+        },
+      };
+    });
+  };
 
   const handleShopChange = (value: string) => {
     setShopId(value);
@@ -162,6 +192,15 @@ export const PosCreateOrderPage: React.FC = () => {
       return;
     }
 
+    const invalidSerializedItem = cartItems.find((item) =>
+      isSerializedProduct(item.product) && item.selectedSerializedUnits.length !== item.quantity
+    );
+
+    if (invalidSerializedItem) {
+      setSubmitError(`Select ${invalidSerializedItem.quantity} IMEI/barcode unit${invalidSerializedItem.quantity === 1 ? '' : 's'} for ${invalidSerializedItem.product.productName}.`);
+      return;
+    }
+
     setSubmitting(true);
     setSubmitError('');
 
@@ -173,6 +212,16 @@ export const PosCreateOrderPage: React.FC = () => {
         items: cartItems.map((item) => ({
           productId: item.product.productId,
           quantity: item.quantity,
+          barcodes: item.selectedSerializedUnits,
+          serializedUnits: item.selectedSerializedUnits.map((unit) => ({
+            barcode: unit.barcode || undefined,
+            unitBarcode: unit.barcode || undefined,
+            imei1: unit.imei1 || undefined,
+            imei2: unit.imei2 || undefined,
+          })),
+          serializedUnitBarcodes: item.selectedSerializedUnits
+            .map((unit) => unit.barcode)
+            .filter((value): value is string => Boolean(value)),
         })),
       });
 
@@ -271,6 +320,7 @@ export const PosCreateOrderPage: React.FC = () => {
             onNotesChange={setNotes}
             onIncrementItem={incrementItem}
             onDecrementItem={decrementItem}
+            onSerializedUnitsChange={handleSerializedUnitsChange}
             onSubmit={handleSubmit}
             submitting={submitting || lookupsLoading}
             receipt={receipt}
