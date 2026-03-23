@@ -4580,6 +4580,7 @@ export interface CreateContactInquiryResponseDtoApiResponse {
 export interface CreateOrderItemRequestDto {
     productId?: string;
     quantity?: number;
+    barcodes?: string[];
 }
 
 export interface CreateOrderRequestDto {
@@ -4594,6 +4595,7 @@ export interface CreateOrderRequestDto {
 export interface CreatePosOrderItemDto {
     productId?: string;
     quantity?: number;
+    barcodes?: string[];
 }
 
 export interface CreatePosOrderRequestDto {
