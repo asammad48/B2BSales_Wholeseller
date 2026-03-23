@@ -136,6 +136,9 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
                     <div>
                       <p className="text-sm font-medium text-gray-900">{item.product.productName}</p>
                       <p className="mt-1 text-xs text-gray-500">{item.product.sku || item.product.barcode || 'POS item'}</p>
+                      {item.product.barcodes.length ? (
+                        <p className="mt-1 text-[11px] text-gray-400">Serialized stock available: {item.product.barcodes.length}</p>
+                      ) : null}
                     </div>
                     <p className="text-sm font-semibold text-gray-900">{formatMoney(item.lineTotal, item.product.currencyCode)}</p>
                   </div>
