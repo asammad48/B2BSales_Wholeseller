@@ -43,7 +43,7 @@ const mapSerializedOptions = (product?: TransferProductLookup | null): Searchabl
   }));
 
 const isSerializedProduct = (product?: TransferProductLookup | null) =>
-  (product?.trackingType || '').toLowerCase() === 'serialized' || Boolean(product?.serializedBarcodes.length);
+  (product?.trackingType || '').toLowerCase() === 'serialized';
 
 export const TransfersPage: React.FC = () => {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
@@ -364,7 +364,7 @@ export const TransfersPage: React.FC = () => {
 
       <AnimatePresence>
         {isCreateModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 overflow-y-auto p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -376,7 +376,7 @@ export const TransfersPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[32px] shadow-xl p-8"
+              className="relative my-8 mx-auto w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto bg-white rounded-[32px] shadow-xl p-8"
             >
               <div className="flex items-center justify-between mb-6 gap-4">
                 <div>
