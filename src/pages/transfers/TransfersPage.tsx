@@ -61,6 +61,9 @@ export const TransfersPage: React.FC = () => {
   const [quantity, setQuantity] = useState('1');
   const [notes, setNotes] = useState('');
   const [selectedSerializedBarcodes, setSelectedSerializedBarcodes] = useState<string[]>([]);
+  const [selectedTransferAction, setSelectedTransferAction] = useState<'dispatch' | 'receive' | null>(null);
+  const [selectedTransfer, setSelectedTransfer] = useState<Transfer | null>(null);
+  const [isProcessingTransferAction, setIsProcessingTransferAction] = useState(false);
 
   const shopOptions = useMemo(() => mapShopOptions(shops), [shops]);
   const sourceProducts = useMemo(
@@ -119,21 +122,41 @@ export const TransfersPage: React.FC = () => {
     }
   }, [selectedProductIsSerialized, selectedSerializedBarcodes]);
 
-  const handleDispatch = async (id: string) => {
-    try {
-      await transfersRepository.dispatchTransfer(id);
-      fetchTransfers();
-    } catch (error) {
-      alert('Failed to dispatch transfer');
-    }
+  const openTransferActionModal = (transfer: Transfer, action: 'dispatch' | 'receive') => {
+    setSelectedTransfer(transfer);
+    setSelectedTransferAction(action);
   };
 
-  const handleReceive = async (id: string) => {
+  const closeTransferActionModal = () => {
+    if (isProcessingTransferAction) {
+      return;
+    }
+
+    setSelectedTransfer(null);
+    setSelectedTransferAction(null);
+  };
+
+  const handleTransferAction = async () => {
+    if (!selectedTransfer || !selectedTransferAction) {
+      return;
+    }
+
+    setIsProcessingTransferAction(true);
+
     try {
-      await transfersRepository.receiveTransfer(id);
+      if (selectedTransferAction === 'dispatch') {
+        await transfersRepository.dispatchTransfer(selectedTransfer);
+      } else {
+        await transfersRepository.receiveTransfer(selectedTransfer);
+      }
+
+      setSelectedTransfer(null);
+      setSelectedTransferAction(null);
       fetchTransfers();
     } catch (error) {
-      alert('Failed to receive transfer');
+      alert(selectedTransferAction === 'dispatch' ? 'Failed to dispatch transfer' : 'Failed to receive transfer');
+    } finally {
+      setIsProcessingTransferAction(false);
     }
   };
 
@@ -278,7 +301,7 @@ export const TransfersPage: React.FC = () => {
         <div className="flex items-center gap-2">
           {t.status === 'Pending' && (
             <button
-              onClick={() => handleDispatch(t.id)}
+              onClick={() => openTransferActionModal(t, 'dispatch')}
               className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors"
               title="Dispatch"
             >
@@ -287,7 +310,7 @@ export const TransfersPage: React.FC = () => {
           )}
           {t.status === 'Dispatched' && (
             <button
-              onClick={() => handleReceive(t.id)}
+              onClick={() => openTransferActionModal(t, 'receive')}
               className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
               title="Receive"
             >
@@ -501,6 +524,72 @@ export const TransfersPage: React.FC = () => {
                   </Button>
                 </form>
               )}
+            </motion.div>
+          </div>
+        )}
+
+        {selectedTransfer && selectedTransferAction && (
+          <div className="fixed inset-0 z-50 overflow-y-auto p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeTransferActionModal}
+              className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative my-8 mx-auto w-full max-w-xl overflow-hidden bg-white rounded-[32px] shadow-xl p-8"
+            >
+              <div className="flex items-center justify-between mb-6 gap-4">
+                <div>
+                  <h2 className="text-2xl font-light">{selectedTransferAction === 'dispatch' ? 'Dispatch Transfer' : 'Receive Transfer'}</h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Confirm transfer request payload before sending to API.
+                  </p>
+                </div>
+                <button onClick={closeTransferActionModal} className="text-gray-400 hover:text-gray-600" disabled={isProcessingTransferAction}>
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-sm text-gray-600">
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 space-y-2">
+                  <p><span className="font-medium text-gray-900">Transfer ID:</span> {selectedTransfer.id}</p>
+                  <p><span className="font-medium text-gray-900">Route:</span> {selectedTransfer.fromShopName} → {selectedTransfer.toShopName}</p>
+                  <p><span className="font-medium text-gray-900">Items:</span> {selectedTransfer.items.length}</p>
+                </div>
+
+                <div className="space-y-2">
+                  {selectedTransfer.items.map((item) => (
+                    <div key={`${item.productId}-${item.productName}`} className="rounded-2xl border border-gray-100 p-3">
+                      <p className="font-medium text-gray-900">{item.productName || item.productId}</p>
+                      <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
+                      {item.barcodes?.length ? (
+                        <p className="text-xs text-gray-500">Barcodes: {item.barcodes.join(', ')}</p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={closeTransferActionModal}
+                  className="px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  disabled={isProcessingTransferAction}
+                >
+                  Cancel
+                </button>
+                <Button type="button" onClick={handleTransferAction} disabled={isProcessingTransferAction} className="w-auto px-6" style={{ backgroundColor: 'var(--primary-color)' }}>
+                  {isProcessingTransferAction
+                    ? (selectedTransferAction === 'dispatch' ? 'Dispatching...' : 'Receiving...')
+                    : (selectedTransferAction === 'dispatch' ? 'Dispatch Transfer' : 'Receive Transfer')}
+                </Button>
+              </div>
             </motion.div>
           </div>
         )}

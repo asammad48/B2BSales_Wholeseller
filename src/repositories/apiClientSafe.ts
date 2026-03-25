@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ApiClient } from '../api/generated/apiClient';
+import { buildRepositoryApiClient } from '../api/client';
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -19,4 +20,4 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const safeApiClient = new ApiClient(baseUrl, axiosInstance);
+export const safeApiClient = buildRepositoryApiClient(new ApiClient(baseUrl, axiosInstance));
