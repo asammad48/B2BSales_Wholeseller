@@ -110,15 +110,26 @@ export interface IApiClient {
      * @param body (optional) 
      * @return OK
      */
-    transfers(body?: CreateStockTransferRequestDto | undefined): Promise<GuidApiResponse>;
+    transfersPOST(body?: CreateStockTransferRequestDto | undefined): Promise<GuidApiResponse>;
     /**
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
      * @return OK
      */
-    dispatch(id: string): Promise<StringApiResponse>;
+    transfersGET(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<StockTransferListItemResponseDtoPageResponseApiResponse>;
     /**
+     * @param body (optional) 
      * @return OK
      */
-    receive(id: string): Promise<StringApiResponse>;
+    dispatch(id: string, body?: ProcessStockTransferRequestDto | undefined): Promise<StringApiResponse>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    receive(id: string, body?: ProcessStockTransferRequestDto | undefined): Promise<StringApiResponse>;
     /**
      * @return OK
      */
@@ -1398,7 +1409,7 @@ export class ApiClient implements IApiClient {
      * @param body (optional) 
      * @return OK
      */
-    transfers(body?: CreateStockTransferRequestDto | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
+    transfersPOST(body?: CreateStockTransferRequestDto | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
         let url_ = this.baseUrl + "/api/Inventory/transfers";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1422,11 +1433,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processTransfers(_response);
+            return this.processTransfersPOST(_response);
         });
     }
 
-    protected processTransfers(response: AxiosResponse): Promise<GuidApiResponse> {
+    protected processTransfersPOST(response: AxiosResponse): Promise<GuidApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -1451,19 +1462,100 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param search (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
      * @return OK
      */
-    dispatch(id: string, cancelToken?: CancelToken): Promise<StringApiResponse> {
+    transfersGET(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<StockTransferListItemResponseDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/Inventory/transfers?";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processTransfersGET(_response);
+        });
+    }
+
+    protected processTransfersGET(response: AxiosResponse): Promise<StockTransferListItemResponseDtoPageResponseApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<StockTransferListItemResponseDtoPageResponseApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<StockTransferListItemResponseDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    dispatch(id: string, body?: ProcessStockTransferRequestDto | undefined, cancelToken?: CancelToken): Promise<StringApiResponse> {
         let url_ = this.baseUrl + "/api/Inventory/transfers/{id}/dispatch";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_: AxiosRequestConfig = {
+            data: content_,
             method: "POST",
             url: url_,
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "text/plain"
             },
             cancelToken
@@ -1505,19 +1597,24 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param body (optional) 
      * @return OK
      */
-    receive(id: string, cancelToken?: CancelToken): Promise<StringApiResponse> {
+    receive(id: string, body?: ProcessStockTransferRequestDto | undefined, cancelToken?: CancelToken): Promise<StringApiResponse> {
         let url_ = this.baseUrl + "/api/Inventory/transfers/{id}/receive";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_: AxiosRequestConfig = {
+            data: content_,
             method: "POST",
             url: url_,
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "text/plain"
             },
             cancelToken
@@ -5024,6 +5121,10 @@ export interface PosProductListItemDtoPageResponseApiResponse {
 
 export type PricingMode = "Direct" | "PercentageBased";
 
+export interface ProcessStockTransferRequestDto {
+    items?: CreateStockTransferItemRequestDto[];
+}
+
 export interface ProductBarcodeDto {
     barcode?: string;
     imei1?: string;
@@ -5340,6 +5441,41 @@ export interface StockInRequestDto {
     updateProductDefaultSellingPrice?: boolean;
     serializedUnits?: SerializedStockInUnitRequestDto[];
 }
+
+export interface StockTransferItemResponseDto {
+    productId?: string;
+    productName?: string;
+    quantity?: number;
+    barcodes?: string[];
+}
+
+export interface StockTransferListItemResponseDto {
+    id?: string;
+    sourceShopId?: string;
+    sourceShopName?: string;
+    destinationShopId?: string;
+    destinationShopName?: string;
+    status?: StockTransferStatus;
+    notes?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+    items?: StockTransferItemResponseDto[];
+}
+
+export interface StockTransferListItemResponseDtoPageResponse {
+    items?: StockTransferListItemResponseDto[];
+    totalCount?: number;
+    pageNumber?: number;
+    pageSize?: number;
+}
+
+export interface StockTransferListItemResponseDtoPageResponseApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: StockTransferListItemResponseDtoPageResponse;
+}
+
+export type StockTransferStatus = "Draft" | "Dispatched" | "Received" | "Cancelled";
 
 export interface StringApiResponse {
     success?: boolean;
