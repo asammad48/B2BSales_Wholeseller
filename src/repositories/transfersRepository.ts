@@ -123,11 +123,11 @@ const mapTransferProduct = (item: InventoryItem): TransferProductLookup => ({
   serializedBarcodes: item.barcodes.map((barcode) => barcode.barcode).filter(Boolean),
 });
 
-const toProcessTransferBody = (transfer: Transfer): ProcessStockTransferRequestDto => ({
-  items: transfer.items.map((item) => ({
+const toProcessTransferBody = (items: CreateTransferItemRequest[]): ProcessStockTransferRequestDto => ({
+  items: items.map((item) => ({
     productId: item.productId,
     quantity: item.quantity,
-    barcodes: item.barcodes,
+    barcodes: item.barcodes || [],
   })),
 });
 
@@ -174,24 +174,24 @@ export const transfersRepository = {
     return { id: response.data, fromShopId: body.sourceShopId, toShopId: body.destinationShopId } as Transfer;
   },
 
-  async dispatchTransfer(transfer: Transfer): Promise<Transfer> {
-    const response = await apiClient.dispatchTransfer(transfer.id, toProcessTransferBody(transfer));
+  async dispatchTransfer(transferId: string, items: CreateTransferItemRequest[]): Promise<Transfer> {
+    const response = await apiClient.dispatchTransfer(transferId, toProcessTransferBody(items));
 
     if (!response.success) {
       throw new Error(response.message || 'Failed to dispatch transfer');
     }
 
-    return { id: transfer.id } as Transfer;
+    return { id: transferId } as Transfer;
   },
 
-  async receiveTransfer(transfer: Transfer): Promise<Transfer> {
-    const response = await apiClient.receiveTransfer(transfer.id, toProcessTransferBody(transfer));
+  async receiveTransfer(transferId: string, items: CreateTransferItemRequest[]): Promise<Transfer> {
+    const response = await apiClient.receiveTransfer(transferId, toProcessTransferBody(items));
 
     if (!response.success) {
       throw new Error(response.message || 'Failed to receive transfer');
     }
 
-    return { id: transfer.id } as Transfer;
+    return { id: transferId } as Transfer;
   },
 
   async transfers(body: CreateTransferRequest): Promise<Transfer> {
@@ -199,10 +199,24 @@ export const transfersRepository = {
   },
 
   async dispatch(transfer: Transfer): Promise<Transfer> {
-    return this.dispatchTransfer(transfer);
+    return this.dispatchTransfer(
+      transfer.id,
+      transfer.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        barcodes: item.barcodes || [],
+      }))
+    );
   },
 
   async receive(transfer: Transfer): Promise<Transfer> {
-    return this.receiveTransfer(transfer);
+    return this.receiveTransfer(
+      transfer.id,
+      transfer.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        barcodes: item.barcodes || [],
+      }))
+    );
   },
 };
