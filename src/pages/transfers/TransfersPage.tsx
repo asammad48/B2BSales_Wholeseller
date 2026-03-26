@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
-import { transfersRepository, Transfer, TransferProductLookup } from '../../repositories/transfersRepository';
+import { CreateTransferItemRequest, transfersRepository, Transfer, TransferProductLookup } from '../../repositories/transfersRepository';
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button, FormField, Input, MultiSearchableSelect, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
@@ -61,6 +61,10 @@ export const TransfersPage: React.FC = () => {
   const [quantity, setQuantity] = useState('1');
   const [notes, setNotes] = useState('');
   const [selectedSerializedBarcodes, setSelectedSerializedBarcodes] = useState<string[]>([]);
+  const [selectedTransferAction, setSelectedTransferAction] = useState<'dispatch' | 'receive' | null>(null);
+  const [selectedTransfer, setSelectedTransfer] = useState<Transfer | null>(null);
+  const [isProcessingTransferAction, setIsProcessingTransferAction] = useState(false);
+  const [transferActionItems, setTransferActionItems] = useState<Array<Transfer['items'][number]>>([]);
 
   const shopOptions = useMemo(() => mapShopOptions(shops), [shops]);
   const sourceProducts = useMemo(
@@ -119,21 +123,81 @@ export const TransfersPage: React.FC = () => {
     }
   }, [selectedProductIsSerialized, selectedSerializedBarcodes]);
 
-  const handleDispatch = async (id: string) => {
-    try {
-      await transfersRepository.dispatchTransfer(id);
-      fetchTransfers();
-    } catch (error) {
-      alert('Failed to dispatch transfer');
-    }
+  const openTransferActionModal = (transfer: Transfer, action: 'dispatch' | 'receive') => {
+    setSelectedTransfer(transfer);
+    setSelectedTransferAction(action);
+    setTransferActionItems(
+      transfer.items.map((item) => ({
+        ...item,
+        barcodes: item.barcodes || [],
+      }))
+    );
   };
 
-  const handleReceive = async (id: string) => {
+  const closeTransferActionModal = () => {
+    if (isProcessingTransferAction) {
+      return;
+    }
+
+    setSelectedTransfer(null);
+    setSelectedTransferAction(null);
+    setTransferActionItems([]);
+  };
+
+
+  const updateTransferActionItemQuantity = (index: number, nextQuantity: number) => {
+    setTransferActionItems((prevItems) =>
+      prevItems.map((item, itemIndex) =>
+        itemIndex === index
+          ? { ...item, quantity: Number.isFinite(nextQuantity) && nextQuantity > 0 ? nextQuantity : 1 }
+          : item
+      )
+    );
+  };
+
+  const updateTransferActionItemBarcodes = (index: number, barcodeInput: string) => {
+    const normalizedBarcodes = barcodeInput
+      .split(',')
+      .map((barcode) => barcode.trim())
+      .filter(Boolean);
+
+    setTransferActionItems((prevItems) =>
+      prevItems.map((item, itemIndex) =>
+        itemIndex === index
+          ? { ...item, barcodes: normalizedBarcodes }
+          : item
+      )
+    );
+  };
+
+  const handleTransferAction = async () => {
+    if (!selectedTransfer || !selectedTransferAction) {
+      return;
+    }
+
+    setIsProcessingTransferAction(true);
+
     try {
-      await transfersRepository.receiveTransfer(id);
+      const processItems: CreateTransferItemRequest[] = transferActionItems.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        barcodes: item.barcodes || [],
+      }));
+
+      if (selectedTransferAction === 'dispatch') {
+        await transfersRepository.dispatchTransfer(selectedTransfer.id, processItems);
+      } else {
+        await transfersRepository.receiveTransfer(selectedTransfer.id, processItems);
+      }
+
+      setSelectedTransfer(null);
+      setSelectedTransferAction(null);
+      setTransferActionItems([]);
       fetchTransfers();
     } catch (error) {
-      alert('Failed to receive transfer');
+      alert(selectedTransferAction === 'dispatch' ? 'Failed to dispatch transfer' : 'Failed to receive transfer');
+    } finally {
+      setIsProcessingTransferAction(false);
     }
   };
 
@@ -278,7 +342,7 @@ export const TransfersPage: React.FC = () => {
         <div className="flex items-center gap-2">
           {t.status === 'Pending' && (
             <button
-              onClick={() => handleDispatch(t.id)}
+              onClick={() => openTransferActionModal(t, 'dispatch')}
               className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors"
               title="Dispatch"
             >
@@ -287,7 +351,7 @@ export const TransfersPage: React.FC = () => {
           )}
           {t.status === 'Dispatched' && (
             <button
-              onClick={() => handleReceive(t.id)}
+              onClick={() => openTransferActionModal(t, 'receive')}
               className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
               title="Receive"
             >
@@ -501,6 +565,84 @@ export const TransfersPage: React.FC = () => {
                   </Button>
                 </form>
               )}
+            </motion.div>
+          </div>
+        )}
+
+        {selectedTransfer && selectedTransferAction && (
+          <div className="fixed inset-0 z-50 overflow-y-auto p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeTransferActionModal}
+              className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative my-8 mx-auto w-full max-w-xl overflow-hidden bg-white rounded-[32px] shadow-xl p-8"
+            >
+              <div className="flex items-center justify-between mb-6 gap-4">
+                <div>
+                  <h2 className="text-2xl font-light">{selectedTransferAction === 'dispatch' ? 'Dispatch Transfer' : 'Receive Transfer'}</h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Confirm transfer request payload before sending to API.
+                  </p>
+                </div>
+                <button onClick={closeTransferActionModal} className="text-gray-400 hover:text-gray-600" disabled={isProcessingTransferAction}>
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-sm text-gray-600">
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 space-y-2">
+                  <p><span className="font-medium text-gray-900">Transfer ID:</span> {selectedTransfer.id}</p>
+                  <p><span className="font-medium text-gray-900">Route:</span> {selectedTransfer.fromShopName} → {selectedTransfer.toShopName}</p>
+                  <p><span className="font-medium text-gray-900">Items:</span> {selectedTransfer.items.length}</p>
+                </div>
+
+                <div className="space-y-2">
+                  {transferActionItems.map((item, index) => (
+                    <div key={`${item.productId}-${item.productName}-${index}`} className="rounded-2xl border border-gray-100 p-3 space-y-2">
+                      <p className="font-medium text-gray-900">{item.productName || item.productId}</p>
+                      <FormField label="Quantity">
+                        <Input
+                          type="number"
+                          min="1"
+                          value={String(item.quantity)}
+                          onChange={(event) => updateTransferActionItemQuantity(index, Number(event.target.value))}
+                        />
+                      </FormField>
+                      <FormField label="Barcodes (comma separated)">
+                        <Input
+                          type="text"
+                          value={(item.barcodes || []).join(', ')}
+                          onChange={(event) => updateTransferActionItemBarcodes(index, event.target.value)}
+                          placeholder="barcode1, barcode2"
+                        />
+                      </FormField>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={closeTransferActionModal}
+                  className="px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  disabled={isProcessingTransferAction}
+                >
+                  Cancel
+                </button>
+                <Button type="button" onClick={handleTransferAction} disabled={isProcessingTransferAction} className="w-auto px-6" style={{ backgroundColor: 'var(--primary-color)' }}>
+                  {isProcessingTransferAction
+                    ? (selectedTransferAction === 'dispatch' ? 'Dispatching...' : 'Receiving...')
+                    : (selectedTransferAction === 'dispatch' ? 'Dispatch Transfer' : 'Receive Transfer')}
+                </Button>
+              </div>
             </motion.div>
           </div>
         )}

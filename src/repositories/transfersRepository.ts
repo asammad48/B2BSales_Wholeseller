@@ -1,6 +1,10 @@
 import {
   CreateStockTransferRequestDto,
   ProductLookupResponseDto,
+  ProcessStockTransferRequestDto,
+  StockTransferItemResponseDto,
+  StockTransferListItemResponseDto,
+  StockTransferStatus,
 } from '../api/generated/apiClient';
 import { safeApiClient as apiClient } from './apiClientSafe';
 import { InventoryItem, inventoryRepository } from './inventoryRepository';
@@ -12,6 +16,7 @@ export interface TransferItem {
   productId: string;
   productName: string;
   quantity: number;
+  barcodes?: string[];
 }
 
 export interface Transfer {
@@ -22,6 +27,7 @@ export interface Transfer {
   toShopName: string;
   status: TransferStatus;
   createdAt: string;
+  notes?: string;
   items: TransferItem[];
   productName?: string;
   quantity?: number;
@@ -59,6 +65,48 @@ export interface TransfersResponse {
   total: number;
 }
 
+const mapTransferStatus = (status?: StockTransferStatus): TransferStatus => {
+  switch (status) {
+    case 'Draft':
+      return 'Pending';
+    case 'Dispatched':
+      return 'Dispatched';
+    case 'Received':
+      return 'Received';
+    case 'Cancelled':
+      return 'Cancelled';
+    default:
+      return 'Pending';
+  }
+};
+
+const mapTransferItems = (items?: StockTransferItemResponseDto[]): TransferItem[] =>
+  (items || []).map((item) => ({
+    productId: item.productId || '',
+    productName: item.productName || '',
+    quantity: item.quantity || 0,
+    barcodes: item.barcodes || [],
+  }));
+
+const mapTransfer = (item: StockTransferListItemResponseDto): Transfer => {
+  const items = mapTransferItems(item.items);
+  const firstItem = items[0];
+
+  return {
+    id: item.id || '',
+    fromShopId: item.sourceShopId || '',
+    fromShopName: item.sourceShopName || '',
+    toShopId: item.destinationShopId || '',
+    toShopName: item.destinationShopName || '',
+    status: mapTransferStatus(item.status),
+    createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : new Date().toISOString(),
+    notes: item.notes || '',
+    items,
+    productName: firstItem?.productName || '-',
+    quantity: firstItem?.quantity || 0,
+  };
+};
+
 const mapTransferProduct = (item: InventoryItem): TransferProductLookup => ({
   id: item.productId,
   name: item.productName,
@@ -75,11 +123,26 @@ const mapTransferProduct = (item: InventoryItem): TransferProductLookup => ({
   serializedBarcodes: item.barcodes.map((barcode) => barcode.barcode).filter(Boolean),
 });
 
+const toProcessTransferBody = (items: CreateTransferItemRequest[]): ProcessStockTransferRequestDto => ({
+  items: items.map((item) => ({
+    productId: item.productId,
+    quantity: item.quantity,
+    barcodes: item.barcodes || [],
+  })),
+});
+
 export const transfersRepository = {
-  async getTransfers(_page: number = 1, _limit: number = 10, _search: string = ''): Promise<TransfersResponse> {
+  async getTransfers(page: number = 1, limit: number = 10, search: string = ''): Promise<TransfersResponse> {
+    const normalizedSearch = search.trim() || undefined;
+    const response = await apiClient.getStockTransfer(page, limit, normalizedSearch);
+
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to fetch transfers');
+    }
+
     return {
-      data: [],
-      total: 0,
+      data: (response.data.items || []).map(mapTransfer),
+      total: response.data.totalCount || 0,
     };
   },
 
@@ -111,35 +174,49 @@ export const transfersRepository = {
     return { id: response.data, fromShopId: body.sourceShopId, toShopId: body.destinationShopId } as Transfer;
   },
 
-  async dispatchTransfer(id: string): Promise<Transfer> {
-    const response = await apiClient.dispatch(id);
+  async dispatchTransfer(transferId: string, items: CreateTransferItemRequest[]): Promise<Transfer> {
+    const response = await apiClient.dispatchTransfer(transferId, toProcessTransferBody(items));
 
     if (!response.success) {
       throw new Error(response.message || 'Failed to dispatch transfer');
     }
 
-    return { id } as Transfer;
+    return { id: transferId } as Transfer;
   },
 
-  async receiveTransfer(id: string): Promise<Transfer> {
-    const response = await apiClient.receive(id);
+  async receiveTransfer(transferId: string, items: CreateTransferItemRequest[]): Promise<Transfer> {
+    const response = await apiClient.receiveTransfer(transferId, toProcessTransferBody(items));
 
     if (!response.success) {
       throw new Error(response.message || 'Failed to receive transfer');
     }
 
-    return { id } as Transfer;
+    return { id: transferId } as Transfer;
   },
 
   async transfers(body: CreateTransferRequest): Promise<Transfer> {
     return this.createTransfer(body);
   },
 
-  async dispatch(id: string): Promise<Transfer> {
-    return this.dispatchTransfer(id);
+  async dispatch(transfer: Transfer): Promise<Transfer> {
+    return this.dispatchTransfer(
+      transfer.id,
+      transfer.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        barcodes: item.barcodes || [],
+      }))
+    );
   },
 
-  async receive(id: string): Promise<Transfer> {
-    return this.receiveTransfer(id);
+  async receive(transfer: Transfer): Promise<Transfer> {
+    return this.receiveTransfer(
+      transfer.id,
+      transfer.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        barcodes: item.barcodes || [],
+      }))
+    );
   },
 };
