@@ -45,7 +45,7 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    ordersGET(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ClientOrderListItemDtoPageResponseApiResponse>;
+    clientOrders(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ClientOrderListItemDtoPageResponseApiResponse>;
     /**
      * @return OK
      */
@@ -155,16 +155,11 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    ordersGET(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<OrderListItemResponseDtoPageResponseApiResponse>;
-    /**
-     * @param body (optional) 
-     * @return OK
-     */
-    ordersPOST(body?: CreateOrderRequestDto | undefined): Promise<GuidApiResponse>;
+    adminOrders(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<OrderListItemResponseDtoPageResponseApiResponse>;
     /**
      * @return OK
      */
-    ordersGET2(id: string): Promise<OrderDetailsDtoApiResponse>;
+    getOrderById(id: string): Promise<OrderDetailsDtoApiResponse>;
     /**
      * @param body (optional) 
      * @return OK
@@ -197,7 +192,7 @@ export interface IApiClient {
      * @param body (optional) 
      * @return OK
      */
-    ordersPOST(body?: CreatePosOrderRequestDto | undefined): Promise<CreatePosOrderResponseDtoApiResponse>;
+    orders(body?: CreatePosOrderRequestDto | undefined): Promise<CreatePosOrderResponseDtoApiResponse>;
     /**
      * @return OK
      */
@@ -294,22 +289,37 @@ export interface IApiClient {
      * @param brandId (optional) 
      * @param modelId (optional) 
      * @param partTypeId (optional) 
+     * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
      * @param sortBy (optional) 
      * @param sortDirection (optional) 
      * @return OK
      */
-    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
+    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
     /**
+     * @param search (optional) 
+     * @param categoryId (optional) 
+     * @param brandId (optional) 
+     * @param modelId (optional) 
+     * @param partTypeId (optional) 
+     * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
-     * @param search (optional) 
      * @param sortBy (optional) 
      * @param sortDirection (optional) 
      * @return OK
      */
-    newArrivals(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse>;
+    newArrivals(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse>;
+    /**
+     * @param search (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    featured(shopId: string, search?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse>;
     /**
      * @param body (optional) 
      * @return OK
@@ -715,8 +725,8 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    ordersGET(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
-        let url_ = this.baseUrl + "/api/client/clients/{clientId}/orders?";
+    clientOrders(clientId: string, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/client/clients/{clientId}/client-orders?";
         if (clientId === undefined || clientId === null)
             throw new Error("The parameter 'clientId' must be defined.");
         url_ = url_.replace("{clientId}", encodeURIComponent("" + clientId));
@@ -758,11 +768,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processOrdersGET(_response);
+            return this.processClientOrders(_response);
         });
     }
 
-    protected processOrdersGET(response: AxiosResponse): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
+    protected processClientOrders(response: AxiosResponse): Promise<ClientOrderListItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -1844,8 +1854,8 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    ordersGET(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<OrderListItemResponseDtoPageResponseApiResponse> {
-        let url_ = this.baseUrl + "/api/Orders?";
+    adminOrders(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<OrderListItemResponseDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/Orders/admin-orders?";
         if (pageNumber === null)
             throw new Error("The parameter 'pageNumber' cannot be null.");
         else if (pageNumber !== undefined)
@@ -1884,11 +1894,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processOrdersGET(_response);
+            return this.processAdminOrders(_response);
         });
     }
 
-    protected processOrdersGET(response: AxiosResponse): Promise<OrderListItemResponseDtoPageResponseApiResponse> {
+    protected processAdminOrders(response: AxiosResponse): Promise<OrderListItemResponseDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -1913,66 +1923,10 @@ export class ApiClient implements IApiClient {
     }
 
     /**
-     * @param body (optional) 
      * @return OK
      */
-    ordersPOST(body?: CreateOrderRequestDto | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
-        let url_ = this.baseUrl + "/api/Orders";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_: AxiosRequestConfig = {
-            data: content_,
-            method: "POST",
-            url: url_,
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "text/plain"
-            },
-            cancelToken
-        };
-
-        return this.instance.request(options_).catch((_error: any) => {
-            if (isAxiosError(_error) && _error.response) {
-                return _error.response;
-            } else {
-                throw _error;
-            }
-        }).then((_response: AxiosResponse) => {
-            return this.processOrdersPOST(_response);
-        });
-    }
-
-    protected processOrdersPOST(response: AxiosResponse): Promise<GuidApiResponse> {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && typeof response.headers === "object") {
-            for (const k in response.headers) {
-                if (response.headers.hasOwnProperty(k)) {
-                    _headers[k] = response.headers[k];
-                }
-            }
-        }
-        if (status === 200) {
-            const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            result200 = JSON.parse(resultData200);
-            return Promise.resolve<GuidApiResponse>(result200);
-
-        } else if (status !== 200 && status !== 204) {
-            const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-        }
-        return Promise.resolve<GuidApiResponse>(null as any);
-    }
-
-    /**
-     * @return OK
-     */
-    ordersGET2(id: string, cancelToken?: CancelToken): Promise<OrderDetailsDtoApiResponse> {
-        let url_ = this.baseUrl + "/api/Orders/{id}";
+    getOrderById(id: string, cancelToken?: CancelToken): Promise<OrderDetailsDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/Orders/get-order-by-id/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -1994,11 +1948,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processOrdersGET2(_response);
+            return this.processGetOrderById(_response);
         });
     }
 
-    protected processOrdersGET2(response: AxiosResponse): Promise<OrderDetailsDtoApiResponse> {
+    protected processGetOrderById(response: AxiosResponse): Promise<OrderDetailsDtoApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -2330,7 +2284,7 @@ export class ApiClient implements IApiClient {
      * @param body (optional) 
      * @return OK
      */
-    ordersPOST(body?: CreatePosOrderRequestDto | undefined, cancelToken?: CancelToken): Promise<CreatePosOrderResponseDtoApiResponse> {
+    orders(body?: CreatePosOrderRequestDto | undefined, cancelToken?: CancelToken): Promise<CreatePosOrderResponseDtoApiResponse> {
         let url_ = this.baseUrl + "/api/pos/orders";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -2354,11 +2308,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processOrdersPOST(_response);
+            return this.processOrders(_response);
         });
     }
 
-    protected processOrdersPOST(response: AxiosResponse): Promise<CreatePosOrderResponseDtoApiResponse> {
+    protected processOrders(response: AxiosResponse): Promise<CreatePosOrderResponseDtoApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3258,13 +3212,14 @@ export class ApiClient implements IApiClient {
      * @param brandId (optional) 
      * @param modelId (optional) 
      * @param partTypeId (optional) 
+     * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
      * @param sortBy (optional) 
      * @param sortDirection (optional) 
      * @return OK
      */
-    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
+    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/public/catalog/products?";
         if (search === null)
             throw new Error("The parameter 'search' cannot be null.");
@@ -3286,6 +3241,10 @@ export class ApiClient implements IApiClient {
             throw new Error("The parameter 'partTypeId' cannot be null.");
         else if (partTypeId !== undefined)
             url_ += "PartTypeId=" + encodeURIComponent("" + partTypeId) + "&";
+        if (shopId === null)
+            throw new Error("The parameter 'shopId' cannot be null.");
+        else if (shopId !== undefined)
+            url_ += "ShopId=" + encodeURIComponent("" + shopId) + "&";
         if (pageNumber === null)
             throw new Error("The parameter 'pageNumber' cannot be null.");
         else if (pageNumber !== undefined)
@@ -3349,15 +3308,44 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param search (optional) 
+     * @param categoryId (optional) 
+     * @param brandId (optional) 
+     * @param modelId (optional) 
+     * @param partTypeId (optional) 
+     * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
-     * @param search (optional) 
      * @param sortBy (optional) 
      * @param sortDirection (optional) 
      * @return OK
      */
-    newArrivals(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse> {
+    newArrivals(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/public/products/new-arrivals?";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (categoryId === null)
+            throw new Error("The parameter 'categoryId' cannot be null.");
+        else if (categoryId !== undefined)
+            url_ += "CategoryId=" + encodeURIComponent("" + categoryId) + "&";
+        if (brandId === null)
+            throw new Error("The parameter 'brandId' cannot be null.");
+        else if (brandId !== undefined)
+            url_ += "BrandId=" + encodeURIComponent("" + brandId) + "&";
+        if (modelId === null)
+            throw new Error("The parameter 'modelId' cannot be null.");
+        else if (modelId !== undefined)
+            url_ += "ModelId=" + encodeURIComponent("" + modelId) + "&";
+        if (partTypeId === null)
+            throw new Error("The parameter 'partTypeId' cannot be null.");
+        else if (partTypeId !== undefined)
+            url_ += "PartTypeId=" + encodeURIComponent("" + partTypeId) + "&";
+        if (shopId === null)
+            throw new Error("The parameter 'shopId' cannot be null.");
+        else if (shopId !== undefined)
+            url_ += "ShopId=" + encodeURIComponent("" + shopId) + "&";
         if (pageNumber === null)
             throw new Error("The parameter 'pageNumber' cannot be null.");
         else if (pageNumber !== undefined)
@@ -3366,10 +3354,6 @@ export class ApiClient implements IApiClient {
             throw new Error("The parameter 'pageSize' cannot be null.");
         else if (pageSize !== undefined)
             url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-        if (search === null)
-            throw new Error("The parameter 'search' cannot be null.");
-        else if (search !== undefined)
-            url_ += "Search=" + encodeURIComponent("" + search) + "&";
         if (sortBy === null)
             throw new Error("The parameter 'sortBy' cannot be null.");
         else if (sortBy !== undefined)
@@ -3401,6 +3385,86 @@ export class ApiClient implements IApiClient {
     }
 
     protected processNewArrivals(response: AxiosResponse): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<PublicNewArrivalProductItemDtoPageResponseApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<PublicNewArrivalProductItemDtoPageResponseApiResponse>(null as any);
+    }
+
+    /**
+     * @param search (optional) 
+     * @param pageNumber (optional) 
+     * @param pageSize (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     * @return OK
+     */
+    featured(shopId: string, search?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/public/products/featured?";
+        if (shopId === undefined || shopId === null)
+            throw new Error("The parameter 'shopId' must be defined and cannot be null.");
+        else
+            url_ += "ShopId=" + encodeURIComponent("" + shopId) + "&";
+        if (search === null)
+            throw new Error("The parameter 'search' cannot be null.");
+        else if (search !== undefined)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (pageNumber === null)
+            throw new Error("The parameter 'pageNumber' cannot be null.");
+        else if (pageNumber !== undefined)
+            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection === null)
+            throw new Error("The parameter 'sortDirection' cannot be null.");
+        else if (sortDirection !== undefined)
+            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processFeatured(_response);
+        });
+    }
+
+    protected processFeatured(response: AxiosResponse): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -4647,10 +4711,12 @@ export interface CreateClientRequestDto {
     businessName: string;
     phone: string;
     email: string;
+    password: string;
     address?: string | undefined;
     preferredCurrencyId?: string | undefined;
     preferredLanguageId?: string | undefined;
     priceTierId?: string | undefined;
+    isActive?: boolean;
     status?: ClientStatus;
 }
 
@@ -4672,21 +4738,6 @@ export interface CreateContactInquiryResponseDtoApiResponse {
     success?: boolean;
     message?: string;
     data?: CreateContactInquiryResponseDto;
-}
-
-export interface CreateOrderItemRequestDto {
-    productId?: string;
-    quantity?: number;
-    barcodes?: string[];
-}
-
-export interface CreateOrderRequestDto {
-    shopId?: string;
-    clientId?: string;
-    currencyId?: string;
-    exchangeRate?: number;
-    notes?: string | undefined;
-    items?: CreateOrderItemRequestDto[];
 }
 
 export interface CreatePosOrderItemDto {
