@@ -65,12 +65,30 @@ const mapSerializedUnit = (item?: ProductBarcodeDto | null): PosSerializedUnit =
   imei2: item?.imei2 || '',
 });
 
+const hasSerializedIdentity = (item?: ProductBarcodeDto | null): boolean =>
+  Boolean(item?.imei1?.trim() || item?.imei2?.trim());
+
+const mapProductBarcodes = (item: PosProductListItemDto): PosSerializedUnit[] => {
+  const source = item.barcodes || [];
+
+  if (!source.length) {
+    return [];
+  }
+
+  const hasAnySerializedUnit = source.length > 1 || source.some(hasSerializedIdentity);
+  if (!hasAnySerializedUnit) {
+    return [];
+  }
+
+  return source.map(mapSerializedUnit);
+};
+
 const mapPosProduct = (item: PosProductListItemDto): PosProduct => ({
   productId: item.productId || '',
   productName: item.productName || '',
   sku: item.sku || '',
   barcode: item.barcode,
-  barcodes: (item.barcodes || []).map(mapSerializedUnit),
+  barcodes: mapProductBarcodes(item),
   brandName: item.brandName,
   modelName: item.modelName,
   partTypeName: item.partTypeName,
