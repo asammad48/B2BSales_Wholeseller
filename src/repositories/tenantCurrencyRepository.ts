@@ -58,7 +58,9 @@ const normalizeExchangeRate = (rate: TenantCurrencySettingsResponse['exchangeRat
 export const tenantCurrencyRepository = {
   async getTenantCurrencySettings(): Promise<TenantCurrencySettings> {
     try {
-      const response = await adminHttp.get('/api/tenant-currency/settings');
+      const response = await adminHttp.get('/api/tenant-currency/settings', {
+        params: { _t: Date.now() },
+      });
       const data = unwrapApiResponse<TenantCurrencySettingsResponse>(response.data);
       const lookupBundle = await lookupsRepository.getBundle();
       const availableCurrencies = data.availableCurrencies || data.currencies || lookupBundle.currencies || [];

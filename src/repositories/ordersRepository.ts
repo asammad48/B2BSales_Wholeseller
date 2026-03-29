@@ -127,7 +127,7 @@ export const ordersRepository = {
     search: string = ''
   ): Promise<OrdersResponse> {
     const normalizedSearch = search.trim() || undefined;
-    const response = await apiClient.ordersGET(page, limit, normalizedSearch);
+    const response = await apiClient.adminOrders(page, limit, normalizedSearch);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch orders');
@@ -153,7 +153,7 @@ export const ordersRepository = {
   },
 
   async getOrderDetails(id: string): Promise<OrderDetails> {
-    const response = await apiClient.ordersGET2(id);
+    const response = await apiClient.getOrderById(id);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to fetch order details');
@@ -205,13 +205,13 @@ export const ordersRepository = {
   },
 
   async createOrder(body: CreateOrderBody): Promise<string> {
-    const response = await apiClient.ordersPOST(body);
+    const response = await apiClient.orders(body);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to create order');
     }
 
-    return response.data;
+    return response.data.orderId || '';
   },
 
   async downloadOrderInvoicePdf(orderId: string): Promise<OrderInvoicePdf> {

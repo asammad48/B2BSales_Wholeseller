@@ -88,7 +88,7 @@ export const PosCreateOrderPage: React.FC = () => {
       try {
         const response = await posOrdersRepository.getPosProducts({
           shopId: shopId || undefined,
-          limit: 100,
+          limit: 10000,
           search,
         });
         setProducts(response.data);
@@ -260,7 +260,6 @@ export const PosCreateOrderPage: React.FC = () => {
       <div className="mx-auto max-w-7xl">
         <PageHeader
           title="POS Order"
-          description="Use the dedicated POS page to sell stocked products, fulfill on create, and print the completed receipt PDF."
           actions={
             <Link to="/orders" className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800">
               <ArrowLeft size={16} /> Back to Orders

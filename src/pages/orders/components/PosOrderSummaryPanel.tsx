@@ -98,8 +98,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Receipt Summary</p>
-            <h2 className="mt-2 text-2xl font-light text-gray-900">Create and fulfill in one step</h2>
-            <p className="mt-2 text-sm text-gray-500">Review selected products, confirm the destination shop, and complete the sale immediately.</p>
+            <h2 className="mt-1 text-xl font-medium text-gray-900">Order summary</h2>
           </div>
           {receipt ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-emerald-700">
@@ -254,7 +253,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Button type="button" onClick={onPrintReceipt} className="!w-full inline-flex items-center justify-center gap-2">
-                <Printer size={16} /> Print / Download PDF
+                <Printer size={16} /> Print
               </Button>
               <Button type="button" variant="secondary" onClick={onStartNewSale} className="!w-full inline-flex items-center justify-center gap-2">
                 <RotateCcw size={16} /> Start New Sale

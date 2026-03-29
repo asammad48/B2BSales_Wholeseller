@@ -32,8 +32,7 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">POS Products</p>
-            <h2 className="mt-2 text-2xl font-light text-gray-900">Stocked items ready to sell</h2>
-            <p className="mt-2 text-sm text-gray-500">Search stocked products, review available quantity, and add items into the receipt.</p>
+            <h2 className="mt-1 text-xl font-medium text-gray-900">Stocked items</h2>
           </div>
           <div className="rounded-2xl bg-gray-50 px-4 py-3 text-right min-w-[112px]">
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Visible</p>

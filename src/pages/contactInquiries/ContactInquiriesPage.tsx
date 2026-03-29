@@ -76,9 +76,8 @@ export const ContactInquiriesPage: React.FC = () => {
     setStatusSubmitting(true);
     try {
       await contactInquiriesRepository.updateContactInquiryStatus(selectedInquiry.id, { status: selectedStatus });
-      const refreshed = await contactInquiriesRepository.getContactInquiryById(selectedInquiry.id);
-      setSelectedInquiry(refreshed);
       await fetchInquiries();
+      setSelectedInquiry(null);
     } catch (error) {
       console.error('Failed to update inquiry status', error);
       alert('Failed to update inquiry status');
