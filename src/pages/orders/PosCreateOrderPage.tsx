@@ -88,7 +88,7 @@ export const PosCreateOrderPage: React.FC = () => {
       try {
         const response = await posOrdersRepository.getPosProducts({
           shopId: shopId || undefined,
-          limit: 100,
+          limit: 10000,
           search,
         });
         setProducts(response.data);
