@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Building2, Mail, Phone, Plus, User2, X } from 'lucide-react';
-import { ClientStatus } from '../../api/generated/apiClient';
+import { ClientStatus, CreateClientRequestDto } from '../../api/generated/apiClient';
 import { DataTable } from '../../components/common/DataTable';
 import { Button, FormField, Input, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
 import { PageHeader } from '../../components/common/PageHeader';
@@ -25,6 +25,7 @@ export const ClientsPage: React.FC = () => {
   const [name, setName] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [preferredCurrencyId, setPreferredCurrencyId] = useState('');
@@ -36,6 +37,7 @@ export const ClientsPage: React.FC = () => {
     setName('');
     setBusinessName('');
     setEmail('');
+    setPassword('');
     setPhone('');
     setAddress('');
     setPreferredCurrencyId('');
@@ -78,17 +80,19 @@ export const ClientsPage: React.FC = () => {
     event.preventDefault();
     setSubmitting(true);
     try {
-      const created = await clientsRepository.createClient({
+      const payload: CreateClientRequestDto = {
         name: name.trim(),
         businessName: businessName.trim(),
         email: email.trim(),
+        password: password.trim(),
         phone: phone.trim(),
         address: address.trim() || undefined,
         preferredCurrencyId: preferredCurrencyId || undefined,
         preferredLanguageId: preferredLanguageId || undefined,
         priceTierId: priceTierId.trim() || undefined,
         status,
-      });
+      };
+      const created = await clientsRepository.createClient(payload);
       setRecentlyCreatedClient(created);
       setIsCreateModalOpen(false);
       resetForm();
@@ -175,6 +179,9 @@ export const ClientsPage: React.FC = () => {
                   </FormField>
                   <FormField label="Email">
                     <Input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="client@example.com" />
+                  </FormField>
+                  <FormField label="Password">
+                    <Input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Set client portal password" />
                   </FormField>
                   <FormField label="Phone">
                     <Input required value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Mobile or office phone" />
