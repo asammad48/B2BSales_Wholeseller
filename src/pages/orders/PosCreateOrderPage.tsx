@@ -6,6 +6,7 @@ import { ClientLookupItem } from '../../repositories/clientsRepository';
 import { ordersRepository } from '../../repositories/ordersRepository';
 import { posOrdersRepository, PosProduct } from '../../repositories/posOrdersRepository';
 import { ShopLookupItem } from '../../repositories/shopsRepository';
+import { useAuth } from '../../state/AuthContext';
 import { PosOrderSummaryPanel } from './components/PosOrderSummaryPanel';
 import { PosProductSelectorPanel } from './components/PosProductSelectorPanel';
 
@@ -38,9 +39,8 @@ const buildCartItems = (cart: Record<string, PosCartItem>): PosCartItem[] =>
     lineTotal: item.product.sellingPrice * item.quantity,
   }));
 
-const POS_DEFAULT_SHOP_ID = '27a0154e-ebc2-4dd5-8453-8b85d0ce176c';
-
 export const PosCreateOrderPage: React.FC = () => {
+  const { user } = useAuth();
   const [products, setProducts] = useState<PosProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
@@ -49,13 +49,21 @@ export const PosCreateOrderPage: React.FC = () => {
   const [shops] = useState<ShopLookupItem[]>([]);
   const [clients] = useState<ClientLookupItem[]>([]);
 
-  const [shopId, setShopId] = useState(POS_DEFAULT_SHOP_ID);
+  const [shopId, setShopId] = useState('');
   const [clientId, setClientId] = useState('');
   const [notes, setNotes] = useState('');
   const [cart, setCart] = useState<Record<string, PosCartItem>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [receipt, setReceipt] = useState<PosOrderReceipt | null>(null);
+
+  useEffect(() => {
+    if (!receipt && user?.shopId && user.shopId !== shopId) {
+      setShopId(user.shopId);
+      setCart({});
+      setSubmitError('');
+    }
+  }, [user?.shopId, receipt, shopId]);
 
   useEffect(() => {
     if (!shopId) {
