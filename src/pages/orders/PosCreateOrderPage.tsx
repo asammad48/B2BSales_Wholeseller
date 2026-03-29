@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../components/common/PageHeader';
-import { clientsRepository, ClientLookupItem } from '../../repositories/clientsRepository';
+import { ClientLookupItem } from '../../repositories/clientsRepository';
 import { ordersRepository } from '../../repositories/ordersRepository';
 import { posOrdersRepository, PosProduct } from '../../repositories/posOrdersRepository';
-import { shopsRepository, ShopLookupItem } from '../../repositories/shopsRepository';
+import { ShopLookupItem } from '../../repositories/shopsRepository';
 import { PosOrderSummaryPanel } from './components/PosOrderSummaryPanel';
 import { PosProductSelectorPanel } from './components/PosProductSelectorPanel';
 
@@ -38,17 +38,18 @@ const buildCartItems = (cart: Record<string, PosCartItem>): PosCartItem[] =>
     lineTotal: item.product.sellingPrice * item.quantity,
   }));
 
+const POS_DEFAULT_SHOP_ID = '27a0154e-ebc2-4dd5-8453-8b85d0ce176c';
+
 export const PosCreateOrderPage: React.FC = () => {
   const [products, setProducts] = useState<PosProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
   const [search, setSearch] = useState('');
 
-  const [shops, setShops] = useState<ShopLookupItem[]>([]);
-  const [clients, setClients] = useState<ClientLookupItem[]>([]);
-  const [lookupsLoading, setLookupsLoading] = useState(true);
+  const [shops] = useState<ShopLookupItem[]>([]);
+  const [clients] = useState<ClientLookupItem[]>([]);
 
-  const [shopId, setShopId] = useState('');
+  const [shopId, setShopId] = useState(POS_DEFAULT_SHOP_ID);
   const [clientId, setClientId] = useState('');
   const [notes, setNotes] = useState('');
   const [cart, setCart] = useState<Record<string, PosCartItem>>({});
@@ -57,31 +58,12 @@ export const PosCreateOrderPage: React.FC = () => {
   const [receipt, setReceipt] = useState<PosOrderReceipt | null>(null);
 
   useEffect(() => {
-    const loadLookups = async () => {
-      setLookupsLoading(true);
-      try {
-        const [shopsLookup, clientLookups] = await Promise.all([
-          shopsRepository.getShopsLookup(),
-          clientsRepository.getCreateClientLookups(),
-        ]);
+    if (!shopId) {
+      setProducts([]);
+      setProductsLoading(false);
+      return;
+    }
 
-        setShops(shopsLookup);
-        setClients(clientLookups.clients);
-        if (!shopId && shopsLookup[0]?.id) {
-          setShopId(shopsLookup[0].id);
-        }
-      } catch (error) {
-        console.error('Failed to load POS lookups', error);
-        setSubmitError(error instanceof Error ? error.message : 'Failed to load POS lookups');
-      } finally {
-        setLookupsLoading(false);
-      }
-    };
-
-    loadLookups();
-  }, []);
-
-  useEffect(() => {
     const timer = window.setTimeout(async () => {
       setProductsLoading(true);
       setProductsError('');
@@ -276,7 +258,7 @@ export const PosCreateOrderPage: React.FC = () => {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.25fr)_420px]">
           <PosProductSelectorPanel
-            loading={productsLoading || lookupsLoading}
+            loading={productsLoading}
             products={products}
             search={search}
             onSearchChange={setSearch}
@@ -302,7 +284,7 @@ export const PosCreateOrderPage: React.FC = () => {
             onDecrementItem={decrementItem}
             onSerializedSelectionChange={updateSerializedSelections}
             onSubmit={handleSubmit}
-            submitting={submitting || lookupsLoading}
+            submitting={submitting}
             receipt={receipt}
             onPrintReceipt={handlePrintReceipt}
             onStartNewSale={resetSale}
