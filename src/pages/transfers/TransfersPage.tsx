@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
-import { transfersRepository, Transfer, TransferProductLookup } from '../../repositories/transfersRepository';
+import { CreateTransferItemRequest, transfersRepository, Transfer, TransferProductLookup } from '../../repositories/transfersRepository';
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button, FormField, Input, MultiSearchableSelect, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
@@ -64,6 +64,7 @@ export const TransfersPage: React.FC = () => {
   const [selectedTransferAction, setSelectedTransferAction] = useState<'dispatch' | 'receive' | null>(null);
   const [selectedTransfer, setSelectedTransfer] = useState<Transfer | null>(null);
   const [isProcessingTransferAction, setIsProcessingTransferAction] = useState(false);
+  const [transferActionItems, setTransferActionItems] = useState<Array<Transfer['items'][number]>>([]);
 
   const shopOptions = useMemo(() => mapShopOptions(shops), [shops]);
   const sourceProducts = useMemo(
@@ -125,6 +126,12 @@ export const TransfersPage: React.FC = () => {
   const openTransferActionModal = (transfer: Transfer, action: 'dispatch' | 'receive') => {
     setSelectedTransfer(transfer);
     setSelectedTransferAction(action);
+    setTransferActionItems(
+      transfer.items.map((item) => ({
+        ...item,
+        barcodes: item.barcodes || [],
+      }))
+    );
   };
 
   const closeTransferActionModal = () => {
@@ -134,6 +141,33 @@ export const TransfersPage: React.FC = () => {
 
     setSelectedTransfer(null);
     setSelectedTransferAction(null);
+    setTransferActionItems([]);
+  };
+
+
+  const updateTransferActionItemQuantity = (index: number, nextQuantity: number) => {
+    setTransferActionItems((prevItems) =>
+      prevItems.map((item, itemIndex) =>
+        itemIndex === index
+          ? { ...item, quantity: Number.isFinite(nextQuantity) && nextQuantity > 0 ? nextQuantity : 1 }
+          : item
+      )
+    );
+  };
+
+  const updateTransferActionItemBarcodes = (index: number, barcodeInput: string) => {
+    const normalizedBarcodes = barcodeInput
+      .split(',')
+      .map((barcode) => barcode.trim())
+      .filter(Boolean);
+
+    setTransferActionItems((prevItems) =>
+      prevItems.map((item, itemIndex) =>
+        itemIndex === index
+          ? { ...item, barcodes: normalizedBarcodes }
+          : item
+      )
+    );
   };
 
   const handleTransferAction = async () => {
@@ -144,14 +178,21 @@ export const TransfersPage: React.FC = () => {
     setIsProcessingTransferAction(true);
 
     try {
+      const processItems: CreateTransferItemRequest[] = transferActionItems.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        barcodes: item.barcodes || [],
+      }));
+
       if (selectedTransferAction === 'dispatch') {
-        await transfersRepository.dispatchTransfer(selectedTransfer);
+        await transfersRepository.dispatchTransfer(selectedTransfer.id, processItems);
       } else {
-        await transfersRepository.receiveTransfer(selectedTransfer);
+        await transfersRepository.receiveTransfer(selectedTransfer.id, processItems);
       }
 
       setSelectedTransfer(null);
       setSelectedTransferAction(null);
+      setTransferActionItems([]);
       fetchTransfers();
     } catch (error) {
       alert(selectedTransferAction === 'dispatch' ? 'Failed to dispatch transfer' : 'Failed to receive transfer');
@@ -563,13 +604,25 @@ export const TransfersPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  {selectedTransfer.items.map((item) => (
-                    <div key={`${item.productId}-${item.productName}`} className="rounded-2xl border border-gray-100 p-3">
+                  {transferActionItems.map((item, index) => (
+                    <div key={`${item.productId}-${item.productName}-${index}`} className="rounded-2xl border border-gray-100 p-3 space-y-2">
                       <p className="font-medium text-gray-900">{item.productName || item.productId}</p>
-                      <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
-                      {item.barcodes?.length ? (
-                        <p className="text-xs text-gray-500">Barcodes: {item.barcodes.join(', ')}</p>
-                      ) : null}
+                      <FormField label="Quantity">
+                        <Input
+                          type="number"
+                          min="1"
+                          value={String(item.quantity)}
+                          onChange={(event) => updateTransferActionItemQuantity(index, Number(event.target.value))}
+                        />
+                      </FormField>
+                      <FormField label="Barcodes (comma separated)">
+                        <Input
+                          type="text"
+                          value={(item.barcodes || []).join(', ')}
+                          onChange={(event) => updateTransferActionItemBarcodes(index, event.target.value)}
+                          placeholder="barcode1, barcode2"
+                        />
+                      </FormField>
                     </div>
                   ))}
                 </div>
