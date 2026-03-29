@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../components/common/PageHeader';
-import { clientsRepository, ClientLookupItem } from '../../repositories/clientsRepository';
+import { ClientLookupItem } from '../../repositories/clientsRepository';
 import { ordersRepository } from '../../repositories/ordersRepository';
 import { posOrdersRepository, PosProduct } from '../../repositories/posOrdersRepository';
-import { shopsRepository, ShopLookupItem } from '../../repositories/shopsRepository';
+import { ShopLookupItem } from '../../repositories/shopsRepository';
+import { useAuth } from '../../state/AuthContext';
 import { PosOrderSummaryPanel } from './components/PosOrderSummaryPanel';
 import { PosProductSelectorPanel } from './components/PosProductSelectorPanel';
 
@@ -39,14 +40,14 @@ const buildCartItems = (cart: Record<string, PosCartItem>): PosCartItem[] =>
   }));
 
 export const PosCreateOrderPage: React.FC = () => {
+  const { user } = useAuth();
   const [products, setProducts] = useState<PosProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState('');
   const [search, setSearch] = useState('');
 
-  const [shops, setShops] = useState<ShopLookupItem[]>([]);
-  const [clients, setClients] = useState<ClientLookupItem[]>([]);
-  const [lookupsLoading, setLookupsLoading] = useState(true);
+  const [shops] = useState<ShopLookupItem[]>([]);
+  const [clients] = useState<ClientLookupItem[]>([]);
 
   const [shopId, setShopId] = useState('');
   const [clientId, setClientId] = useState('');
@@ -57,38 +58,27 @@ export const PosCreateOrderPage: React.FC = () => {
   const [receipt, setReceipt] = useState<PosOrderReceipt | null>(null);
 
   useEffect(() => {
-    const loadLookups = async () => {
-      setLookupsLoading(true);
-      try {
-        const [shopsLookup, clientLookups] = await Promise.all([
-          shopsRepository.getShopsLookup(),
-          clientsRepository.getCreateClientLookups(),
-        ]);
-
-        setShops(shopsLookup);
-        setClients(clientLookups.clients);
-        if (!shopId && shopsLookup[0]?.id) {
-          setShopId(shopsLookup[0].id);
-        }
-      } catch (error) {
-        console.error('Failed to load POS lookups', error);
-        setSubmitError(error instanceof Error ? error.message : 'Failed to load POS lookups');
-      } finally {
-        setLookupsLoading(false);
-      }
-    };
-
-    loadLookups();
-  }, []);
+    if (!receipt && user?.shopId && user.shopId !== shopId) {
+      setShopId(user.shopId);
+      setCart({});
+      setSubmitError('');
+    }
+  }, [user?.shopId, receipt, shopId]);
 
   useEffect(() => {
+    if (!shopId) {
+      setProducts([]);
+      setProductsLoading(false);
+      return;
+    }
+
     const timer = window.setTimeout(async () => {
       setProductsLoading(true);
       setProductsError('');
       try {
         const response = await posOrdersRepository.getPosProducts({
           shopId: shopId || undefined,
-          limit: 100,
+          limit: 10000,
           search,
         });
         setProducts(response.data);
@@ -260,7 +250,6 @@ export const PosCreateOrderPage: React.FC = () => {
       <div className="mx-auto max-w-7xl">
         <PageHeader
           title="POS Order"
-          description="Use the dedicated POS page to sell stocked products, fulfill on create, and print the completed receipt PDF."
           actions={
             <Link to="/orders" className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800">
               <ArrowLeft size={16} /> Back to Orders
@@ -277,7 +266,7 @@ export const PosCreateOrderPage: React.FC = () => {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.25fr)_420px]">
           <PosProductSelectorPanel
-            loading={productsLoading || lookupsLoading}
+            loading={productsLoading}
             products={products}
             search={search}
             onSearchChange={setSearch}
@@ -303,7 +292,7 @@ export const PosCreateOrderPage: React.FC = () => {
             onDecrementItem={decrementItem}
             onSerializedSelectionChange={updateSerializedSelections}
             onSubmit={handleSubmit}
-            submitting={submitting || lookupsLoading}
+            submitting={submitting}
             receipt={receipt}
             onPrintReceipt={handlePrintReceipt}
             onStartNewSale={resetSale}

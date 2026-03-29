@@ -94,6 +94,39 @@ export const TenantCurrencyPage: React.FC = () => {
         toCurrencyId,
         rate: numericRate,
       });
+      setSettings((current) => {
+        if (!current) {
+          return current;
+        }
+
+        const fromCurrency = current.availableCurrencies.find((item) => item.id === fromCurrencyId);
+        const toCurrency = current.availableCurrencies.find((item) => item.id === toCurrencyId);
+        const nowIso = new Date().toISOString();
+
+        const existingIndex = current.exchangeRates.findIndex(
+          (item) => item.fromCurrencyId === fromCurrencyId && item.toCurrencyId === toCurrencyId
+        );
+
+        const nextRate = {
+          id: existingIndex >= 0 ? current.exchangeRates[existingIndex].id : `${fromCurrencyId}-${toCurrencyId}`,
+          fromCurrencyId,
+          fromCurrencyCode: fromCurrency?.code || '',
+          toCurrencyId,
+          toCurrencyCode: toCurrency?.code || '',
+          rate: numericRate,
+          updatedAt: nowIso,
+        };
+
+        const nextExchangeRates =
+          existingIndex >= 0
+            ? current.exchangeRates.map((item, index) => (index === existingIndex ? nextRate : item))
+            : [nextRate, ...current.exchangeRates];
+
+        return {
+          ...current,
+          exchangeRates: nextExchangeRates,
+        };
+      });
       setRate('');
       await fetchSettings();
     } catch (error) {

@@ -5,6 +5,8 @@ export interface User {
   email: string;
   role: 'owner' | 'admin' | 'staff' | 'client';
   name: string;
+  shopId?: string;
+  shopName?: string;
 }
 
 export interface LoginResponse {
@@ -22,7 +24,7 @@ export const authRepository = {
       throw new Error(response.message || 'Login failed');
     }
 
-    const { token, userId, email, fullName, role } = response.data;
+    const { token, userId, email, fullName, role, shopId, shopName } = response.data as any;
     
     return {
       token: token || '',
@@ -30,7 +32,9 @@ export const authRepository = {
         id: userId || '',
         email: email || '',
         name: fullName || '',
-        role: (role?.toLowerCase() as any) || 'staff'
+        role: (role?.toLowerCase() as any) || 'staff',
+        shopId: shopId || undefined,
+        shopName: shopName || undefined,
       }
     };
   },
@@ -42,13 +46,15 @@ export const authRepository = {
       throw new Error(response.message || 'Failed to fetch user');
     }
 
-    const { id, email, fullName, role } = response.data;
+    const { id, email, fullName, role, shopId, shopName } = response.data;
 
     return {
       id: id || '',
       email: email || '',
       name: fullName || '',
-      role: (role?.toLowerCase() as any) || 'staff'
+      role: (role?.toLowerCase() as any) || 'staff',
+      shopId: shopId || undefined,
+      shopName: shopName || undefined,
     };
   },
 
