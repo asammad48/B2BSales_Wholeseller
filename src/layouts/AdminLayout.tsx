@@ -33,7 +33,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
       whileHover={{ x: collapsed ? 0 : 4 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative',
+        'flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative',
         active ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5',
         collapsed && 'justify-center px-0'
       )}
@@ -42,7 +42,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
 
       <AnimatePresence>
         {!collapsed && (
-          <motion.span initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="font-medium tracking-wide whitespace-nowrap overflow-hidden">
+          <motion.span initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="text-sm font-medium tracking-wide whitespace-nowrap overflow-hidden">
             {label}
           </motion.span>
         )}
