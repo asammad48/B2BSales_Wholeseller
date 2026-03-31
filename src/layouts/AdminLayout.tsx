@@ -63,7 +63,7 @@ export const AdminLayout = () => {
   const navItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/products', icon: Package, label: 'Products' },
-    { to: '/products/bulk-upload', icon: Upload, label: 'Bulk Product Upload' },
+    { to: '/bulk-product-upload', icon: Upload, label: 'Bulk Product Upload' },
     { to: '/inventory', icon: Boxes, label: 'Inventory' },
     { to: '/orders', icon: ShoppingCart, label: 'Orders' },
     { to: '/clients', icon: Building2, label: 'Clients' },

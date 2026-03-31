@@ -64,7 +64,8 @@ export const AppRoutes = () => {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route path="products/bulk-upload" element={<BulkProductUploadPage />} />
+        <Route path="bulk-product-upload" element={<BulkProductUploadPage />} />
+        <Route path="products/bulk-upload" element={<Navigate to="/bulk-product-upload" replace />} />
         <Route path="inventory" element={<PagePlaceholder title="Inventory" />} />
         <Route path="orders/pos" element={<PosCreateOrderPage />} />
         <Route path="orders" element={<OrdersPage />} />
