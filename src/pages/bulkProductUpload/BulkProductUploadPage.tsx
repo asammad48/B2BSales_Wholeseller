@@ -29,10 +29,10 @@ const writeStoredJobs = (jobs: StoredJob[]) => {
 };
 
 const statusClassNames: Record<string, string> = {
-  Completed: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
-  Failed: 'bg-rose-500/15 text-rose-300 border border-rose-500/30',
-  Processing: 'bg-amber-500/15 text-amber-300 border border-amber-500/30',
-  Pending: 'bg-slate-500/15 text-slate-300 border border-slate-500/30',
+  Completed: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  Failed: 'bg-rose-50 text-rose-700 border border-rose-200',
+  Processing: 'bg-amber-50 text-amber-700 border border-amber-200',
+  Pending: 'bg-slate-100 text-slate-600 border border-slate-200',
 };
 
 export const BulkProductUploadPage: React.FC = () => {
@@ -165,13 +165,13 @@ export const BulkProductUploadPage: React.FC = () => {
   const historyColumns = useMemo(() => [
     {
       header: 'Job ID',
-      accessor: (item: StoredJob) => <span className="font-mono text-xs text-white/90">{item.jobId}</span>,
+      accessor: (item: StoredJob) => <span className="font-mono text-xs text-gray-700">{item.jobId}</span>,
     },
     {
       header: 'Status',
       accessor: (item: StoredJob) => {
         const status = historyStatusByJobId[item.jobId]?.status || 'Unknown';
-        return <span className={`inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassNames[status] || 'bg-slate-500/15 text-slate-300 border border-slate-500/30'}`}>{status}</span>;
+        return <span className={`inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassNames[status] || 'bg-slate-100 text-slate-600 border border-slate-200'}`}>{status}</span>;
       },
     },
     {
@@ -196,7 +196,7 @@ export const BulkProductUploadPage: React.FC = () => {
             setJobIdInput(item.jobId);
             refreshJobStatus(item.jobId);
           }}
-          className="text-xs font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
+          className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
         >
           View status
         </button>
@@ -205,94 +205,98 @@ export const BulkProductUploadPage: React.FC = () => {
   ], [historyStatusByJobId]);
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-[#f5f5f5] p-6"><div className="mx-auto max-w-7xl space-y-6">
       <PageHeader
         title="Bulk Product Upload"
         description="Upload product CSV files using multipart/form-data, monitor background processing, and resume failed jobs without reprocessing completed rows."
       />
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="admin-card p-6 space-y-5">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm space-y-5">
+        <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-white px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">CSV Import</p>
+          <p className="mt-1 text-sm text-gray-600">Upload a CSV to queue product creation, then track job progress live.</p>
+        </div>
         <div className="grid gap-4 md:grid-cols-[1fr_auto] items-end">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">CSV File</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">CSV File</label>
             <input
               type="file"
               accept=".csv,text/csv"
               onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
-              className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-secondary)] file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--color-primary)]/20 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[var(--color-primary)]"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-emerald-700"
             />
           </div>
-          <button type="button" onClick={handleUpload} disabled={isUploading} className="btn-primary !w-auto inline-flex items-center gap-2">
+          <button type="button" onClick={handleUpload} disabled={isUploading} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60">
             <Upload size={16} /> {isUploading ? 'Uploading...' : 'Upload & Queue'}
           </button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1fr_auto_auto] items-end">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">Job ID</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Job ID</label>
             <input
               type="text"
               value={jobIdInput}
               onChange={(event) => setJobIdInput(event.target.value)}
               placeholder="Paste existing job ID"
-              className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-white placeholder:text-[var(--text-muted)]"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400"
             />
           </div>
-          <button type="button" onClick={() => refreshJobStatus(jobIdInput.trim())} disabled={isRefreshingStatus} className="btn-ghost !w-auto inline-flex items-center gap-2">
+          <button type="button" onClick={() => refreshJobStatus(jobIdInput.trim())} disabled={isRefreshingStatus} className="inline-flex !w-auto items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
             <RefreshCcw size={16} /> {isRefreshingStatus ? 'Refreshing...' : 'Check Status'}
           </button>
-          <button type="button" onClick={handleResume} disabled={isResuming} className="btn-primary !w-auto inline-flex items-center gap-2">
+          <button type="button" onClick={handleResume} disabled={isResuming} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60">
             <PlayCircle size={16} /> {isResuming ? 'Resuming...' : 'Resume Job'}
           </button>
         </div>
 
-        {error && <p className="text-sm text-rose-300 flex items-center gap-2"><AlertCircle size={16} /> {error}</p>}
-        {successMessage && <p className="text-sm text-emerald-300 flex items-center gap-2"><CheckCircle2 size={16} /> {successMessage}</p>}
+        {error && <p className="text-sm text-rose-600 flex items-center gap-2"><AlertCircle size={16} /> {error}</p>}
+        {successMessage && <p className="text-sm text-emerald-700 flex items-center gap-2"><CheckCircle2 size={16} /> {successMessage}</p>}
       </motion.div>
 
       {activeJob && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="admin-card p-6 space-y-4">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <p className="text-xs uppercase tracking-wider text-[var(--text-muted)]">Active Job</p>
-              <p className="font-mono text-sm text-white break-all">{activeJob.jobId}</p>
+              <p className="text-xs uppercase tracking-wider text-gray-500">Active Job</p>
+              <p className="font-mono text-sm text-gray-800 break-all">{activeJob.jobId}</p>
             </div>
-            <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusClassNames[activeJob.status] || 'bg-slate-500/15 text-slate-300 border border-slate-500/30'}`}>
+            <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusClassNames[activeJob.status] || 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
               {activeJob.status}
             </span>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-xl bg-[var(--bg-elevated)] p-4"><p className="text-xs text-[var(--text-muted)]">Total Rows</p><p className="text-xl font-semibold text-white">{activeJob.totalRows}</p></div>
-            <div className="rounded-xl bg-[var(--bg-elevated)] p-4"><p className="text-xs text-[var(--text-muted)]">Processed</p><p className="text-xl font-semibold text-white">{activeJob.processedRows}</p></div>
-            <div className="rounded-xl bg-[var(--bg-elevated)] p-4"><p className="text-xs text-[var(--text-muted)]">Successful</p><p className="text-xl font-semibold text-emerald-300">{activeJob.successfulRows}</p></div>
-            <div className="rounded-xl bg-[var(--bg-elevated)] p-4"><p className="text-xs text-[var(--text-muted)]">Failed</p><p className="text-xl font-semibold text-rose-300">{activeJob.failedRows}</p></div>
+            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4"><p className="text-xs text-gray-500">Total Rows</p><p className="text-xl font-semibold text-gray-900">{activeJob.totalRows}</p></div>
+            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4"><p className="text-xs text-gray-500">Processed</p><p className="text-xl font-semibold text-gray-900">{activeJob.processedRows}</p></div>
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4"><p className="text-xs text-emerald-700">Successful</p><p className="text-xl font-semibold text-emerald-700">{activeJob.successfulRows}</p></div>
+            <div className="rounded-xl border border-rose-100 bg-rose-50 p-4"><p className="text-xs text-rose-700">Failed</p><p className="text-xl font-semibold text-rose-700">{activeJob.failedRows}</p></div>
           </div>
 
-          <div className="text-xs text-[var(--text-muted)] space-y-1">
+          <div className="text-xs text-gray-500 space-y-1">
             <p className="inline-flex items-center gap-1"><Clock3 size={13} /> Started: {activeJob.startedAt ? new Date(activeJob.startedAt).toLocaleString() : '—'}</p>
             <p>Completed: {activeJob.completedAt ? new Date(activeJob.completedAt).toLocaleString() : '—'}</p>
-            {activeJob.errorMessage && <p className="text-rose-300">Error: {activeJob.errorMessage}</p>}
+            {activeJob.errorMessage && <p className="text-rose-700">Error: {activeJob.errorMessage}</p>}
           </div>
         </motion.div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Job History</h2>
-          <p className="text-xs text-[var(--text-muted)]">Shows locally tracked jobs for quick resume/status checks.</p>
+          <h2 className="text-lg font-semibold text-gray-900">Job History</h2>
+          <p className="text-xs text-gray-500">Shows locally tracked jobs for quick resume/status checks.</p>
         </div>
 
         <DataTable data={pagedHistory} columns={historyColumns} loading={false} />
 
         <div className="mt-2 flex items-center justify-between px-1">
-          <p className="text-xs text-[var(--text-muted)]">Showing <span className="text-white font-medium">{pagedHistory.length}</span> of <span className="text-white font-medium">{jobHistory.length}</span> jobs</p>
+          <p className="text-xs text-gray-500">Showing <span className="text-gray-900 font-medium">{pagedHistory.length}</span> of <span className="text-gray-900 font-medium">{jobHistory.length}</span> jobs</p>
           <div className="flex gap-2">
-            <button disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="px-4 py-2 text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg hover:bg-white/5 disabled:opacity-50 transition-colors">Previous</button>
-            <button disabled={page * PAGE_SIZE >= jobHistory.length} onClick={() => setPage((current) => current + 1)} className="px-4 py-2 text-xs font-medium bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg hover:bg-white/5 disabled:opacity-50 transition-colors">Next</button>
+            <button disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Previous</button>
+            <button disabled={page * PAGE_SIZE >= jobHistory.length} onClick={() => setPage((current) => current + 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Next</button>
           </div>
         </div>
       </motion.div>
-    </div>
+    </div></div>
   );
 };
