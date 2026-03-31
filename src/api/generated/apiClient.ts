@@ -33,6 +33,19 @@ export interface IApiClient {
      */
     resetPassword(body?: ResetPasswordRequestDto | undefined): Promise<StringApiResponse>;
     /**
+     * @param file (optional) 
+     * @return OK
+     */
+    bulkProductUpload(file?: FileParameter | undefined): Promise<GuidApiResponse>;
+    /**
+     * @return OK
+     */
+    resume(jobId: string): Promise<GuidApiResponse>;
+    /**
+     * @return OK
+     */
+    jobStatus(jobId: string): Promise<BulkProductUploadStatusResponseDtoApiResponse>;
+    /**
      * @param body (optional) 
      * @return OK
      */
@@ -659,6 +672,173 @@ export class ApiClient implements IApiClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<StringApiResponse>(null as any);
+    }
+
+    /**
+     * @param file (optional) 
+     * @return OK
+     */
+    bulkProductUpload(file?: FileParameter | undefined, cancelToken?: CancelToken): Promise<GuidApiResponse> {
+        let url_ = this.baseUrl + "/api/bulk-product-upload";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (file === null || file === undefined)
+            throw new Error("The parameter 'file' cannot be null.");
+        else
+            content_.append("file", file.data, file.fileName ? file.fileName : "file");
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processBulkProductUpload(_response);
+        });
+    }
+
+    protected processBulkProductUpload(response: AxiosResponse): Promise<GuidApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<GuidApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<GuidApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    resume(jobId: string, cancelToken?: CancelToken): Promise<GuidApiResponse> {
+        let url_ = this.baseUrl + "/api/bulk-product-upload/{jobId}/resume";
+        if (jobId === undefined || jobId === null)
+            throw new Error("The parameter 'jobId' must be defined.");
+        url_ = url_.replace("{jobId}", encodeURIComponent("" + jobId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "POST",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processResume(_response);
+        });
+    }
+
+    protected processResume(response: AxiosResponse): Promise<GuidApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<GuidApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<GuidApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    jobStatus(jobId: string, cancelToken?: CancelToken): Promise<BulkProductUploadStatusResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/bulk-product-upload/{jobId}/job-status";
+        if (jobId === undefined || jobId === null)
+            throw new Error("The parameter 'jobId' must be defined.");
+        url_ = url_.replace("{jobId}", encodeURIComponent("" + jobId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processJobStatus(_response);
+        });
+    }
+
+    protected processJobStatus(response: AxiosResponse): Promise<BulkProductUploadStatusResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<BulkProductUploadStatusResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<BulkProductUploadStatusResponseDtoApiResponse>(null as any);
     }
 
     /**
@@ -4543,6 +4723,24 @@ export interface BooleanApiResponse {
     data?: boolean;
 }
 
+export interface BulkProductUploadStatusResponseDto {
+    jobId?: string;
+    status?: string;
+    totalRows?: number;
+    processedRows?: number;
+    successfulRows?: number;
+    failedRows?: number;
+    errorMessage?: string | undefined;
+    startedAt?: Date | undefined;
+    completedAt?: Date | undefined;
+}
+
+export interface BulkProductUploadStatusResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: BulkProductUploadStatusResponseDto;
+}
+
 export interface ChangePasswordRequestDto {
     currentPassword?: string;
     newPassword?: string;
@@ -5187,7 +5385,7 @@ export interface ProductDetailResponseDto {
     sku?: string;
     barcode?: string | undefined;
     name?: string;
-    categoryId?: string;
+    categoryId?: string | undefined;
     categoryName?: string;
     brandId?: string | undefined;
     brandName?: string | undefined;
@@ -5237,7 +5435,7 @@ export interface ProductListItemResponseDto {
     sku?: string;
     barcode?: string | undefined;
     name?: string;
-    categoryId?: string;
+    categoryId?: string | undefined;
     categoryName?: string;
     brandId?: string | undefined;
     brandName?: string | undefined;
@@ -5332,7 +5530,7 @@ export interface PublicNewArrivalProductItemDto {
     shortDescription?: string | undefined;
     sku?: string;
     barcode?: string | undefined;
-    categoryId?: string;
+    categoryId?: string | undefined;
     categoryName?: string;
     brandId?: string | undefined;
     brandName?: string | undefined;
@@ -5371,7 +5569,7 @@ export interface PublicProductListItemDto {
     shortDescription?: string | undefined;
     sku?: string;
     barcode?: string | undefined;
-    categoryId?: string;
+    categoryId?: string | undefined;
     categoryName?: string;
     brandId?: string | undefined;
     brandName?: string | undefined;
@@ -5419,7 +5617,7 @@ export interface PublicShopLookupItemDtoIEnumerableApiResponse {
     data?: PublicShopLookupItemDto[] | undefined;
 }
 
-export type QualityType = "Original" | "OEM" | "HighCopy" | "Refurbished";
+export type QualityType = "Compatible" | "Deji" | "Desconocido" | "Oem" | "Original" | "OriginalDesmontaje" | "ServicePack";
 
 export type RangeType = "Day" | "Week" | "Month" | "Custom";
 
@@ -5595,7 +5793,7 @@ export interface TopSellingProductReportItemDtoPageResponseApiResponse {
     data?: TopSellingProductReportItemDtoPageResponse;
 }
 
-export type TrackingType = "QuantityBased" | "Serialized";
+export type TrackingType = "PorCantidad" | "Serializado";
 
 export interface UnableToFulfillRequest {
     reason?: string | undefined;
