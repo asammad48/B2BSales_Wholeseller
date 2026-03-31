@@ -18,6 +18,7 @@ import {
   Building2,
   MessageSquareMore,
   Coins,
+  Upload,
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -62,6 +63,7 @@ export const AdminLayout = () => {
   const navItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/products', icon: Package, label: 'Products' },
+    { to: '/products/bulk-upload', icon: Upload, label: 'Bulk Upload' },
     { to: '/inventory', icon: Boxes, label: 'Inventory' },
     { to: '/orders', icon: ShoppingCart, label: 'Orders' },
     { to: '/clients', icon: Building2, label: 'Clients' },

@@ -16,6 +16,7 @@ import { ClientsPage } from '../pages/clients/ClientsPage';
 import { ContactInquiriesPage } from '../pages/contactInquiries/ContactInquiriesPage';
 import { ProductsPage } from '../pages/products/ProductsPage';
 import { TenantCurrencyPage } from '../pages/currencies/TenantCurrencyPage';
+import { BulkProductUploadPage } from '../pages/bulkProductUpload/BulkProductUploadPage';
 
 const PagePlaceholder = ({ title }: { title: string }) => (
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}>
@@ -63,6 +64,7 @@ export const AppRoutes = () => {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products" element={<ProductsPage />} />
+        <Route path="products/bulk-upload" element={<BulkProductUploadPage />} />
         <Route path="inventory" element={<PagePlaceholder title="Inventory" />} />
         <Route path="orders/pos" element={<PosCreateOrderPage />} />
         <Route path="orders" element={<OrdersPage />} />
