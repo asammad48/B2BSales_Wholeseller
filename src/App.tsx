@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './state/AuthContext';
 import { SettingsProvider, useSettings } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
-import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload } from 'lucide-react';
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { OrdersPage } from './pages/orders/OrdersPage';
@@ -17,6 +17,7 @@ import { ReportsPage } from './pages/reports/ReportsPage';
 import { ClientsPage } from './pages/clients/ClientsPage';
 import { ContactInquiriesPage } from './pages/contactInquiries/ContactInquiriesPage';
 import { TenantCurrencyPage } from './pages/currencies/TenantCurrencyPage';
+import { BulkProductUploadPage } from './pages/bulkProductUpload/BulkProductUploadPage';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -27,6 +28,7 @@ const Sidebar: React.FC = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: BarChart3, label: 'Reports', path: '/reports' },
     { icon: Package, label: 'Products', path: '/products' },
+    { icon: Upload, label: 'Bulk Product Upload', path: '/bulk-product-upload' },
     { icon: Box, label: 'Inventory', path: '/inventory' },
     { icon: ShoppingBag, label: 'Orders', path: '/orders' },
     { icon: ReceiptText, label: 'POS', path: '/orders/pos' },
@@ -140,6 +142,7 @@ const App: React.FC = () => {
           <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
           <Route path="/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
+          <Route path="/bulk-product-upload" element={<ProtectedRoute><BulkProductUploadPage /></ProtectedRoute>} />
           <Route path="/orders/pos" element={<ProtectedRoute><PosCreateOrderPage /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
           <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />

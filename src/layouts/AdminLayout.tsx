@@ -18,6 +18,7 @@ import {
   Building2,
   MessageSquareMore,
   Coins,
+  Upload,
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -62,6 +63,7 @@ export const AdminLayout = () => {
   const navItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/products', icon: Package, label: 'Products' },
+    { to: '/bulk-product-upload', icon: Upload, label: 'Bulk Product Upload' },
     { to: '/inventory', icon: Boxes, label: 'Inventory' },
     { to: '/orders', icon: ShoppingCart, label: 'Orders' },
     { to: '/clients', icon: Building2, label: 'Clients' },
@@ -94,7 +96,14 @@ export const AdminLayout = () => {
 
         <nav className="flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => (
-            <SidebarItem key={item.to} to={item.to} icon={item.icon} label={item.label} active={location.pathname === item.to} collapsed={!isSidebarOpen} />
+            <SidebarItem
+              key={item.to}
+              to={item.to}
+              icon={item.icon}
+              label={item.label}
+              active={location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)}
+              collapsed={!isSidebarOpen}
+            />
           ))}
         </nav>
 

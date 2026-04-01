@@ -10,8 +10,8 @@ import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiC
 import { tenantCurrencyRepository, TenantCurrencySettings } from '../../repositories/tenantCurrencyRepository';
 import { useProductPricing } from '../../utils/productPricing';
 
-const trackingOptions: TrackingType[] = ['QuantityBased', 'Serialized'];
-const qualityOptions: QualityType[] = ['Original', 'OEM', 'HighCopy', 'Refurbished'];
+const trackingOptions: TrackingType[] = ['PorCantidad', 'Serializado'];
+const qualityOptions: QualityType[] = ['Original', 'Oem', 'Compatible', 'ServicePack', 'OriginalDesmontaje', 'Deji', 'Desconocido'];
 const pricingOptions: PricingMode[] = ['Direct', 'PercentageBased'];
 
 interface ProductImageDraft {
@@ -533,7 +533,7 @@ export const ProductsPage: React.FC = () => {
                     <Input name="barcode" />
                   </FormField>
                   <FormField label="Tracking Type">
-                    <SearchableSelect name="trackingType" required defaultValue="QuantityBased" placeholder="Select tracking type" searchPlaceholder="Search tracking types" options={trackingTypeOptions} />
+                    <SearchableSelect name="trackingType" required defaultValue="PorCantidad" placeholder="Select tracking type" searchPlaceholder="Search tracking types" options={trackingTypeOptions} />
                   </FormField>
 
                   <FormField label="Quality Type">
