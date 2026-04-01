@@ -212,10 +212,6 @@ export const BulkProductUploadPage: React.FC = () => {
       />
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm space-y-5">
-        <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-white px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">CSV Import</p>
-          <p className="mt-1 text-sm text-gray-600">Upload a CSV to queue product creation, then track job progress live.</p>
-        </div>
         <div className="grid gap-4 md:grid-cols-[1fr_auto] items-end">
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">CSV File</label>
@@ -226,7 +222,7 @@ export const BulkProductUploadPage: React.FC = () => {
               className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-emerald-700"
             />
           </div>
-          <button type="button" onClick={handleUpload} disabled={isUploading} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60">
+          <button type="button" onClick={handleUpload} disabled={isUploading} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
             <Upload size={16} /> {isUploading ? 'Uploading...' : 'Upload & Queue'}
           </button>
         </div>
@@ -245,7 +241,7 @@ export const BulkProductUploadPage: React.FC = () => {
           <button type="button" onClick={() => refreshJobStatus(jobIdInput.trim())} disabled={isRefreshingStatus} className="inline-flex !w-auto items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
             <RefreshCcw size={16} /> {isRefreshingStatus ? 'Refreshing...' : 'Check Status'}
           </button>
-          <button type="button" onClick={handleResume} disabled={isResuming} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60">
+          <button type="button" onClick={handleResume} disabled={isResuming} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
             <PlayCircle size={16} /> {isResuming ? 'Resuming...' : 'Resume Job'}
           </button>
         </div>
