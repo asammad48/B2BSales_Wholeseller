@@ -200,7 +200,7 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PosProductListItemDtoPageResponseApiResponse>;
+    productsGET(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PosProductListItemDtoPageResponseApiResponse>;
     /**
      * @param body (optional) 
      * @return OK
@@ -276,18 +276,14 @@ export interface IApiClient {
      */
     theme(): Promise<ThemeResponseDtoApiResponse>;
     /**
-     * @param pageNumber (optional) 
-     * @param pageSize (optional) 
-     * @param search (optional) 
-     * @param sortBy (optional) 
-     * @param sortDirection (optional) 
+     * @param body (optional) 
      * @return OK
      */
-    products2(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<ProductListItemResponseDtoPageResponseApiResponse>;
+    productsPOST(body?: PageRequest | undefined): Promise<ProductListItemResponseDtoPageResponseApiResponse>;
     /**
      * @return OK
      */
-    products3(id: string): Promise<ProductDetailResponseDtoApiResponse>;
+    productsGET2(id: string): Promise<ProductDetailResponseDtoApiResponse>;
     /**
      * @return OK
      */
@@ -302,6 +298,10 @@ export interface IApiClient {
      * @param brandId (optional) 
      * @param modelId (optional) 
      * @param partTypeId (optional) 
+     * @param categoryIds (optional) 
+     * @param brandIds (optional) 
+     * @param modelIds (optional) 
+     * @param partTypeIds (optional) 
      * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
@@ -309,13 +309,17 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
+    productsGET3(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
     /**
      * @param search (optional) 
      * @param categoryId (optional) 
      * @param brandId (optional) 
      * @param modelId (optional) 
      * @param partTypeId (optional) 
+     * @param categoryIds (optional) 
+     * @param brandIds (optional) 
+     * @param modelIds (optional) 
+     * @param partTypeIds (optional) 
      * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
@@ -323,7 +327,7 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    newArrivals(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse>;
+    newArrivals(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse>;
     /**
      * @param search (optional) 
      * @param pageNumber (optional) 
@@ -2388,7 +2392,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PosProductListItemDtoPageResponseApiResponse> {
+    productsGET(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PosProductListItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/pos/products?";
         if (shopId === null)
             throw new Error("The parameter 'shopId' cannot be null.");
@@ -2432,11 +2436,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProducts(_response);
+            return this.processProductsGET(_response);
         });
     }
 
-    protected processProducts(response: AxiosResponse): Promise<PosProductListItemDtoPageResponseApiResponse> {
+    protected processProductsGET(response: AxiosResponse): Promise<PosProductListItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3155,41 +3159,21 @@ export class ApiClient implements IApiClient {
     }
 
     /**
-     * @param pageNumber (optional) 
-     * @param pageSize (optional) 
-     * @param search (optional) 
-     * @param sortBy (optional) 
-     * @param sortDirection (optional) 
+     * @param body (optional) 
      * @return OK
      */
-    products2(pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
-        let url_ = this.baseUrl + "/api/public/storefront/products?";
-        if (pageNumber === null)
-            throw new Error("The parameter 'pageNumber' cannot be null.");
-        else if (pageNumber !== undefined)
-            url_ += "PageNumber=" + encodeURIComponent("" + pageNumber) + "&";
-        if (pageSize === null)
-            throw new Error("The parameter 'pageSize' cannot be null.");
-        else if (pageSize !== undefined)
-            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-        if (search === null)
-            throw new Error("The parameter 'search' cannot be null.");
-        else if (search !== undefined)
-            url_ += "Search=" + encodeURIComponent("" + search) + "&";
-        if (sortBy === null)
-            throw new Error("The parameter 'sortBy' cannot be null.");
-        else if (sortBy !== undefined)
-            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
-        if (sortDirection === null)
-            throw new Error("The parameter 'sortDirection' cannot be null.");
-        else if (sortDirection !== undefined)
-            url_ += "SortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+    productsPOST(body?: PageRequest | undefined, cancelToken?: CancelToken): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/public/storefront/products";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_: AxiosRequestConfig = {
-            method: "GET",
+            data: content_,
+            method: "POST",
             url: url_,
             headers: {
+                "Content-Type": "application/json",
                 "Accept": "text/plain"
             },
             cancelToken
@@ -3202,11 +3186,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProducts2(_response);
+            return this.processProductsPOST(_response);
         });
     }
 
-    protected processProducts2(response: AxiosResponse): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
+    protected processProductsPOST(response: AxiosResponse): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3233,7 +3217,7 @@ export class ApiClient implements IApiClient {
     /**
      * @return OK
      */
-    products3(id: string, cancelToken?: CancelToken): Promise<ProductDetailResponseDtoApiResponse> {
+    productsGET2(id: string, cancelToken?: CancelToken): Promise<ProductDetailResponseDtoApiResponse> {
         let url_ = this.baseUrl + "/api/public/storefront/products/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -3256,11 +3240,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProducts3(_response);
+            return this.processProductsGET2(_response);
         });
     }
 
-    protected processProducts3(response: AxiosResponse): Promise<ProductDetailResponseDtoApiResponse> {
+    protected processProductsGET2(response: AxiosResponse): Promise<ProductDetailResponseDtoApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3392,6 +3376,10 @@ export class ApiClient implements IApiClient {
      * @param brandId (optional) 
      * @param modelId (optional) 
      * @param partTypeId (optional) 
+     * @param categoryIds (optional) 
+     * @param brandIds (optional) 
+     * @param modelIds (optional) 
+     * @param partTypeIds (optional) 
      * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
@@ -3399,7 +3387,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    products4(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
+    productsGET3(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/public/catalog/products?";
         if (search === null)
             throw new Error("The parameter 'search' cannot be null.");
@@ -3421,6 +3409,22 @@ export class ApiClient implements IApiClient {
             throw new Error("The parameter 'partTypeId' cannot be null.");
         else if (partTypeId !== undefined)
             url_ += "PartTypeId=" + encodeURIComponent("" + partTypeId) + "&";
+        if (categoryIds === null)
+            throw new Error("The parameter 'categoryIds' cannot be null.");
+        else if (categoryIds !== undefined)
+            categoryIds && categoryIds.forEach(item => { url_ += "CategoryIds=" + encodeURIComponent("" + item) + "&"; });
+        if (brandIds === null)
+            throw new Error("The parameter 'brandIds' cannot be null.");
+        else if (brandIds !== undefined)
+            brandIds && brandIds.forEach(item => { url_ += "BrandIds=" + encodeURIComponent("" + item) + "&"; });
+        if (modelIds === null)
+            throw new Error("The parameter 'modelIds' cannot be null.");
+        else if (modelIds !== undefined)
+            modelIds && modelIds.forEach(item => { url_ += "ModelIds=" + encodeURIComponent("" + item) + "&"; });
+        if (partTypeIds === null)
+            throw new Error("The parameter 'partTypeIds' cannot be null.");
+        else if (partTypeIds !== undefined)
+            partTypeIds && partTypeIds.forEach(item => { url_ += "PartTypeIds=" + encodeURIComponent("" + item) + "&"; });
         if (shopId === null)
             throw new Error("The parameter 'shopId' cannot be null.");
         else if (shopId !== undefined)
@@ -3459,11 +3463,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProducts4(_response);
+            return this.processProductsGET3(_response);
         });
     }
 
-    protected processProducts4(response: AxiosResponse): Promise<PublicProductListItemDtoPageResponseApiResponse> {
+    protected processProductsGET3(response: AxiosResponse): Promise<PublicProductListItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3493,6 +3497,10 @@ export class ApiClient implements IApiClient {
      * @param brandId (optional) 
      * @param modelId (optional) 
      * @param partTypeId (optional) 
+     * @param categoryIds (optional) 
+     * @param brandIds (optional) 
+     * @param modelIds (optional) 
+     * @param partTypeIds (optional) 
      * @param shopId (optional) 
      * @param pageNumber (optional) 
      * @param pageSize (optional) 
@@ -3500,7 +3508,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    newArrivals(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse> {
+    newArrivals(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicNewArrivalProductItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/public/products/new-arrivals?";
         if (search === null)
             throw new Error("The parameter 'search' cannot be null.");
@@ -3522,6 +3530,22 @@ export class ApiClient implements IApiClient {
             throw new Error("The parameter 'partTypeId' cannot be null.");
         else if (partTypeId !== undefined)
             url_ += "PartTypeId=" + encodeURIComponent("" + partTypeId) + "&";
+        if (categoryIds === null)
+            throw new Error("The parameter 'categoryIds' cannot be null.");
+        else if (categoryIds !== undefined)
+            categoryIds && categoryIds.forEach(item => { url_ += "CategoryIds=" + encodeURIComponent("" + item) + "&"; });
+        if (brandIds === null)
+            throw new Error("The parameter 'brandIds' cannot be null.");
+        else if (brandIds !== undefined)
+            brandIds && brandIds.forEach(item => { url_ += "BrandIds=" + encodeURIComponent("" + item) + "&"; });
+        if (modelIds === null)
+            throw new Error("The parameter 'modelIds' cannot be null.");
+        else if (modelIds !== undefined)
+            modelIds && modelIds.forEach(item => { url_ += "ModelIds=" + encodeURIComponent("" + item) + "&"; });
+        if (partTypeIds === null)
+            throw new Error("The parameter 'partTypeIds' cannot be null.");
+        else if (partTypeIds !== undefined)
+            partTypeIds && partTypeIds.forEach(item => { url_ += "PartTypeIds=" + encodeURIComponent("" + item) + "&"; });
         if (shopId === null)
             throw new Error("The parameter 'shopId' cannot be null.");
         else if (shopId !== undefined)
@@ -5312,6 +5336,14 @@ export interface OrderStatusSummaryDtoApiResponse {
     success?: boolean;
     message?: string;
     data?: OrderStatusSummaryDto;
+}
+
+export interface PageRequest {
+    pageNumber?: number;
+    pageSize?: number;
+    search?: string | undefined;
+    sortBy?: string | undefined;
+    sortDirection?: string | undefined;
 }
 
 export interface PlaceClientOrderItemRequestDto {

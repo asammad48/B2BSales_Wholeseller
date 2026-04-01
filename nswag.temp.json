@@ -2,8 +2,8 @@
   "runtime": "Net80",
   "documentGenerator": {
     "fromDocument": {
-      "url": "https://hbsxxs40-51948.inc1.devtunnels.ms/swagger/v1/swagger.json",
-      "output": null
+        "url": "https://localhost:51948/swagger/v1/swagger.json",
+        "output": null
     }
   },
   "codeGenerators": {
