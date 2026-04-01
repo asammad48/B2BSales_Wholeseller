@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../components/common/PageHeader';
-import { ClientLookupItem } from '../../repositories/clientsRepository';
+import { clientsRepository, ClientLookupItem } from '../../repositories/clientsRepository';
 import { ordersRepository } from '../../repositories/ordersRepository';
 import { posOrdersRepository, PosProduct } from '../../repositories/posOrdersRepository';
-import { ShopLookupItem } from '../../repositories/shopsRepository';
+import { shopsRepository, ShopLookupItem } from '../../repositories/shopsRepository';
 import { useAuth } from '../../state/AuthContext';
 import { PosOrderSummaryPanel } from './components/PosOrderSummaryPanel';
 import { PosProductSelectorPanel } from './components/PosProductSelectorPanel';
@@ -46,8 +46,8 @@ export const PosCreateOrderPage: React.FC = () => {
   const [productsError, setProductsError] = useState('');
   const [search, setSearch] = useState('');
 
-  const [shops] = useState<ShopLookupItem[]>([]);
-  const [clients] = useState<ClientLookupItem[]>([]);
+  const [shops, setShops] = useState<ShopLookupItem[]>([]);
+  const [clients, setClients] = useState<ClientLookupItem[]>([]);
 
   const [shopId, setShopId] = useState('');
   const [clientId, setClientId] = useState('');
@@ -56,6 +56,25 @@ export const PosCreateOrderPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [receipt, setReceipt] = useState<PosOrderReceipt | null>(null);
+
+
+  useEffect(() => {
+    const loadLookups = async () => {
+      try {
+        const [shopsLookup, clientLookups] = await Promise.all([
+          shopsRepository.getShopsLookup(),
+          clientsRepository.getCreateClientLookups(),
+        ]);
+
+        setShops(shopsLookup);
+        setClients(clientLookups.clients || []);
+      } catch (error) {
+        console.error('Failed to load POS lookups', error);
+      }
+    };
+
+    loadLookups();
+  }, []);
 
   useEffect(() => {
     if (!receipt && user?.shopId && user.shopId !== shopId) {
