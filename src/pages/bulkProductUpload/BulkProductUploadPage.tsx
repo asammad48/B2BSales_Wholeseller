@@ -196,7 +196,7 @@ export const BulkProductUploadPage: React.FC = () => {
             setJobIdInput(item.jobId);
             refreshJobStatus(item.jobId);
           }}
-          className="text-xs font-medium text-emerald-700 hover:text-emerald-800"
+          className="text-xs font-medium text-gray-800 hover:text-black"
         >
           View status
         </button>
@@ -219,7 +219,7 @@ export const BulkProductUploadPage: React.FC = () => {
               type="file"
               accept=".csv,text/csv"
               onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-emerald-700"
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white"
             />
           </div>
           <button type="button" onClick={handleUpload} disabled={isUploading} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
