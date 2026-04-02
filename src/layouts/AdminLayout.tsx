@@ -13,8 +13,8 @@ import {
   LogOut,
   Bell,
   Search,
-  Menu,
-  X,
+  ChevronsLeft,
+  ChevronsRight,
   Building2,
   MessageSquareMore,
   Coins,
@@ -78,7 +78,7 @@ export const AdminLayout = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-secondary)] selection:bg-[var(--color-primary)]/30">
       <motion.aside initial={false} animate={{ width: isSidebarOpen ? 280 : 80 }} className="admin-sidebar overflow-hidden">
-        <div className="p-6 flex items-center justify-between">
+        <div className="p-4 pb-3 flex items-center justify-between shrink-0">
           <AnimatePresence mode="wait">
             {isSidebarOpen && (
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex items-center gap-2">
@@ -89,12 +89,17 @@ export const AdminLayout = () => {
               </motion.div>
             )}
           </AnimatePresence>
-          <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="btn-ghost">
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          <button
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            {isSidebarOpen ? <ChevronsLeft size={18} /> : <ChevronsRight size={18} />}
           </button>
         </div>
 
-        <nav className="min-h-0 flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+        <nav className="min-h-0 flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto overscroll-contain custom-scrollbar">
           {navItems.map((item) => (
             <SidebarItem
               key={item.to}
