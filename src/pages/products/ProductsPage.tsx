@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
 import { Plus, Package, CheckCircle2, XCircle, X, DollarSign, GripVertical, ImagePlus, Star, RefreshCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -53,6 +54,7 @@ export const ProductsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lookups, setLookups] = useState<CatalogLookups>({ categories: [], brands: [], models: [], partTypes: [], currencies: [] });
   const [lookupsLoading, setLookupsLoading] = useState(false);
@@ -79,7 +81,7 @@ export const ProductsPage: React.FC = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await productsRepository.getProducts(page, 10, search);
+      const response = await productsRepository.getProducts(page, pageSize, search);
       setProducts(response.data);
       setTotal(response.total);
     } catch (error) {
@@ -119,7 +121,14 @@ export const ProductsPage: React.FC = () => {
       fetchProducts();
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, page]);
+  }, [search, page, pageSize]);
+
+  useEffect(() => {
+    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, pageSize, total]);
 
   useEffect(() => {
     fetchLookups();
@@ -457,27 +466,18 @@ export const ProductsPage: React.FC = () => {
             loading={loading}
           />
 
-          <div className="mt-6 flex items-center justify-between px-2">
-            <p className="text-xs text-gray-400">
-              Showing <span className="font-medium text-gray-600">{products.length}</span> of <span className="font-medium text-gray-600">{total}</span> products
-            </p>
-            <div className="flex gap-2">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-                className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                Previous
-              </button>
-              <button
-                disabled={page * 10 >= total}
-                onClick={() => setPage(p => p + 1)}
-                className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <PaginationControls
+            currentPage={page}
+            pageSize={pageSize}
+            totalItems={total}
+            currentCount={products.length}
+            itemLabel="products"
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </motion.div>
       </div>
 

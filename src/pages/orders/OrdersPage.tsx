@@ -14,6 +14,7 @@ import { FormField, Button } from '../../components/common/Form';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import { Order, OrderDetails, ordersRepository } from '../../repositories/ordersRepository';
 import { canComplete, canMarkAsReady, canMarkAsUnable, getStatusColor } from '../../utils/orderActions';
 
@@ -25,6 +26,7 @@ export const OrdersPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [isUnableModalOpen, setIsUnableModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -35,7 +37,7 @@ export const OrdersPage: React.FC = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await ordersRepository.getOrders(page, 10, search);
+      const response = await ordersRepository.getOrders(page, pageSize, search);
       setOrders(response.data);
       setTotal(response.total);
     } catch (error) {
@@ -55,7 +57,14 @@ export const OrdersPage: React.FC = () => {
       fetchOrders();
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, page]);
+  }, [search, page, pageSize]);
+
+  useEffect(() => {
+    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, pageSize, total]);
 
   const openOrderDetails = async (order: Order) => {
     setDetailsLoading(true);
@@ -188,15 +197,18 @@ export const OrdersPage: React.FC = () => {
           <SearchToolbar search={search} onSearchChange={setSearch} placeholder="Search by order #, client, or shop..." />
           <DataTable data={orders} columns={columns} loading={loading} onRowClick={openOrderDetails} />
 
-          <div className="mt-6 flex items-center justify-between px-2">
-            <p className="text-xs text-gray-400">
-              Showing <span className="font-medium text-gray-600">{orders.length}</span> of <span className="font-medium text-gray-600">{total}</span> orders
-            </p>
-            <div className="flex gap-2">
-              <button disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Previous</button>
-              <button disabled={page * 10 >= total} onClick={() => setPage((p) => p + 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Next</button>
-            </div>
-          </div>
+          <PaginationControls
+            currentPage={page}
+            pageSize={pageSize}
+            totalItems={total}
+            currentCount={orders.length}
+            itemLabel="orders"
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </motion.div>
       </div>
 

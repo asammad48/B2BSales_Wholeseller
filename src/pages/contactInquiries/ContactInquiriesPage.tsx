@@ -6,6 +6,7 @@ import { DataTable } from '../../components/common/DataTable';
 import { Button, FormField, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import {
   contactInquiriesRepository,
   ContactInquiry,
@@ -32,6 +33,7 @@ export const ContactInquiriesPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [detailLoading, setDetailLoading] = useState(false);
   const [selectedInquiry, setSelectedInquiry] = useState<ContactInquiryDetails | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<ContactInquiryStatus>('New');
@@ -40,7 +42,7 @@ export const ContactInquiriesPage: React.FC = () => {
   const fetchInquiries = async () => {
     setLoading(true);
     try {
-      const response = await contactInquiriesRepository.getContactInquiries(page, 10, search);
+      const response = await contactInquiriesRepository.getContactInquiries(page, pageSize, search);
       setInquiries(response.data);
       setTotal(response.total);
     } catch (error) {
@@ -55,7 +57,14 @@ export const ContactInquiriesPage: React.FC = () => {
       fetchInquiries();
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, page]);
+  }, [search, page, pageSize]);
+
+  useEffect(() => {
+    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, pageSize, total]);
 
   const openInquiry = async (inquiry: ContactInquiry) => {
     setDetailLoading(true);
@@ -122,15 +131,18 @@ export const ContactInquiriesPage: React.FC = () => {
           <SearchToolbar search={search} onSearchChange={setSearch} placeholder="Search by name, email, subject, or mobile number..." />
           <DataTable data={inquiries} columns={columns} loading={loading} onRowClick={openInquiry} />
 
-          <div className="mt-6 flex items-center justify-between px-2">
-            <p className="text-xs text-gray-400">
-              Showing <span className="font-medium text-gray-600">{inquiries.length}</span> of <span className="font-medium text-gray-600">{total}</span> inquiries
-            </p>
-            <div className="flex gap-2">
-              <button disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Previous</button>
-              <button disabled={page * 10 >= total} onClick={() => setPage((current) => current + 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Next</button>
-            </div>
-          </div>
+          <PaginationControls
+            currentPage={page}
+            pageSize={pageSize}
+            totalItems={total}
+            currentCount={inquiries.length}
+            itemLabel="inquiries"
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </motion.div>
       </div>
 

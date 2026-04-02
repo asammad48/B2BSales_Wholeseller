@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import { CreateTransferItemRequest, transfersRepository, Transfer, TransferProductLookup } from '../../repositories/transfersRepository';
 import { Truck, ArrowRightLeft, CheckCircle2, Package, X, Plus, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -51,6 +52,7 @@ export const TransfersPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [shops, setShops] = useState<ShopLookupItem[]>([]);
@@ -83,7 +85,7 @@ export const TransfersPage: React.FC = () => {
   const fetchTransfers = async () => {
     setLoading(true);
     try {
-      const response = await transfersRepository.getTransfers(page, 10, search);
+      const response = await transfersRepository.getTransfers(page, pageSize, search);
       setTransfers(response.data);
       setTotal(response.total);
     } catch (error) {
@@ -98,7 +100,14 @@ export const TransfersPage: React.FC = () => {
       fetchTransfers();
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, page]);
+  }, [search, page, pageSize]);
+
+  useEffect(() => {
+    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, pageSize, total]);
 
   useEffect(() => {
     setProductId('');
@@ -402,27 +411,17 @@ export const TransfersPage: React.FC = () => {
             loading={loading}
           />
 
-          <div className="mt-6 flex items-center justify-between px-2">
-            <p className="text-xs text-gray-400">
-              Showing <span className="font-medium text-gray-600">{transfers.length}</span> of <span className="font-medium text-gray-600">{total}</span> records
-            </p>
-            <div className="flex gap-2">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-                className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                Previous
-              </button>
-              <button
-                disabled={page * 10 >= total}
-                onClick={() => setPage(p => p + 1)}
-                className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          </div>
+          <PaginationControls
+            currentPage={page}
+            pageSize={pageSize}
+            totalItems={total}
+            currentCount={transfers.length}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </motion.div>
       </div>
 

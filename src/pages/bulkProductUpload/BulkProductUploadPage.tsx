@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Upload, PlayCircle, RefreshCcw, AlertCircle, CheckCircle2, Clock3 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import { bulkProductUploadRepository, BulkUploadJobStatus } from '../../repositories/bulkProductUploadRepository';
 
 type StoredJob = {
@@ -11,7 +12,6 @@ type StoredJob = {
 };
 
 const JOB_STORAGE_KEY = 'bulk_upload_job_history';
-const PAGE_SIZE = 10;
 
 const readStoredJobs = (): StoredJob[] => {
   try {
@@ -47,6 +47,7 @@ export const BulkProductUploadPage: React.FC = () => {
   const [jobHistory, setJobHistory] = useState<StoredJob[]>([]);
   const [historyStatusByJobId, setHistoryStatusByJobId] = useState<Record<string, BulkUploadJobStatus>>({});
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const loadHistory = () => {
     setJobHistory(readStoredJobs());
@@ -158,9 +159,16 @@ export const BulkProductUploadPage: React.FC = () => {
   };
 
   const pagedHistory = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return jobHistory.slice(start, start + PAGE_SIZE);
-  }, [jobHistory, page]);
+    const start = (page - 1) * pageSize;
+    return jobHistory.slice(start, start + pageSize);
+  }, [jobHistory, page, pageSize]);
+
+  useEffect(() => {
+    const totalPages = Math.max(Math.ceil(jobHistory.length / pageSize), 1);
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [jobHistory.length, page, pageSize]);
 
   const historyColumns = useMemo(() => [
     {
@@ -285,13 +293,18 @@ export const BulkProductUploadPage: React.FC = () => {
 
         <DataTable data={pagedHistory} columns={historyColumns} loading={false} />
 
-        <div className="mt-2 flex items-center justify-between px-1">
-          <p className="text-xs text-gray-500">Showing <span className="text-gray-900 font-medium">{pagedHistory.length}</span> of <span className="text-gray-900 font-medium">{jobHistory.length}</span> jobs</p>
-          <div className="flex gap-2">
-            <button disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Previous</button>
-            <button disabled={page * PAGE_SIZE >= jobHistory.length} onClick={() => setPage((current) => current + 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">Next</button>
-          </div>
-        </div>
+        <PaginationControls
+          currentPage={page}
+          pageSize={pageSize}
+          totalItems={jobHistory.length}
+          currentCount={pagedHistory.length}
+          itemLabel="jobs"
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
       </motion.div>
     </div></div>
   );
