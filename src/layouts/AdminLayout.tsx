@@ -57,7 +57,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
 
 export const AdminLayout = () => {
   const location = useLocation();
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
 
   const navItems = [
@@ -77,7 +77,7 @@ export const AdminLayout = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-secondary)] selection:bg-[var(--color-primary)]/30">
-      <motion.aside initial={false} animate={{ width: isSidebarOpen ? 280 : 80 }} className="admin-sidebar">
+      <motion.aside initial={false} animate={{ width: isSidebarOpen ? 280 : 80 }} className="admin-sidebar overflow-hidden">
         <div className="p-6 flex items-center justify-between">
           <AnimatePresence mode="wait">
             {isSidebarOpen && (
@@ -94,7 +94,7 @@ export const AdminLayout = () => {
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+        <nav className="min-h-0 flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => (
             <SidebarItem
               key={item.to}
