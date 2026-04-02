@@ -4,6 +4,7 @@ import { CheckCircle2, Plus, Store, User as UserIcon, X, XCircle } from 'lucide-
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
+import { PaginationControls } from '../../components/common/PaginationControls';
 import { Button, FormField, Input, SearchableSelect, SearchableSelectOption } from '../../components/common/Form';
 import { usersRepository, UserAdmin } from '../../repositories/usersRepository';
 
@@ -19,6 +20,7 @@ export const UsersPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -49,7 +51,7 @@ export const UsersPage: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await usersRepository.getUsers(page, 10, search);
+      const response = await usersRepository.getUsers(page, pageSize, search);
       setUsers(response.data);
       setTotal(response.total);
     } catch (error) {
@@ -78,7 +80,14 @@ export const UsersPage: React.FC = () => {
       fetchUsers();
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, page]);
+  }, [search, page, pageSize]);
+
+  useEffect(() => {
+    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, pageSize, total]);
 
   const openCreateModal = async () => {
     setIsCreateModalOpen(true);
@@ -189,19 +198,17 @@ export const UsersPage: React.FC = () => {
 
           <DataTable data={users} columns={columns} loading={loading} />
 
-          <div className="mt-6 flex items-center justify-between px-2">
-            <p className="text-xs text-gray-400">
-              Showing <span className="font-medium text-gray-600">{users.length}</span> of <span className="font-medium text-gray-600">{total}</span> records
-            </p>
-            <div className="flex gap-2">
-              <button disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">
-                Previous
-              </button>
-              <button disabled={page * 10 >= total} onClick={() => setPage((p) => p + 1)} className="px-4 py-2 text-xs font-medium bg-white border border-gray-100 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors">
-                Next
-              </button>
-            </div>
-          </div>
+          <PaginationControls
+            currentPage={page}
+            pageSize={pageSize}
+            totalItems={total}
+            currentCount={users.length}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </motion.div>
       </div>
 
