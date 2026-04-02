@@ -76,7 +76,7 @@ export const AdminLayout = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-main)] text-[var(--text-secondary)] selection:bg-[var(--color-primary)]/30">
+    <div className="flex h-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-secondary)] selection:bg-[var(--color-primary)]/30">
       <motion.aside initial={false} animate={{ width: isSidebarOpen ? 280 : 80 }} className="admin-sidebar">
         <div className="p-6 flex items-center justify-between">
           <AnimatePresence mode="wait">
@@ -115,7 +115,7 @@ export const AdminLayout = () => {
         </div>
       </motion.aside>
 
-      <main className={cn('flex-1 transition-all duration-300', isSidebarOpen ? 'ml-[280px]' : 'ml-[80px]')}>
+      <main className={cn('flex-1 h-screen overflow-y-auto transition-all duration-300', isSidebarOpen ? 'ml-[280px]' : 'ml-[80px]')}>
         <header className="admin-header">
           <div className="search-input-wrapper">
             <Search size={18} className="text-[var(--text-muted)]" />

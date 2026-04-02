@@ -11,13 +11,15 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   loading?: boolean;
   onRowClick?: (item: T) => void;
+  maxHeightClassName?: string;
 }
 
 export function DataTable<T extends { id: string | number }>({ 
   data, 
   columns, 
   loading,
-  onRowClick 
+  onRowClick,
+  maxHeightClassName = 'max-h-[62vh]',
 }: DataTableProps<T>) {
   if (loading) {
     return (
@@ -38,7 +40,7 @@ export function DataTable<T extends { id: string | number }>({
 
   return (
     <div className="bg-white rounded-b-[24px] overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className={`overflow-auto ${maxHeightClassName}`}>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-50">
