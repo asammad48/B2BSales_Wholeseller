@@ -43,26 +43,30 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 overflow-hidden`}>
-      <div className="p-4 flex items-center justify-between gap-3 border-b border-gray-50 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: 'var(--primary-color)' }}>
-            <Shield size={20} />
-          </div>
-          {isSidebarOpen && (
+      <div className={`p-4 flex items-center border-b border-gray-50 shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
+        {isSidebarOpen && (
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: 'var(--primary-color)' }}>
+              <Shield size={20} />
+            </div>
             <div className="min-w-0">
               <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Wholesaler'}</h1>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <button
           onClick={() => setSidebarOpen(!isSidebarOpen)}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shrink-0"
+          className={`inline-flex items-center justify-center rounded-lg transition-colors shrink-0 ${
+            isSidebarOpen
+              ? 'h-8 w-8 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              : 'h-10 w-10 bg-gray-900 text-white hover:bg-black'
+          }`}
           title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         >
-          {isSidebarOpen ? <ChevronsLeft size={16} /> : <ChevronsRight size={16} />}
+          {isSidebarOpen ? <ChevronsLeft size={16} /> : <ChevronsRight size={18} />}
         </button>
       </div>
 
@@ -76,7 +80,7 @@ const Sidebar: React.FC = () => {
             } ${isSidebarOpen ? '' : 'justify-center px-0'}`}
             title={item.label}
           >
-            <item.icon size={18} />
+            <item.icon size={isSidebarOpen ? 18 : 21} />
             {isSidebarOpen && <span className="truncate">{item.label}</span>}
           </Link>
         ))}
