@@ -77,10 +77,10 @@ const Sidebar: React.FC = () => {
             to={item.path}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
               ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path)) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            } ${isSidebarOpen ? '' : 'justify-center px-0'}`}
+            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-10 w-10'}`}
             title={item.label}
           >
-            <item.icon size={isSidebarOpen ? 18 : 21} />
+            <item.icon size={isSidebarOpen ? 18 : 18} />
             {isSidebarOpen && <span className="truncate">{item.label}</span>}
           </Link>
         ))}
