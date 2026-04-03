@@ -36,10 +36,10 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
       className={cn(
         'flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative',
         active ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5',
-        collapsed && 'justify-center px-0'
+        collapsed && 'justify-center px-0 h-10 w-10 mx-auto'
       )}
     >
-      <Icon size={20} className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--text-primary)]')} />
+      <Icon size={collapsed ? 18 : 20} className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--text-primary)]')} />
 
       <AnimatePresence>
         {!collapsed && (
@@ -91,7 +91,12 @@ export const AdminLayout = () => {
           </AnimatePresence>
           <button
             onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            className={cn(
+              'inline-flex items-center justify-center rounded-lg transition-colors',
+              isSidebarOpen
+                ? 'h-9 w-9 border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white'
+                : 'h-10 w-10 bg-black text-white hover:bg-black/90'
+            )}
             title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
