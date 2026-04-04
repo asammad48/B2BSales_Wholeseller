@@ -75,21 +75,21 @@ const Sidebar: React.FC = () => {
         )}
       </div>
 
-      <nav className="min-h-0 flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain">
+      <nav className="min-h-0 flex-1 p-4 space-y-2 overflow-y-auto overscroll-contain">
         {navItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all ${
               ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path)) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-10 w-10'}`}
+            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-12 w-12'}`}
             title={item.label}
           >
             <item.icon
-              size={isSidebarOpen ? 18 : 20}
+              size={isSidebarOpen ? 21 : 24}
               strokeWidth={2.25}
             />
-            {isSidebarOpen && <span className="truncate">{item.label}</span>}
+            {isSidebarOpen && <span className="truncate text-[15px]">{item.label}</span>}
           </Link>
         ))}
       </nav>
