@@ -79,7 +79,12 @@ export const AdminLayout = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-main)] text-[var(--text-secondary)] selection:bg-[var(--color-primary)]/30">
-      <motion.aside initial={false} animate={{ width: isSidebarOpen ? 280 : 80 }} className="admin-sidebar overflow-hidden">
+      <motion.aside
+        initial={false}
+        animate={{ width: isSidebarOpen ? 280 : 80 }}
+        transition={{ duration: 0.28, ease: 'easeInOut' }}
+        className="admin-sidebar overflow-hidden"
+      >
         <div className="p-4 pb-3 flex items-center justify-between shrink-0">
           <AnimatePresence mode="wait">
             {isSidebarOpen && (

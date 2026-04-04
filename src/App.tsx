@@ -42,7 +42,7 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 overflow-hidden`}>
+    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden`}>
       <div className={`p-4 flex items-center border-b border-gray-50 shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
         {isSidebarOpen && (
           <div className="flex items-center gap-3 min-w-0">
@@ -80,7 +80,7 @@ const Sidebar: React.FC = () => {
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all ${
+            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out ${
               ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path)) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
             } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-12 w-12'}`}
             title={item.label}
@@ -89,7 +89,9 @@ const Sidebar: React.FC = () => {
               size={isSidebarOpen ? 21 : 24}
               strokeWidth={2.25}
             />
-            {isSidebarOpen && <span className="truncate text-[15px]">{item.label}</span>}
+            <span className={`truncate text-[15px] transition-all duration-200 ease-in-out ${isSidebarOpen ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+              {item.label}
+            </span>
           </Link>
         ))}
       </nav>
