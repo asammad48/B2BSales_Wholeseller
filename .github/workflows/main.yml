@@ -1,0 +1,71 @@
+name: Deploy Admin Website
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      CURRENT_DIR: /opt/apps/mobia2z-admin/current
+      INCOMING_FILE: /tmp/mobia2z-admin.tar.gz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package
+        run: tar -czf admin.tar.gz -C ./dist .
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Upload package
+        run: |
+          scp -P "${{ secrets.VPS_PORT }}" -o StrictHostKeyChecking=no \
+            admin.tar.gz \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ env.INCOMING_FILE }}"
+
+      - name: Deploy on VPS
+        run: |
+          ssh -p "${{ secrets.VPS_PORT }}" -o StrictHostKeyChecking=no \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
+              set -euo pipefail
+
+              CURRENT_DIR="/opt/apps/mobia2z-admin/current"
+              INCOMING_FILE="/tmp/mobia2z-admin.tar.gz"
+              EXTRACT_DIR="/tmp/mobia2z-admin-extract"
+
+              mkdir -p "$CURRENT_DIR"
+              rm -rf "$EXTRACT_DIR"
+              mkdir -p "$EXTRACT_DIR"
+
+              tar -xzf "$INCOMING_FILE" -C "$EXTRACT_DIR"
+
+              find "$CURRENT_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+
+              cp -a "$EXTRACT_DIR"/. "$CURRENT_DIR"/
+
+              sudo nginx -t
+              sudo systemctl reload nginx
+
+              rm -rf "$EXTRACT_DIR"
+              rm -f "$INCOMING_FILE"
+          EOF
