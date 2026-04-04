@@ -84,28 +84,30 @@ export const AdminLayout = () => {
           <AnimatePresence mode="wait">
             {isSidebarOpen && (
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-glow">
+                <button
+                  onClick={() => setSidebarOpen(!isSidebarOpen)}
+                  className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-glow"
+                  title="Collapse sidebar"
+                  aria-label="Collapse sidebar"
+                >
                   <Boxes size={18} className="text-white" />
-                </div>
+                </button>
                 <span className="font-bold text-lg tracking-tight text-white uppercase">Wholesale</span>
               </motion.div>
             )}
           </AnimatePresence>
-          <button
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className={cn(
-              'inline-flex items-center justify-center rounded-lg transition-colors',
-              isSidebarOpen
-                ? 'h-9 w-9 border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white'
-                : 'h-10 w-10 bg-black text-white hover:bg-black/90'
-            )}
-            title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          >
-            <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-glow">
-              <Boxes size={18} className="text-white" />
-            </div>
-          </button>
+          {!isSidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(!isSidebarOpen)}
+              className="h-10 w-10 inline-flex items-center justify-center rounded-lg transition-colors bg-black text-white hover:bg-black/90"
+              title="Expand sidebar"
+              aria-label="Expand sidebar"
+            >
+              <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-glow">
+                <Boxes size={18} className="text-white" />
+              </div>
+            </button>
+          )}
         </div>
 
         <nav className="min-h-0 flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto overscroll-contain custom-scrollbar">

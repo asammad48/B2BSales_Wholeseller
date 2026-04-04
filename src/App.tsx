@@ -46,9 +46,15 @@ const Sidebar: React.FC = () => {
       <div className={`p-4 flex items-center border-b border-gray-50 shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
         {isSidebarOpen && (
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: 'var(--primary-color)' }}>
+            <button
+              onClick={() => setSidebarOpen(!isSidebarOpen)}
+              className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0"
+              style={{ backgroundColor: 'var(--primary-color)' }}
+              title="Collapse sidebar"
+              aria-label="Collapse sidebar"
+            >
               <Shield size={20} />
-            </div>
+            </button>
             <div className="min-w-0">
               <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Wholesaler'}</h1>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
@@ -56,23 +62,17 @@ const Sidebar: React.FC = () => {
           </div>
         )}
 
-        <button
-          onClick={() => setSidebarOpen(!isSidebarOpen)}
-          className={`inline-flex items-center justify-center rounded-lg transition-colors shrink-0 ${
-            isSidebarOpen
-              ? 'h-8 w-8 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              : 'h-10 w-10 bg-gray-900 text-white hover:bg-black'
-          }`}
-          title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-        >
-          <div
-            className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white"
+        {!isSidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className="h-10 w-10 inline-flex items-center justify-center rounded-xl transition-colors shrink-0 bg-gray-900 text-white hover:bg-black"
             style={{ backgroundColor: 'var(--primary-color)' }}
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
           >
             <Shield size={20} />
-          </div>
-        </button>
+          </button>
+        )}
       </div>
 
       <nav className="min-h-0 flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain">
