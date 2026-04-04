@@ -13,8 +13,6 @@ import {
   LogOut,
   Bell,
   Search,
-  ChevronsLeft,
-  ChevronsRight,
   Building2,
   MessageSquareMore,
   Coins,
@@ -104,7 +102,9 @@ export const AdminLayout = () => {
             title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            {isSidebarOpen ? <ChevronsLeft size={18} /> : <ChevronsRight size={18} />}
+            <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-glow">
+              <Boxes size={18} className="text-white" />
+            </div>
           </button>
         </div>
 

@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './state/AuthContext';
 import { SettingsProvider, useSettings } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
-import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload } from 'lucide-react';
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { OrdersPage } from './pages/orders/OrdersPage';
@@ -66,7 +66,12 @@ const Sidebar: React.FC = () => {
           title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         >
-          {isSidebarOpen ? <ChevronsLeft size={16} /> : <ChevronsRight size={18} />}
+          <div
+            className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white"
+            style={{ backgroundColor: 'var(--primary-color)' }}
+          >
+            <Shield size={20} />
+          </div>
         </button>
       </div>
 
