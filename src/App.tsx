@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './state/AuthContext';
 import { SettingsProvider, useSettings } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
-import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { OrdersPage } from './pages/orders/OrdersPage';
@@ -23,6 +23,7 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const { logout } = useAuth();
   const { settings } = useSettings();
+  const [isSidebarOpen, setSidebarOpen] = React.useState(false);
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -41,36 +42,57 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
-      <div className="p-6 flex items-center gap-3 border-b border-gray-50">
-        <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white" style={{ backgroundColor: 'var(--primary-color)' }}>
-          <Shield size={20} />
-        </div>
-        <div>
-          <h1 className="font-medium text-gray-900 leading-tight">{settings?.name || 'Wholesaler'}</h1>
-          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
-        </div>
+    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 overflow-hidden`}>
+      <div className={`p-4 flex items-center border-b border-gray-50 shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
+        {isSidebarOpen && (
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: 'var(--primary-color)' }}>
+              <Shield size={20} />
+            </div>
+            <div className="min-w-0">
+              <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Wholesaler'}</h1>
+              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => setSidebarOpen(!isSidebarOpen)}
+          className={`inline-flex items-center justify-center rounded-lg transition-colors shrink-0 ${
+            isSidebarOpen
+              ? 'h-8 w-8 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              : 'h-10 w-10 bg-gray-900 text-white hover:bg-black'
+          }`}
+          title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+        >
+          {isSidebarOpen ? <ChevronsLeft size={16} /> : <ChevronsRight size={18} />}
+        </button>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="min-h-0 flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain">
         {navItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
               ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path)) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            }`}
+            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-10 w-10'}`}
+            title={item.label}
           >
-            <item.icon size={18} />
-            <span>{item.label}</span>
+            <item.icon
+              size={isSidebarOpen ? 18 : 20}
+              strokeWidth={2.25}
+            />
+            {isSidebarOpen && <span className="truncate">{item.label}</span>}
           </Link>
         ))}
       </nav>
 
       <div className="p-4 border-t border-gray-50">
-        <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all">
+        <button onClick={logout} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all ${isSidebarOpen ? '' : 'justify-center px-0'}`}>
           <LogOut size={18} />
-          <span>Logout</span>
+          {isSidebarOpen && <span>Logout</span>}
         </button>
       </div>
     </aside>
