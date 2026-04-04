@@ -80,7 +80,11 @@ const Sidebar: React.FC = () => {
             } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-10 w-10'}`}
             title={item.label}
           >
-            <item.icon size={isSidebarOpen ? 18 : 24} strokeWidth={2.25} />
+            <item.icon
+              size={isSidebarOpen ? 18 : 28}
+              strokeWidth={2.25}
+              style={isSidebarOpen ? undefined : { width: 28, height: 28, minWidth: 28, minHeight: 28 }}
+            />
             {isSidebarOpen && <span className="truncate">{item.label}</span>}
           </Link>
         ))}

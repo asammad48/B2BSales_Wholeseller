@@ -39,7 +39,12 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
         collapsed && 'justify-center px-0 h-10 w-10 mx-auto'
       )}
     >
-      <Icon size={collapsed ? 24 : 20} strokeWidth={2.25} className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--text-primary)]')} />
+      <Icon
+        size={collapsed ? 28 : 20}
+        strokeWidth={2.25}
+        style={collapsed ? { width: 28, height: 28, minWidth: 28, minHeight: 28 } : undefined}
+        className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--text-primary)]')}
+      />
 
       <AnimatePresence>
         {!collapsed && (
