@@ -115,7 +115,7 @@ const appendIfPresent = (formData: FormData, key: string, value: string | number
 };
 
 export const productsRepository = {
-  async getProducts(
+  async products(
     page: number = 1,
     limit: number = 10,
     search: string = '',
@@ -174,7 +174,7 @@ export const productsRepository = {
     };
   },
 
-  async getProductById(id: string): Promise<Product> {
+  async publicProductsGET(id: string): Promise<Product> {
     const response = await apiClient.productsGET2(id);
 
     if (!response.success || !response.data) {
@@ -182,6 +182,20 @@ export const productsRepository = {
     }
 
     return response.data as any;
+  },
+
+  async getProducts(
+    page: number = 1,
+    limit: number = 10,
+    search: string = '',
+    sortBy: string = 'createdAt',
+    sortDirection: 'asc' | 'desc' = 'desc'
+  ): Promise<ProductsResponse> {
+    return productsRepository.products(page, limit, search, sortBy, sortDirection);
+  },
+
+  async getProductById(id: string): Promise<Product> {
+    return productsRepository.publicProductsGET(id);
   },
 
   async createProduct(product: CreateProductPayload): Promise<string> {

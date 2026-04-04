@@ -101,7 +101,7 @@ const mapPosProduct = (item: PosProductListItemDto): PosProduct => ({
 });
 
 export const posOrdersRepository = {
-  async getPosProducts(params: PosProductsQuery = {}): Promise<PosProductsResponse> {
+  async products(params: PosProductsQuery = {}): Promise<PosProductsResponse> {
     const response = await apiClient.productsGET(
       params.shopId,
       params.page || 1,
@@ -123,6 +123,10 @@ export const posOrdersRepository = {
       success: Boolean(response.success),
       message: response.message || '',
     };
+  },
+
+  async getPosProducts(params: PosProductsQuery = {}): Promise<PosProductsResponse> {
+    return posOrdersRepository.products(params);
   },
 
   async createPosOrder(body: CreatePosOrderBody): Promise<CreatePosOrderResponseDto> {
