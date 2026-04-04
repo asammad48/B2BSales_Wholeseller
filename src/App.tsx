@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './state/AuthContext';
 import { SettingsProvider, useSettings } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
-import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload } from 'lucide-react';
 import { ProductsPage } from './pages/products/ProductsPage';
 import { InventoryPage } from './pages/inventory/InventoryPage';
 import { OrdersPage } from './pages/orders/OrdersPage';
@@ -42,13 +42,19 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 overflow-hidden`}>
+    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden`}>
       <div className={`p-4 flex items-center border-b border-gray-50 shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
         {isSidebarOpen && (
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0" style={{ backgroundColor: 'var(--primary-color)' }}>
+            <button
+              onClick={() => setSidebarOpen(!isSidebarOpen)}
+              className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0"
+              style={{ backgroundColor: 'var(--primary-color)' }}
+              title="Collapse sidebar"
+              aria-label="Collapse sidebar"
+            >
               <Shield size={20} />
-            </div>
+            </button>
             <div className="min-w-0">
               <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Wholesaler'}</h1>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
@@ -56,35 +62,36 @@ const Sidebar: React.FC = () => {
           </div>
         )}
 
-        <button
-          onClick={() => setSidebarOpen(!isSidebarOpen)}
-          className={`inline-flex items-center justify-center rounded-lg transition-colors shrink-0 ${
-            isSidebarOpen
-              ? 'h-8 w-8 border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              : 'h-10 w-10 bg-gray-900 text-white hover:bg-black'
-          }`}
-          title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-        >
-          {isSidebarOpen ? <ChevronsLeft size={16} /> : <ChevronsRight size={18} />}
-        </button>
+        {!isSidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className="h-10 w-10 inline-flex items-center justify-center rounded-xl transition-colors shrink-0 bg-gray-900 text-white hover:bg-black"
+            style={{ backgroundColor: 'var(--primary-color)' }}
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+          >
+            <Shield size={20} />
+          </button>
+        )}
       </div>
 
-      <nav className="min-h-0 flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain">
+      <nav className="min-h-0 flex-1 p-4 space-y-2 overflow-y-auto overscroll-contain">
         {navItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out ${
               ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path)) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-10 w-10'}`}
+            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-12 w-12'}`}
             title={item.label}
           >
             <item.icon
-              size={isSidebarOpen ? 18 : 20}
+              size={isSidebarOpen ? 21 : 24}
               strokeWidth={2.25}
             />
-            {isSidebarOpen && <span className="truncate">{item.label}</span>}
+            <span className={`truncate text-[15px] transition-all duration-200 ease-in-out ${isSidebarOpen ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
+              {item.label}
+            </span>
           </Link>
         ))}
       </nav>
