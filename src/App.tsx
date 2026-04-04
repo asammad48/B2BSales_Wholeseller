@@ -81,9 +81,8 @@ const Sidebar: React.FC = () => {
             title={item.label}
           >
             <item.icon
-              size={isSidebarOpen ? 18 : 28}
+              size={isSidebarOpen ? 18 : 20}
               strokeWidth={2.25}
-              style={isSidebarOpen ? undefined : { width: 28, height: 28, minWidth: 28, minHeight: 28 }}
             />
             {isSidebarOpen && <span className="truncate">{item.label}</span>}
           </Link>
