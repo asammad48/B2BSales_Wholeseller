@@ -200,7 +200,7 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    productsGET(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PosProductListItemDtoPageResponseApiResponse>;
+    products(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PosProductListItemDtoPageResponseApiResponse>;
     /**
      * @param body (optional) 
      * @return OK
@@ -279,11 +279,11 @@ export interface IApiClient {
      * @param body (optional) 
      * @return OK
      */
-    productsPOST(body?: PageRequest | undefined): Promise<ProductListItemResponseDtoPageResponseApiResponse>;
+    publicProductsPOST(body?: PageRequest | undefined): Promise<ProductListItemResponseDtoPageResponseApiResponse>;
     /**
      * @return OK
      */
-    productsGET2(id: string): Promise<ProductDetailResponseDtoApiResponse>;
+    publicProductsGET(id: string): Promise<ProductDetailResponseDtoApiResponse>;
     /**
      * @return OK
      */
@@ -309,7 +309,7 @@ export interface IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    productsGET3(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
+    products2(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined): Promise<PublicProductListItemDtoPageResponseApiResponse>;
     /**
      * @param search (optional) 
      * @param categoryId (optional) 
@@ -2392,7 +2392,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    productsGET(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PosProductListItemDtoPageResponseApiResponse> {
+    products(shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, search?: string | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PosProductListItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/pos/products?";
         if (shopId === null)
             throw new Error("The parameter 'shopId' cannot be null.");
@@ -2436,11 +2436,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProductsGET(_response);
+            return this.processProducts(_response);
         });
     }
 
-    protected processProductsGET(response: AxiosResponse): Promise<PosProductListItemDtoPageResponseApiResponse> {
+    protected processProducts(response: AxiosResponse): Promise<PosProductListItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3162,8 +3162,8 @@ export class ApiClient implements IApiClient {
      * @param body (optional) 
      * @return OK
      */
-    productsPOST(body?: PageRequest | undefined, cancelToken?: CancelToken): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
-        let url_ = this.baseUrl + "/api/public/storefront/products";
+    publicProductsPOST(body?: PageRequest | undefined, cancelToken?: CancelToken): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
+        let url_ = this.baseUrl + "/api/public/storefront/public-products";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -3186,11 +3186,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProductsPOST(_response);
+            return this.processPublicProductsPOST(_response);
         });
     }
 
-    protected processProductsPOST(response: AxiosResponse): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
+    protected processPublicProductsPOST(response: AxiosResponse): Promise<ProductListItemResponseDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3217,8 +3217,8 @@ export class ApiClient implements IApiClient {
     /**
      * @return OK
      */
-    productsGET2(id: string, cancelToken?: CancelToken): Promise<ProductDetailResponseDtoApiResponse> {
-        let url_ = this.baseUrl + "/api/public/storefront/products/{id}";
+    publicProductsGET(id: string, cancelToken?: CancelToken): Promise<ProductDetailResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/public/storefront/public-products/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -3240,11 +3240,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProductsGET2(_response);
+            return this.processPublicProductsGET(_response);
         });
     }
 
-    protected processProductsGET2(response: AxiosResponse): Promise<ProductDetailResponseDtoApiResponse> {
+    protected processPublicProductsGET(response: AxiosResponse): Promise<ProductDetailResponseDtoApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -3387,7 +3387,7 @@ export class ApiClient implements IApiClient {
      * @param sortDirection (optional) 
      * @return OK
      */
-    productsGET3(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
+    products2(search?: string | undefined, categoryId?: string | undefined, brandId?: string | undefined, modelId?: string | undefined, partTypeId?: string | undefined, categoryIds?: string[] | undefined, brandIds?: string[] | undefined, modelIds?: string[] | undefined, partTypeIds?: string[] | undefined, shopId?: string | undefined, pageNumber?: number | undefined, pageSize?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, cancelToken?: CancelToken): Promise<PublicProductListItemDtoPageResponseApiResponse> {
         let url_ = this.baseUrl + "/api/public/catalog/products?";
         if (search === null)
             throw new Error("The parameter 'search' cannot be null.");
@@ -3463,11 +3463,11 @@ export class ApiClient implements IApiClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processProductsGET3(_response);
+            return this.processProducts2(_response);
         });
     }
 
-    protected processProductsGET3(response: AxiosResponse): Promise<PublicProductListItemDtoPageResponseApiResponse> {
+    protected processProducts2(response: AxiosResponse): Promise<PublicProductListItemDtoPageResponseApiResponse> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
