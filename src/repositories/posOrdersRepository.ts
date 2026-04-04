@@ -4,7 +4,7 @@ import {
   PosProductListItemDto,
   ProductBarcodeDto,
 } from '../api/generated/apiClient';
-import { safeApiClient as apiClient } from './apiClientSafe';
+import { apiClient } from '../api/client';
 import { adminHttp, getApiErrorMessage, unwrapApiResponse } from './adminHttp';
 
 export interface PosSerializedUnit {
