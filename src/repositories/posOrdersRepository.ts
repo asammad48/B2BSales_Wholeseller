@@ -102,7 +102,7 @@ const mapPosProduct = (item: PosProductListItemDto): PosProduct => ({
 
 export const posOrdersRepository = {
   async products(params: PosProductsQuery = {}): Promise<PosProductsResponse> {
-    const response = await apiClient.productsGET(
+        const response = await apiClient.products(
       params.shopId,
       params.page || 1,
       params.limit || 100,
