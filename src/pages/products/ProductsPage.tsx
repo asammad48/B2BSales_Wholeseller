@@ -150,7 +150,7 @@ export const ProductsPage: React.FC = () => {
   useEffect(() => {
     if (selectedProduct && isPricingModalOpen) {
       pricingAdjustment.setBaseCurrencyId(selectedProduct.baseCurrencyId || currencySettings?.defaultSellingCurrencyId || '');
-      pricingAdjustment.setBasePrice(selectedProduct.basePrice || selectedProduct.defaultBuyingPrice || 0);
+      pricingAdjustment.setBasePrice(selectedProduct.basePrice ?? 0);
       pricingAdjustment.setPricingMode(selectedProduct.defaultPricingMode || 'Direct');
       pricingAdjustment.setMarkupPercentage(selectedProduct.defaultMarkupPercentage || 0);
       pricingAdjustment.setSellingPrice(selectedProduct.defaultSellingPrice || 0);
@@ -314,20 +314,18 @@ export const ProductsPage: React.FC = () => {
     if (!selectedProduct) return;
 
     const formData = new FormData(e.currentTarget);
-    const buyingPrice = Number(formData.get('buyingPrice'));
     const reasonRaw = (formData.get('reason') as string)?.trim();
     const effectiveSellingPrice = pricingAdjustment.pricingMode === 'PercentageBased'
       ? pricingAdjustment.computedSellingPrice
       : pricingAdjustment.sellingPrice;
 
-    if (buyingPrice < 0 || effectiveSellingPrice < 0 || pricingAdjustment.basePrice < 0) {
-      alert('Base, buying, and selling prices must be non-negative');
+    if (effectiveSellingPrice < 0 || pricingAdjustment.basePrice < 0) {
+      alert('Base and selling prices must be non-negative');
       return;
     }
 
     try {
       await productsRepository.adjustProductPricing(selectedProduct.id, {
-        buyingPrice,
         baseCurrencyId: pricingAdjustment.baseCurrencyId,
         basePrice: pricingAdjustment.basePrice,
         pricingMode: pricingAdjustment.pricingMode,
@@ -776,9 +774,6 @@ export const ProductsPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleAdjustPricing} className="grid grid-cols-2 gap-4">
-                <FormField label="Buying Price">
-                  <Input name="buyingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultBuyingPrice || 0} required />
-                </FormField>
                 <FormField label="Base Currency">
                   <SearchableSelect
                     name="adjustBaseCurrencyId"
