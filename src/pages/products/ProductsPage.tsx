@@ -788,6 +788,17 @@ export const ProductsPage: React.FC = () => {
                 <FormField label="Buying Price">
                   <Input name="buyingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultBuyingPrice || 0} required />
                 </FormField>
+                <FormField label="Buying Currency">
+                  <SearchableSelect
+                    name="adjustBaseCurrencyId"
+                    required
+                    value={pricingAdjustment.baseCurrencyId}
+                    onChange={pricingAdjustment.setBaseCurrencyId}
+                    placeholder="Select buying currency"
+                    searchPlaceholder="Search currencies"
+                    options={currencyOptions}
+                  />
+                </FormField>
                 <FormField label="Pricing Mode">
                   <SearchableSelect
                     name="pricingMode"
