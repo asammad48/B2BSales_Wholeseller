@@ -30,15 +30,15 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
   <Link to={to}>
     <motion.div
       whileHover={{ x: collapsed ? 0 : 4 }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.96 }}
       className={cn(
         'flex items-center rounded-2xl transition-all duration-200 group relative',
         collapsed
           ? cn(
               'justify-center h-12 w-12 mx-auto',
               active
-                ? 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-primary)]'
+                ? 'ring-1 ring-[var(--color-primary)]/30 shadow-[0_0_18px_rgba(16,185,129,0.18)]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--color-primary)] hover:ring-1 hover:ring-[var(--color-primary)]/15 hover:shadow-[0_0_10px_rgba(16,185,129,0.08)]'
             )
           : cn(
               'gap-3 px-4 py-3',
@@ -47,11 +47,20 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
             )
       )}
+      style={
+        collapsed && active
+          ? { background: 'linear-gradient(135deg, rgba(16,185,129,0.22) 0%, rgba(16,185,129,0.07) 100%)' }
+          : undefined
+      }
     >
       <Icon
         size={collapsed ? 22 : 21}
         strokeWidth={collapsed ? 2.5 : 2.25}
-        className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--color-primary)]')}
+        className={cn(
+          'transition-all shrink-0',
+          active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--color-primary)]',
+          collapsed && active ? '[filter:drop-shadow(0_0_5px_rgba(16,185,129,0.55))]' : ''
+        )}
       />
 
       <AnimatePresence>
@@ -63,7 +72,16 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
       </AnimatePresence>
 
       {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] shadow-glow" />}
-      {collapsed && active && <motion.div layoutId="active-pill-collapsed" className="absolute right-0 w-[3px] h-7 bg-[var(--color-primary)] rounded-l-full" style={{ boxShadow: '0 0 8px var(--color-primary-glow)' }} />}
+      {collapsed && active && (
+        <motion.div
+          layoutId="active-pill-collapsed"
+          className="absolute right-0 w-[3px] h-7 rounded-l-full"
+          style={{
+            background: 'linear-gradient(to bottom, var(--color-primary), var(--color-accent))',
+            boxShadow: '0 0 12px rgba(16,185,129,0.6), 0 0 4px rgba(6,182,212,0.3)',
+          }}
+        />
+      )}
     </motion.div>
   </Link>
 );
@@ -143,11 +161,12 @@ export const AdminLayout = () => {
           <button
             onClick={logout}
             className={cn(
-              'flex items-center transition-all duration-200 rounded-2xl text-[var(--text-secondary)] hover:text-rose-400 hover:bg-rose-400/8 group',
-              isSidebarOpen ? 'w-full gap-3 px-4 py-3' : 'h-12 w-12 justify-center'
+              'flex items-center transition-all duration-200 rounded-2xl text-[var(--text-secondary)] group',
+              'hover:text-rose-400 hover:ring-1 hover:ring-rose-400/20 hover:shadow-[0_0_10px_rgba(251,113,133,0.12)]',
+              isSidebarOpen ? 'w-full gap-3 px-4 py-3 hover:bg-rose-400/8' : 'h-12 w-12 justify-center'
             )}
           >
-            <LogOut size={isSidebarOpen ? 20 : 22} strokeWidth={isSidebarOpen ? 2.25 : 2.5} className="shrink-0 transition-colors group-hover:text-rose-400" />
+            <LogOut size={isSidebarOpen ? 20 : 22} strokeWidth={isSidebarOpen ? 2.25 : 2.5} className="shrink-0 transition-all group-hover:text-rose-400 group-hover:[filter:drop-shadow(0_0_4px_rgba(251,113,133,0.5))]" />
             {isSidebarOpen && <span className="font-medium">Logout</span>}
           </button>
         </div>

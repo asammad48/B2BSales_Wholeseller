@@ -90,13 +90,27 @@ const Sidebar: React.FC = () => {
               className={`relative flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ease-in-out ${
                 isSidebarOpen
                   ? `gap-3 px-4 py-3 ${isActive ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
-                  : `justify-center h-12 w-12 mx-auto ${isActive ? 'bg-gray-900/10 text-gray-900' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'}`
+                  : `justify-center h-12 w-12 mx-auto ${
+                      isActive
+                        ? 'ring-1 ring-emerald-200 shadow-[0_2px_12px_rgba(5,150,105,0.15)]'
+                        : 'text-gray-400 hover:text-emerald-600 hover:ring-1 hover:ring-emerald-100 hover:bg-emerald-50/60'
+                    }`
               }`}
+              style={
+                !isSidebarOpen && isActive
+                  ? { background: 'linear-gradient(135deg, rgba(5,150,105,0.12) 0%, rgba(5,150,105,0.04) 100%)', color: '#059669' }
+                  : undefined
+              }
             >
               <item.icon
                 size={isSidebarOpen ? 21 : 22}
                 strokeWidth={isSidebarOpen ? 2.25 : 2.5}
-                className="shrink-0"
+                className="shrink-0 transition-all"
+                style={
+                  !isSidebarOpen && isActive
+                    ? { filter: 'drop-shadow(0 0 5px rgba(5,150,105,0.5))' }
+                    : undefined
+                }
               />
               {isSidebarOpen && (
                 <span className="truncate text-[15px]">{item.label}</span>
@@ -104,7 +118,10 @@ const Sidebar: React.FC = () => {
               {!isSidebarOpen && isActive && (
                 <span
                   className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-l-full"
-                  style={{ backgroundColor: 'var(--primary-color)' }}
+                  style={{
+                    background: 'linear-gradient(to bottom, #10b981, #06b6d4)',
+                    boxShadow: '0 0 10px rgba(16,185,129,0.5)',
+                  }}
                 />
               )}
             </Link>
@@ -115,11 +132,15 @@ const Sidebar: React.FC = () => {
       <div className="p-4 border-t border-gray-100 flex justify-center">
         <button
           onClick={logout}
-          className={`flex items-center text-sm font-medium text-red-500 hover:bg-red-50 transition-all rounded-2xl group ${
-            isSidebarOpen ? 'w-full gap-3 px-4 py-3' : 'h-12 w-12 justify-center'
-          }`}
+          className={`flex items-center text-sm font-medium text-gray-400 transition-all rounded-2xl group
+            hover:text-red-500 hover:ring-1 hover:ring-red-200 hover:shadow-[0_2px_12px_rgba(239,68,68,0.12)]
+            ${isSidebarOpen ? 'w-full gap-3 px-4 py-3 hover:bg-red-50' : 'h-12 w-12 justify-center'}`}
         >
-          <LogOut size={isSidebarOpen ? 18 : 22} strokeWidth={isSidebarOpen ? 2.25 : 2.5} className="shrink-0" />
+          <LogOut
+            size={isSidebarOpen ? 18 : 22}
+            strokeWidth={isSidebarOpen ? 2.25 : 2.5}
+            className="shrink-0 transition-all group-hover:text-red-500 group-hover:[filter:drop-shadow(0_0_4px_rgba(239,68,68,0.45))]"
+          />
           {isSidebarOpen && <span>Logout</span>}
         </button>
       </div>
