@@ -5477,6 +5477,7 @@ export interface ProductListItemResponseDto {
     partTypeName?: string | undefined;
     trackingType?: TrackingType;
     qualityType?: QualityType;
+    defaultBuyingPrice?: number | undefined;
     defaultSellingPrice?: number | undefined;
     primaryImageUrl?: string | undefined;
     quantityInHand?: number;
