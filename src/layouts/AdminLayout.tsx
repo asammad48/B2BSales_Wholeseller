@@ -32,15 +32,26 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
       whileHover={{ x: collapsed ? 0 : 4 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group relative',
-        active ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5',
-        collapsed && 'justify-center px-0 h-12 w-12 mx-auto'
+        'flex items-center rounded-2xl transition-all duration-200 group relative',
+        collapsed
+          ? cn(
+              'justify-center h-12 w-12 mx-auto',
+              active
+                ? 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-primary)]'
+            )
+          : cn(
+              'gap-3 px-4 py-3',
+              active
+                ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
+            )
       )}
     >
       <Icon
-        size={collapsed ? 24 : 21}
-        strokeWidth={2.25}
-        className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--text-primary)]')}
+        size={collapsed ? 22 : 21}
+        strokeWidth={collapsed ? 2.5 : 2.25}
+        className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--color-primary)]')}
       />
 
       <AnimatePresence>
@@ -52,7 +63,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
       </AnimatePresence>
 
       {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] shadow-glow" />}
-      {collapsed && active && <motion.div layoutId="active-pill-collapsed" className="absolute right-0 w-1 h-6 bg-[var(--color-primary)] rounded-l-full shadow-glow" />}
+      {collapsed && active && <motion.div layoutId="active-pill-collapsed" className="absolute right-0 w-[3px] h-7 bg-[var(--color-primary)] rounded-l-full" style={{ boxShadow: '0 0 8px var(--color-primary-glow)' }} />}
     </motion.div>
   </Link>
 );
@@ -128,9 +139,15 @@ export const AdminLayout = () => {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-[var(--border-subtle)]">
-          <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-[var(--text-secondary)] hover:text-rose-400 hover:bg-rose-400/5 rounded-[var(--radius-lg)] transition-all group">
-            <LogOut size={20} />
+        <div className="p-4 border-t border-[var(--border-subtle)] flex justify-center">
+          <button
+            onClick={logout}
+            className={cn(
+              'flex items-center transition-all duration-200 rounded-2xl text-[var(--text-secondary)] hover:text-rose-400 hover:bg-rose-400/8 group',
+              isSidebarOpen ? 'w-full gap-3 px-4 py-3' : 'h-12 w-12 justify-center'
+            )}
+          >
+            <LogOut size={isSidebarOpen ? 20 : 22} strokeWidth={isSidebarOpen ? 2.25 : 2.5} className="shrink-0 transition-colors group-hover:text-rose-400" />
             {isSidebarOpen && <span className="font-medium">Logout</span>}
           </button>
         </div>

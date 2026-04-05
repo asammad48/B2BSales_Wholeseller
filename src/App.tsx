@@ -75,30 +75,51 @@ const Sidebar: React.FC = () => {
         )}
       </div>
 
-      <nav className="min-h-0 flex-1 p-4 space-y-2 overflow-y-auto overscroll-contain">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out ${
-              ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path)) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-12 w-12'}`}
-            title={item.label}
-          >
-            <item.icon
-              size={isSidebarOpen ? 21 : 24}
-              strokeWidth={2.25}
-            />
-            <span className={`truncate text-[15px] transition-all duration-200 ease-in-out ${isSidebarOpen ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
-              {item.label}
-            </span>
-          </Link>
-        ))}
+      <nav className="min-h-0 flex-1 p-4 space-y-1 overflow-y-auto overscroll-contain">
+        {navItems.map((item) => {
+          const isActive =
+            (item.path === '/orders' && location.pathname === '/orders') ||
+            (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) ||
+            (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path);
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              title={item.label}
+              className={`relative flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ease-in-out ${
+                isSidebarOpen
+                  ? `gap-3 px-4 py-3 ${isActive ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
+                  : `justify-center h-12 w-12 mx-auto ${isActive ? 'bg-gray-900/10 text-gray-900' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700'}`
+              }`}
+            >
+              <item.icon
+                size={isSidebarOpen ? 21 : 22}
+                strokeWidth={isSidebarOpen ? 2.25 : 2.5}
+                className="shrink-0"
+              />
+              {isSidebarOpen && (
+                <span className="truncate text-[15px]">{item.label}</span>
+              )}
+              {!isSidebarOpen && isActive && (
+                <span
+                  className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-l-full"
+                  style={{ backgroundColor: 'var(--primary-color)' }}
+                />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      <div className="p-4 border-t border-gray-50">
-        <button onClick={logout} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all ${isSidebarOpen ? '' : 'justify-center px-0'}`}>
-          <LogOut size={18} />
+      <div className="p-4 border-t border-gray-100 flex justify-center">
+        <button
+          onClick={logout}
+          className={`flex items-center text-sm font-medium text-red-500 hover:bg-red-50 transition-all rounded-2xl group ${
+            isSidebarOpen ? 'w-full gap-3 px-4 py-3' : 'h-12 w-12 justify-center'
+          }`}
+        >
+          <LogOut size={isSidebarOpen ? 18 : 22} strokeWidth={isSidebarOpen ? 2.25 : 2.5} className="shrink-0" />
           {isSidebarOpen && <span>Logout</span>}
         </button>
       </div>

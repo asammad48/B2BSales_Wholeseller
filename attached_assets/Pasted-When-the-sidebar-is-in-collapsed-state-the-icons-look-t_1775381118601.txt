@@ -1,0 +1,79 @@
+When the sidebar is in collapsed state, the icons look too small/weak and visually unbalanced. The current collapsed navbar feels inconsistent with the app theme and looks low quality.
+
+Important constraints
+✅ Do not change any functionality, routing, or behavior.
+
+✅ Work on UI design only.
+
+✅ Use existing theme strategy/tokens/colors already defined in the project.
+
+✅ Keep expanded sidebar behavior same.
+
+✅ Apply same quality/design language in both AdminLayout.tsx and App.tsx.
+
+What to improve (collapsed state)
+Icon visibility
+
+Icons should be clearly readable at a glance.
+
+Increase visual weight (size/stroke/contrast) and make active vs inactive states obvious.
+
+Consistent visual system
+
+Follow theme colors (primary, text, borders, hover backgrounds).
+
+Avoid random gray pills/chips that don’t match theme.
+
+Collapsed nav item design
+
+Keep item size consistent and touch-friendly.
+
+Use a clean active style (example: subtle theme-tinted background + side indicator).
+
+Keep spacing uniform from top to bottom.
+
+Hover + active polish
+
+Hover should feel subtle and theme-matched.
+
+Active item should be instantly recognizable without being too flashy.
+
+Logout in collapsed mode
+
+Should match nav style and not look disconnected from the menu items.
+
+Suggested redesign idea (how it can display)
+Collapsed sidebar = vertical column of equal-size icon buttons.
+
+Each icon button:
+
+same width/height (e.g. 44–48px),
+
+rounded corners,
+
+transparent default background,
+
+hover: soft theme tint,
+
+active: stronger theme tint + slim right-side indicator line.
+
+Icon spec:
+
+slightly larger than current collapsed icons,
+
+consistent stroke width,
+
+inactive color = secondary text, active color = primary theme color.
+
+Overall look: minimal, clean, premium, and aligned with existing theme.
+
+Acceptance criteria
+Both files updated (AdminLayout.tsx, App.tsx).
+
+No functional changes.
+
+Collapsed icons look clear, modern, and theme-consistent.
+
+Expanded state remains unchanged in behavior.
+
+Final result should visually feel like one coherent design system.
