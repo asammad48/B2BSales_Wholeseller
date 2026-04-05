@@ -38,31 +38,18 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
           : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5 hover:border-white/10',
         collapsed &&
           cn(
-            'justify-center px-0 h-14 w-14 mx-auto rounded-2xl',
+            'justify-center px-0 h-12 w-12 mx-auto rounded-xl',
             active
-              ? 'bg-gradient-to-br from-[var(--color-primary)]/30 to-[var(--color-accent)]/25 border-[var(--color-primary)]/35 shadow-[0_12px_24px_-12px_var(--color-primary-glow)]'
-              : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.08]'
+              ? 'bg-[var(--color-primary)]/14 border-[var(--color-primary)]/25 shadow-[0_8px_20px_-16px_var(--color-primary-glow)]'
+              : 'bg-transparent border-transparent hover:bg-white/[0.06]'
           )
       )}
     >
-      <span
-        className={cn(
-          'inline-flex items-center justify-center transition-all duration-200 shrink-0',
-          collapsed &&
-            cn(
-              'h-11 w-11 rounded-xl',
-              active
-                ? 'bg-[var(--color-primary)]/20 shadow-[0_8px_20px_-14px_var(--color-primary-glow)]'
-                : 'bg-white/[0.06] group-hover:bg-white/[0.11]'
-            )
-        )}
-      >
-        <Icon
-          size={collapsed ? 25 : 21}
-          strokeWidth={collapsed ? 2.6 : 2.25}
-          className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'text-[var(--text-primary)]/90 group-hover:text-[var(--text-primary)]')}
-        />
-      </span>
+      <Icon
+        size={collapsed ? 24 : 21}
+        strokeWidth={2.35}
+        className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]')}
+      />
 
       <AnimatePresence>
         {!collapsed && (
@@ -73,7 +60,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
       </AnimatePresence>
 
       {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] shadow-glow" />}
-      {collapsed && active && <motion.div layoutId="active-pill-collapsed" className="absolute -right-1 w-1.5 h-7 bg-[var(--color-primary)] rounded-l-full shadow-glow" />}
+      {collapsed && active && <motion.div layoutId="active-pill-collapsed" className="absolute -right-1 w-1.5 h-6 bg-[var(--color-primary)] rounded-l-full shadow-glow" />}
     </motion.div>
   </Link>
 );
