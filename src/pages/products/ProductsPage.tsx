@@ -374,12 +374,24 @@ export const ProductsPage: React.FC = () => {
     },
     {
       header: 'Pricing',
-      accessor: (p: Product) => (
-        <div>
-          <p className="font-medium text-gray-900">{formatMoney(p.defaultSellingPrice || 0, currencySettings?.defaultSellingCurrencyCode)}</p>
-          <p className="text-xs text-gray-400">Base: {formatMoney(p.basePrice || 0, p.baseCurrencyCode)}</p>
-        </div>
-      )
+      accessor: (p: Product) => {
+        const missingPrices =
+          (!p.defaultBuyingPrice || p.defaultBuyingPrice <= 0) &&
+          (!p.defaultSellingPrice || p.defaultSellingPrice <= 0);
+        return (
+          <div>
+            <p className={`font-medium ${missingPrices ? 'text-red-500' : 'text-gray-900'}`}>
+              {formatMoney(p.defaultSellingPrice || 0, currencySettings?.defaultSellingCurrencyCode)}
+            </p>
+            <p className={`text-xs ${missingPrices ? 'text-red-400' : 'text-gray-400'}`}>
+              Base: {formatMoney(p.basePrice || 0, p.baseCurrencyCode)}
+            </p>
+            <p className={`text-xs ${missingPrices ? 'text-red-400' : 'text-gray-400'}`}>
+              Buying: {formatMoney(p.defaultBuyingPrice || 0, currencySettings?.defaultSellingCurrencyCode)}
+            </p>
+          </div>
+        );
+      }
     },
     { header: 'Tracking', accessor: 'trackingType' as keyof Product },
     { header: 'Quality', accessor: 'qualityType' as keyof Product },
@@ -394,19 +406,28 @@ export const ProductsPage: React.FC = () => {
     },
     {
       header: 'Actions',
-      accessor: (p: Product) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedProduct(p);
-            setIsPricingModalOpen(true);
-          }}
-          className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600 transition-colors"
-          title="Adjust Pricing"
-        >
-          <DollarSign size={16} />
-        </button>
-      )
+      accessor: (p: Product) => {
+        const missingPrices =
+          (!p.defaultBuyingPrice || p.defaultBuyingPrice <= 0) &&
+          (!p.defaultSellingPrice || p.defaultSellingPrice <= 0);
+        return (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedProduct(p);
+              setIsPricingModalOpen(true);
+            }}
+            className={`p-2 rounded-lg transition-colors ${
+              missingPrices
+                ? 'text-red-500 hover:bg-red-50'
+                : 'text-emerald-600 hover:bg-emerald-50'
+            }`}
+            title="Adjust Pricing"
+          >
+            <DollarSign size={16} />
+          </button>
+        );
+      }
     }
   ];
 
