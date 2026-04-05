@@ -27,18 +27,26 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string; icon: any; label: string; active: boolean; collapsed: boolean; key?: string }) => (
-  <Link to={to}>
+  <Link to={to} title={collapsed ? label : undefined} aria-label={label}>
     <motion.div
       whileHover={{ x: collapsed ? 0 : 4 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group relative',
-        active ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5',
-        collapsed && 'justify-center px-0 h-12 w-12 mx-auto'
+        'flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group relative border border-transparent',
+        active
+          ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5 hover:border-white/10',
+        collapsed &&
+          cn(
+            'justify-center px-0 h-14 w-14 mx-auto rounded-2xl',
+            active
+              ? 'bg-gradient-to-br from-[var(--color-primary)]/30 to-[var(--color-accent)]/25 border-[var(--color-primary)]/35 shadow-[0_12px_24px_-12px_var(--color-primary-glow)]'
+              : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.08]'
+          )
       )}
     >
       <Icon
-        size={collapsed ? 24 : 21}
+        size={collapsed ? 27 : 21}
         strokeWidth={2.25}
         className={cn('transition-colors shrink-0', active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--text-primary)]')}
       />
@@ -52,7 +60,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
       </AnimatePresence>
 
       {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] shadow-glow" />}
-      {collapsed && active && <motion.div layoutId="active-pill-collapsed" className="absolute right-0 w-1 h-6 bg-[var(--color-primary)] rounded-l-full shadow-glow" />}
+      {collapsed && active && <motion.div layoutId="active-pill-collapsed" className="absolute -right-1 w-1.5 h-7 bg-[var(--color-primary)] rounded-l-full shadow-glow" />}
     </motion.div>
   </Link>
 );
@@ -83,15 +91,15 @@ export const AdminLayout = () => {
         initial={false}
         animate={{ width: isSidebarOpen ? 280 : 80 }}
         transition={{ duration: 0.28, ease: 'easeInOut' }}
-        className="admin-sidebar overflow-hidden"
+        className="admin-sidebar overflow-hidden bg-gradient-to-b from-[var(--bg-sidebar)] to-[color-mix(in_oklab,var(--bg-sidebar),black_6%)]"
       >
-        <div className="p-4 pb-3 flex items-center justify-between shrink-0">
+        <div className={cn('p-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-subtle)]/70', !isSidebarOpen && 'justify-center')}>
           <AnimatePresence mode="wait">
             {isSidebarOpen && (
-              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex items-center gap-2">
+              <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex items-center gap-2.5">
                 <button
                   onClick={() => setSidebarOpen(!isSidebarOpen)}
-                  className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-glow"
+                  className="w-9 h-9 bg-[var(--color-primary)] rounded-xl flex items-center justify-center shadow-glow"
                   title="Collapse sidebar"
                   aria-label="Collapse sidebar"
                 >
@@ -104,18 +112,16 @@ export const AdminLayout = () => {
           {!isSidebarOpen && (
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="h-10 w-10 inline-flex items-center justify-center rounded-lg transition-colors bg-black text-white hover:bg-black/90"
+              className="h-12 w-12 inline-flex items-center justify-center rounded-2xl transition-all duration-200 bg-white/[0.06] border border-white/10 text-white hover:bg-white/[0.12] hover:border-white/20"
               title="Expand sidebar"
               aria-label="Expand sidebar"
             >
-              <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center shadow-glow">
-                <Boxes size={18} className="text-white" />
-              </div>
+              <Boxes size={20} className="text-[var(--color-primary)]" />
             </button>
           )}
         </div>
 
-        <nav className="min-h-0 flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto overscroll-contain custom-scrollbar">
+        <nav className={cn('min-h-0 flex-1 px-4 py-5 flex flex-col gap-2 overflow-y-auto overscroll-contain custom-scrollbar', !isSidebarOpen && 'px-2 gap-3')}>
           {navItems.map((item) => (
             <SidebarItem
               key={item.to}
@@ -128,9 +134,17 @@ export const AdminLayout = () => {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-[var(--border-subtle)]">
-          <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-[var(--text-secondary)] hover:text-rose-400 hover:bg-rose-400/5 rounded-[var(--radius-lg)] transition-all group">
-            <LogOut size={20} />
+        <div className={cn('p-4 border-t border-[var(--border-subtle)]/70', !isSidebarOpen && 'p-2 pb-4')}>
+          <button
+            onClick={logout}
+            title={!isSidebarOpen ? 'Logout' : undefined}
+            aria-label="Logout"
+            className={cn(
+              'w-full flex items-center gap-3 px-4 py-3 text-[var(--text-secondary)] hover:text-rose-400 hover:bg-rose-400/5 rounded-[var(--radius-lg)] transition-all group border border-transparent',
+              !isSidebarOpen && 'h-14 w-14 mx-auto justify-center px-0 rounded-2xl bg-white/[0.03] border-white/5 hover:border-rose-400/30'
+            )}
+          >
+            <LogOut size={!isSidebarOpen ? 24 : 20} />
             {isSidebarOpen && <span className="font-medium">Logout</span>}
           </button>
         </div>
