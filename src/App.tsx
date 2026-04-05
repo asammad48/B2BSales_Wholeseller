@@ -75,19 +75,21 @@ const Sidebar: React.FC = () => {
         )}
       </div>
 
-      <nav className="min-h-0 flex-1 p-4 space-y-2 overflow-y-auto overscroll-contain">
+      <nav className={`min-h-0 flex-1 p-4 overflow-y-auto overscroll-contain ${isSidebarOpen ? 'space-y-2' : 'space-y-2.5 px-2'}`}>
         {navItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out ${
-              ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path)) ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-12 w-12'}`}
+            className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out border border-transparent ${
+              ((item.path === '/orders' && location.pathname === '/orders') || (item.path === '/orders/pos' && location.pathname.startsWith('/orders/pos')) || (item.path !== '/orders' && item.path !== '/orders/pos' && location.pathname === item.path))
+                ? 'bg-gray-900 text-white shadow-md'
+                : 'text-gray-500 hover:bg-gray-50 hover:border-gray-200'
+            } ${isSidebarOpen ? '' : 'justify-center px-0 mx-auto h-12 w-12 rounded-xl hover:bg-gray-100/80'}`}
             title={item.label}
           >
             <item.icon
-              size={isSidebarOpen ? 21 : 24}
-              strokeWidth={2.25}
+              size={isSidebarOpen ? 21 : 23}
+              strokeWidth={2.35}
             />
             <span className={`truncate text-[15px] transition-all duration-200 ease-in-out ${isSidebarOpen ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>
               {item.label}
@@ -97,8 +99,13 @@ const Sidebar: React.FC = () => {
       </nav>
 
       <div className="p-4 border-t border-gray-50">
-        <button onClick={logout} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all ${isSidebarOpen ? '' : 'justify-center px-0'}`}>
-          <LogOut size={18} />
+        <button
+          onClick={logout}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all ${isSidebarOpen ? '' : 'justify-center px-0 h-12 w-12 mx-auto hover:bg-red-50/80'}`}
+          title={!isSidebarOpen ? 'Logout' : undefined}
+          aria-label="Logout"
+        >
+          <LogOut size={isSidebarOpen ? 18 : 20} />
           {isSidebarOpen && <span>Logout</span>}
         </button>
       </div>
