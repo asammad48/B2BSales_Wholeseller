@@ -249,7 +249,7 @@ export const ProductsPage: React.FC = () => {
       return;
     }
 
-    if (createPricing.basePrice <= 0) {
+    if (!Number.isFinite(createPricing.basePrice) || createPricing.basePrice <= 0) {
       alert('Base price must be greater than zero');
       return;
     }
@@ -258,7 +258,7 @@ export const ProductsPage: React.FC = () => {
       ? createPricing.computedSellingPrice
       : createPricing.sellingPrice;
 
-    if (computedSellingPrice < 0) {
+    if (!Number.isFinite(computedSellingPrice) || computedSellingPrice < 0) {
       alert('Selling price must be non-negative');
       return;
     }
@@ -320,7 +320,14 @@ export const ProductsPage: React.FC = () => {
       ? pricingAdjustment.computedSellingPrice
       : pricingAdjustment.sellingPrice;
 
-    if (buyingPrice < 0 || effectiveSellingPrice < 0 || pricingAdjustment.basePrice < 0) {
+    if (
+      !Number.isFinite(buyingPrice)
+      || !Number.isFinite(effectiveSellingPrice)
+      || !Number.isFinite(pricingAdjustment.basePrice)
+      || buyingPrice < 0
+      || effectiveSellingPrice < 0
+      || pricingAdjustment.basePrice < 0
+    ) {
       alert('Base, buying, and selling prices must be non-negative');
       return;
     }
@@ -588,8 +595,8 @@ export const ProductsPage: React.FC = () => {
                           type="number"
                           min="0"
                           step="0.01"
-                          value={createPricing.basePrice}
-                          onChange={(event) => createPricing.setBasePrice(Number(event.target.value || 0))}
+                          value={Number.isFinite(createPricing.basePrice) ? createPricing.basePrice : ''}
+                          onChange={(event) => createPricing.setBasePrice(event.target.value === '' ? Number.NaN : Number(event.target.value))}
                           required
                         />
                       </FormField>
@@ -618,8 +625,10 @@ export const ProductsPage: React.FC = () => {
                           type="number"
                           min="0"
                           step="0.01"
-                          value={(createPricing.pricingMode === 'PercentageBased' ? createPricing.computedSellingPrice : createPricing.sellingPrice).toFixed(2)}
-                          onChange={(event) => createPricing.setSellingPrice(Number(event.target.value || 0))}
+                          value={createPricing.pricingMode === 'PercentageBased'
+                            ? createPricing.computedSellingPrice.toFixed(2)
+                            : (Number.isFinite(createPricing.sellingPrice) ? createPricing.sellingPrice : '')}
+                          onChange={(event) => createPricing.setSellingPrice(event.target.value === '' ? Number.NaN : Number(event.target.value))}
                           disabled={createPricing.pricingMode === 'PercentageBased'}
                           required
                         />
@@ -632,8 +641,8 @@ export const ProductsPage: React.FC = () => {
                             type="number"
                             min="0"
                             step="0.01"
-                            value={createPricing.markupPercentage}
-                            onChange={(event) => createPricing.setMarkupPercentage(Number(event.target.value || 0))}
+                            value={Number.isFinite(createPricing.markupPercentage) ? createPricing.markupPercentage : ''}
+                            onChange={(event) => createPricing.setMarkupPercentage(event.target.value === '' ? Number.NaN : Number(event.target.value))}
                           />
                         </FormField>
                       )}
@@ -779,30 +788,16 @@ export const ProductsPage: React.FC = () => {
                 <FormField label="Buying Price">
                   <Input name="buyingPrice" type="number" min="0" step="0.01" defaultValue={selectedProduct.defaultBuyingPrice || 0} required />
                 </FormField>
-                <FormField label="Base Currency">
+                <FormField label="Buying Currency">
                   <SearchableSelect
                     name="adjustBaseCurrencyId"
                     required
                     value={pricingAdjustment.baseCurrencyId}
                     onChange={pricingAdjustment.setBaseCurrencyId}
-                    placeholder="Select base currency"
+                    placeholder="Select buying currency"
                     searchPlaceholder="Search currencies"
                     options={currencyOptions}
                   />
-                </FormField>
-                <FormField label="Base Price">
-                  <Input
-                    name="adjustBasePrice"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={pricingAdjustment.basePrice}
-                    onChange={(event) => pricingAdjustment.setBasePrice(Number(event.target.value || 0))}
-                    required
-                  />
-                </FormField>
-                <FormField label="Converted Amount">
-                  <Input value={pricingAdjustment.convertedAmount.toFixed(2)} readOnly disabled />
                 </FormField>
                 <FormField label="Pricing Mode">
                   <SearchableSelect
@@ -820,8 +815,10 @@ export const ProductsPage: React.FC = () => {
                     type="number"
                     min="0"
                     step="0.01"
-                    value={(pricingAdjustment.pricingMode === 'PercentageBased' ? pricingAdjustment.computedSellingPrice : pricingAdjustment.sellingPrice).toFixed(2)}
-                    onChange={(event) => pricingAdjustment.setSellingPrice(Number(event.target.value || 0))}
+                    value={pricingAdjustment.pricingMode === 'PercentageBased'
+                      ? pricingAdjustment.computedSellingPrice.toFixed(2)
+                      : (Number.isFinite(pricingAdjustment.sellingPrice) ? pricingAdjustment.sellingPrice : '')}
+                    onChange={(event) => pricingAdjustment.setSellingPrice(event.target.value === '' ? Number.NaN : Number(event.target.value))}
                     disabled={pricingAdjustment.pricingMode === 'PercentageBased'}
                     required
                   />
@@ -833,8 +830,8 @@ export const ProductsPage: React.FC = () => {
                       type="number"
                       min="0"
                       step="0.01"
-                      value={pricingAdjustment.markupPercentage}
-                      onChange={(event) => pricingAdjustment.setMarkupPercentage(Number(event.target.value || 0))}
+                      value={Number.isFinite(pricingAdjustment.markupPercentage) ? pricingAdjustment.markupPercentage : ''}
+                      onChange={(event) => pricingAdjustment.setMarkupPercentage(event.target.value === '' ? Number.NaN : Number(event.target.value))}
                     />
                   </FormField>
                 )}
