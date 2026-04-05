@@ -230,7 +230,7 @@ export const BulkProductUploadPage: React.FC = () => {
               className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white"
             />
           </div>
-          <button type="button" onClick={handleUpload} disabled={isUploading} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
+          <button type="button" onClick={handleUpload} disabled={isUploading} className="brand-gradient inline-flex !w-auto items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 disabled:opacity-60">
             <Upload size={16} /> {isUploading ? 'Uploading...' : 'Upload & Queue'}
           </button>
         </div>
@@ -249,7 +249,7 @@ export const BulkProductUploadPage: React.FC = () => {
           <button type="button" onClick={() => refreshJobStatus(jobIdInput.trim())} disabled={isRefreshingStatus} className="inline-flex !w-auto items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
             <RefreshCcw size={16} /> {isRefreshingStatus ? 'Refreshing...' : 'Check Status'}
           </button>
-          <button type="button" onClick={handleResume} disabled={isResuming} className="inline-flex !w-auto items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
+          <button type="button" onClick={handleResume} disabled={isResuming} className="brand-gradient inline-flex !w-auto items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 disabled:opacity-60">
             <PlayCircle size={16} /> {isResuming ? 'Resuming...' : 'Resume Job'}
           </button>
         </div>

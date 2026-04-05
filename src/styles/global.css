@@ -1,6 +1,14 @@
 @import "./tokens.css";
 
 @layer components {
+  .brand-gradient {
+    background-image: var(--brand-gradient);
+  }
+
+  .brand-gradient-soft {
+    background-image: var(--brand-gradient-soft);
+  }
+
   /* Sidebar Shell */
   .admin-sidebar {
     @apply fixed left-0 top-0 h-full bg-[var(--bg-sidebar)] border-r border-[var(--border-subtle)] z-50 flex flex-col transition-all duration-300;
