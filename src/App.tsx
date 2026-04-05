@@ -48,8 +48,7 @@ const Sidebar: React.FC = () => {
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center text-white shrink-0"
-              style={{ backgroundColor: 'var(--primary-color)' }}
+              className="brand-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-[0_6px_18px_rgba(245,158,11,0.35)]"
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
@@ -65,8 +64,7 @@ const Sidebar: React.FC = () => {
         {!isSidebarOpen && (
           <button
             onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="h-10 w-10 inline-flex items-center justify-center rounded-xl transition-colors shrink-0 bg-gray-900 text-white hover:bg-black"
-            style={{ backgroundColor: 'var(--primary-color)' }}
+            className="brand-gradient h-10 w-10 inline-flex items-center justify-center rounded-xl transition-all shrink-0 text-white hover:brightness-110 shadow-[0_6px_18px_rgba(245,158,11,0.35)]"
             title="Expand sidebar"
             aria-label="Expand sidebar"
           >
@@ -89,16 +87,16 @@ const Sidebar: React.FC = () => {
               title={item.label}
               className={`relative flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ease-in-out ${
                 isSidebarOpen
-                  ? `gap-3 px-4 py-3 ${isActive ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
+                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_rgba(245,158,11,0.28)]' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
                   : `justify-center h-12 w-12 mx-auto ${
                       isActive
-                        ? 'ring-1 ring-emerald-200 shadow-[0_2px_12px_rgba(5,150,105,0.15)]'
-                        : 'text-gray-400 hover:text-emerald-600 hover:ring-1 hover:ring-emerald-100 hover:bg-emerald-50/60'
+                        ? 'ring-1 ring-amber-200 shadow-[0_2px_12px_rgba(245,158,11,0.22)]'
+                        : 'text-gray-400 hover:text-amber-600 hover:ring-1 hover:ring-amber-100 hover:bg-amber-50/60'
                     }`
               }`}
               style={
                 !isSidebarOpen && isActive
-                  ? { background: 'linear-gradient(135deg, rgba(5,150,105,0.12) 0%, rgba(5,150,105,0.04) 100%)', color: '#059669' }
+                  ? { background: 'var(--brand-gradient-soft)', color: 'var(--color-gradient-end)' }
                   : undefined
               }
             >
@@ -108,7 +106,7 @@ const Sidebar: React.FC = () => {
                 className="shrink-0 transition-all"
                 style={
                   !isSidebarOpen && isActive
-                    ? { filter: 'drop-shadow(0 0 5px rgba(5,150,105,0.5))' }
+                    ? { filter: 'drop-shadow(0 0 5px rgba(245,158,11,0.5))' }
                     : undefined
                 }
               />
@@ -119,8 +117,8 @@ const Sidebar: React.FC = () => {
                 <span
                   className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-l-full"
                   style={{
-                    background: 'linear-gradient(to bottom, #10b981, #06b6d4)',
-                    boxShadow: '0 0 10px rgba(16,185,129,0.5)',
+                    background: 'var(--brand-gradient-vertical)',
+                    boxShadow: '0 0 10px rgba(245,158,11,0.5)',
                   }}
                 />
               )}
