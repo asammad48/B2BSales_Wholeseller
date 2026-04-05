@@ -87,7 +87,7 @@ const Sidebar: React.FC = () => {
               title={item.label}
               className={`relative flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ease-in-out ${
                 isSidebarOpen
-                  ? `gap-3 px-4 py-3 ${isActive ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
+                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_rgba(245,158,11,0.28)]' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
                   : `justify-center h-12 w-12 mx-auto ${
                       isActive
                         ? 'ring-1 ring-amber-200 shadow-[0_2px_12px_rgba(245,158,11,0.22)]'

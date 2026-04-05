@@ -43,7 +43,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
           : cn(
               'gap-3 px-4 py-3',
               active
-                ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                ? 'brand-gradient text-white shadow-[0_10px_22px_rgba(245,158,11,0.22)]'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
             )
       )}
@@ -58,7 +58,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
         strokeWidth={collapsed ? 2.5 : 2.25}
         className={cn(
           'transition-all shrink-0',
-          active ? 'text-[var(--color-primary)]' : 'group-hover:text-[var(--color-primary)]',
+          active ? (collapsed ? 'text-[var(--color-gradient-start)]' : 'text-white') : 'group-hover:text-[var(--color-primary)]',
           collapsed && active ? '[filter:drop-shadow(0_0_5px_rgba(16,185,129,0.55))]' : ''
         )}
       />
@@ -71,7 +71,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
         )}
       </AnimatePresence>
 
-      {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] shadow-glow" />}
+      {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-white/95 shadow-[0_0_8px_rgba(255,255,255,0.35)]" />}
       {collapsed && active && (
         <motion.div
           layoutId="active-pill-collapsed"
