@@ -44,7 +44,7 @@ let products = [
     id: "1",
     name: "iPhone 15 Pro Max",
     brandId: "b1",
-    brandName: "Apple",
+    brandName: "Mobia2Z",
     modelId: "m1",
     modelName: "iPhone 15 Pro Max",
     sku: "APP-IP15PM-256-GR",
@@ -58,7 +58,7 @@ let products = [
     id: "2",
     name: "Galaxy S24 Ultra",
     brandId: "b2",
-    brandName: "Samsung",
+    brandName: "Mobia2Z",
     modelId: "m2",
     modelName: "Galaxy S24 Ultra",
     sku: "SAM-S24U-512-TI",
@@ -72,7 +72,7 @@ let products = [
     id: "3",
     name: "Pixel 8 Pro",
     brandId: "b3",
-    brandName: "Google",
+    brandName: "Mobia2Z",
     modelId: "m3",
     modelName: "Pixel 8 Pro",
     sku: "GOO-P8P-128-OB",
@@ -92,7 +92,7 @@ let inventory = [
     productName: "iPhone 15 Pro Max",
     sku: "APP-IP15PM-256-GR",
     barcode: "194253700000",
-    brandName: "Apple",
+    brandName: "Mobia2Z",
     modelName: "iPhone 15 Pro Max",
     shopId: "s1",
     shopName: "Main Warehouse",
@@ -107,7 +107,7 @@ let inventory = [
     productName: "Galaxy S24 Ultra",
     sku: "SAM-S24U-512-TI",
     barcode: "880609500000",
-    brandName: "Samsung",
+    brandName: "Mobia2Z",
     modelName: "Galaxy S24 Ultra",
     shopId: "s1",
     shopName: "Main Warehouse",
@@ -122,7 +122,7 @@ let inventory = [
     productName: "iPhone 15 Pro Max",
     sku: "APP-IP15PM-256-GR",
     barcode: "194253700000",
-    brandName: "Apple",
+    brandName: "Mobia2Z",
     modelName: "iPhone 15 Pro Max",
     shopId: "s2",
     shopName: "Downtown Store",
@@ -204,7 +204,7 @@ let notifications = [
 // Mock tenant settings
 let tenantSettings = {
   id: "tenant1",
-  name: "Global Retail Solutions",
+  name: "Mobia2Z",
   primaryColor: "#111827", // gray-900
   secondaryColor: "#4B5563", // gray-600
   accentColor: "#059669", // emerald-600

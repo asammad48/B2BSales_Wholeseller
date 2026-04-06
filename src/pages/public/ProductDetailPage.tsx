@@ -231,7 +231,7 @@ const ProductDetailPage: React.FC = () => {
                   <Truck className="text-[var(--color-primary)] shrink-0" size={20} />
                   <div>
                     <p className="text-sm font-bold text-white">Shipping</p>
-                    <p className="text-xs text-[var(--text-muted)]">Global Wholesaler Delivery</p>
+                    <p className="text-xs text-[var(--text-muted)]">Global Mobia2Z Delivery</p>
                   </div>
                 </div>
               </div>
