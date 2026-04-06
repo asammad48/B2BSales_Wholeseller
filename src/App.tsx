@@ -55,7 +55,7 @@ const Sidebar: React.FC = () => {
               <Shield size={20} />
             </button>
             <div className="min-w-0">
-              <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Wholesaler'}</h1>
+              <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Mobia2Z'}</h1>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
             </div>
           </div>

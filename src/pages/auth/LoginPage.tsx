@@ -93,7 +93,7 @@ export const LoginPage: React.FC = () => {
 
         <div className="mt-8 pt-8 border-t border-gray-100">
           <p className="text-center text-xs text-gray-400">
-            Wholesaler Admin System &copy; 2026
+            Mobia2Z Admin System &copy; 2026
           </p>
         </div>
       </motion.div>
