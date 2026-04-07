@@ -4,7 +4,7 @@ import { SearchToolbar } from '../../components/common/SearchToolbar';
 import { DataTable } from '../../components/common/DataTable';
 import { PaginationControls } from '../../components/common/PaginationControls';
 import { productsRepository, Product, CatalogLookups, CreateProductPayload } from '../../repositories/productsRepository';
-import { Plus, Package, CheckCircle2, XCircle, X, DollarSign, GripVertical, ImagePlus, Star, RefreshCcw } from 'lucide-react';
+import { Plus, Package, CheckCircle2, XCircle, X, DollarSign, GripVertical, ImagePlus, Star, Sparkles, RefreshCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormField, Input, SearchableSelect, SearchableSelectOption, Button } from '../../components/common/Form';
 import { PricingMode, QualityType, TrackingType } from '../../api/generated/apiClient';
@@ -65,6 +65,7 @@ export const ProductsPage: React.FC = () => {
   const [productImages, setProductImages] = useState<ProductImageDraft[]>([]);
   const [createError, setCreateError] = useState<string | null>(null);
   const [draggedImageId, setDraggedImageId] = useState<string | null>(null);
+  const [updatingFlagsProductId, setUpdatingFlagsProductId] = useState<string | null>(null);
 
   const createPricing = useProductPricing({
     currencies: lookups.currencies,
@@ -342,6 +343,21 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
+  const handleToggleProductFlag = async (product: Product, flag: 'isFeatured' | 'isNewArrival') => {
+    setUpdatingFlagsProductId(product.id);
+    try {
+      await productsRepository.updateProductFlags(product.id, {
+        isFeatured: flag === 'isFeatured' ? !Boolean(product.isFeatured) : Boolean(product.isFeatured),
+        isNewArrival: flag === 'isNewArrival' ? !Boolean(product.isNewArrival) : Boolean(product.isNewArrival),
+      });
+      fetchProducts();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to update product flags');
+    } finally {
+      setUpdatingFlagsProductId(null);
+    }
+  };
+
   const columns = [
     {
       header: 'ID',
@@ -393,6 +409,48 @@ export const ProductsPage: React.FC = () => {
     },
     { header: 'Tracking', accessor: 'trackingType' as keyof Product },
     { header: 'Quality', accessor: 'qualityType' as keyof Product },
+    {
+      header: 'Flags',
+      accessor: (p: Product) => {
+        const isUpdating = updatingFlagsProductId === p.id;
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={isUpdating}
+              onClick={(event) => {
+                event.stopPropagation();
+                handleToggleProductFlag(p, 'isFeatured');
+              }}
+              className={`p-2 rounded-lg border transition-colors ${
+                p.isFeatured
+                  ? 'text-amber-500 border-amber-200 bg-amber-50 hover:bg-amber-100'
+                  : 'text-gray-400 border-gray-200 bg-white hover:bg-gray-50'
+              } ${isUpdating ? 'opacity-60 cursor-not-allowed' : ''}`}
+              title={p.isFeatured ? 'Remove from featured' : 'Set as featured'}
+            >
+              <Star size={14} fill={p.isFeatured ? 'currentColor' : 'none'} />
+            </button>
+            <button
+              type="button"
+              disabled={isUpdating}
+              onClick={(event) => {
+                event.stopPropagation();
+                handleToggleProductFlag(p, 'isNewArrival');
+              }}
+              className={`p-2 rounded-lg border transition-colors ${
+                p.isNewArrival
+                  ? 'text-sky-500 border-sky-200 bg-sky-50 hover:bg-sky-100'
+                  : 'text-gray-400 border-gray-200 bg-white hover:bg-gray-50'
+              } ${isUpdating ? 'opacity-60 cursor-not-allowed' : ''}`}
+              title={p.isNewArrival ? 'Remove from new arrivals' : 'Set as new arrival'}
+            >
+              <Sparkles size={14} />
+            </button>
+          </div>
+        );
+      }
+    },
     {
       header: 'Status',
       accessor: (p: Product) => (

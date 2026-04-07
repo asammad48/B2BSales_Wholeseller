@@ -27,6 +27,8 @@ export interface Product {
   defaultPricingMode?: PricingMode;
   defaultMarkupPercentage?: number;
   isActive: boolean;
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
   createdAt: string;
   trackingType: TrackingType;
   qualityType: QualityType;
@@ -89,6 +91,11 @@ export interface AdjustProductPricingPayload {
   updateDefaultPrice?: boolean;
 }
 
+export interface UpdateProductFlagsPayload {
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+}
+
 const normalizeOptionalString = (value?: string) => {
   const normalized = value?.trim();
   return normalized ? normalized : undefined;
@@ -147,6 +154,8 @@ export const productsRepository = {
         defaultPricingMode: item.defaultPricingMode,
         defaultMarkupPercentage: item.defaultMarkupPercentage,
         isActive: Boolean(item.isActive),
+        isFeatured: Boolean(item.isFeatured),
+        isNewArrival: Boolean(item.isNewArrival),
         createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : new Date().toISOString(),
       })),
       total: response.data.totalCount || 0,
@@ -279,6 +288,17 @@ export const productsRepository = {
       return unwrapApiResponse<ProductPricingAdjustmentResultDto>(response.data);
     } catch (error) {
       throw new Error(getApiErrorMessage(error, 'Failed to adjust product pricing'));
+    }
+  },
+
+  async updateProductFlags(productId: string, body: UpdateProductFlagsPayload): Promise<void> {
+    const response = await apiClient.flags(productId, {
+      isFeatured: body.isFeatured,
+      isNewArrival: body.isNewArrival,
+    });
+
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to update product flags');
     }
   },
 };
