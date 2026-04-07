@@ -268,9 +268,18 @@ export interface IApiClient {
      */
     adjust2(productId: string, body?: AdjustProductPricingRequestDto | undefined): Promise<ProductPricingAdjustmentResultDtoApiResponse>;
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    flags(productId: string, body?: UpdateProductFlagsRequestDto | undefined): Promise<ObjectApiResponse>;
+    /**
      * @return OK
      */
     shops(tenantId: string): Promise<PublicShopLookupItemDtoIEnumerableApiResponse>;
+    /**
+     * @return OK
+     */
+    clientInfo(tenantId: string): Promise<PublicTenantClientInfoResponseDtoApiResponse>;
     /**
      * @return OK
      */
@@ -3054,6 +3063,65 @@ export class ApiClient implements IApiClient {
     }
 
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    flags(productId: string, body?: UpdateProductFlagsRequestDto | undefined, cancelToken?: CancelToken): Promise<ObjectApiResponse> {
+        let url_ = this.baseUrl + "/api/Products/{productId}/flags";
+        if (productId === undefined || productId === null)
+            throw new Error("The parameter 'productId' must be defined.");
+        url_ = url_.replace("{productId}", encodeURIComponent("" + productId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "PATCH",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processFlags(_response);
+        });
+    }
+
+    protected processFlags(response: AxiosResponse): Promise<ObjectApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<ObjectApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ObjectApiResponse>(null as any);
+    }
+
+    /**
      * @return OK
      */
     shops(tenantId: string, cancelToken?: CancelToken): Promise<PublicShopLookupItemDtoIEnumerableApiResponse> {
@@ -3105,6 +3173,60 @@ export class ApiClient implements IApiClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
         return Promise.resolve<PublicShopLookupItemDtoIEnumerableApiResponse>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    clientInfo(tenantId: string, cancelToken?: CancelToken): Promise<PublicTenantClientInfoResponseDtoApiResponse> {
+        let url_ = this.baseUrl + "/api/public/tenant/{tenantId}/client-info";
+        if (tenantId === undefined || tenantId === null)
+            throw new Error("The parameter 'tenantId' must be defined.");
+        url_ = url_.replace("{tenantId}", encodeURIComponent("" + tenantId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processClientInfo(_response);
+        });
+    }
+
+    protected processClientInfo(response: AxiosResponse): Promise<PublicTenantClientInfoResponseDtoApiResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = JSON.parse(resultData200);
+            return Promise.resolve<PublicTenantClientInfoResponseDtoApiResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<PublicTenantClientInfoResponseDtoApiResponse>(null as any);
     }
 
     /**
@@ -5431,6 +5553,8 @@ export interface ProductDetailResponseDto {
     primaryImageUrl?: string | undefined;
     quantityInHand?: number;
     isActive?: boolean;
+    isFeatured?: boolean;
+    isNewArrival?: boolean;
     isPriceLocked?: boolean;
     canOrder?: boolean;
     shortDescription?: string | undefined;
@@ -5482,6 +5606,8 @@ export interface ProductListItemResponseDto {
     primaryImageUrl?: string | undefined;
     quantityInHand?: number;
     isActive?: boolean;
+    isFeatured?: boolean;
+    isNewArrival?: boolean;
     isPriceLocked?: boolean;
     canOrder?: boolean;
 }
@@ -5548,6 +5674,18 @@ export interface PublicCatalogLookupsResponseDtoApiResponse {
     success?: boolean;
     message?: string;
     data?: PublicCatalogLookupsResponseDto;
+}
+
+export interface PublicClientInfoItemDto {
+    clientId?: string;
+    name?: string;
+    businessName?: string;
+    phone?: string | undefined;
+    email?: string | undefined;
+    address?: string | undefined;
+    status?: string;
+    currencyCode?: string | undefined;
+    currencySymbol?: string | undefined;
 }
 
 export interface PublicLookupItemDto {
@@ -5648,6 +5786,21 @@ export interface PublicShopLookupItemDtoIEnumerableApiResponse {
     success?: boolean;
     message?: string;
     data?: PublicShopLookupItemDto[] | undefined;
+}
+
+export interface PublicTenantClientInfoResponseDto {
+    tenantId?: string;
+    tenantName?: string;
+    tenantCode?: string;
+    defaultCurrencyCode?: string;
+    defaultCurrencySymbol?: string;
+    clients?: PublicClientInfoItemDto[];
+}
+
+export interface PublicTenantClientInfoResponseDtoApiResponse {
+    success?: boolean;
+    message?: string;
+    data?: PublicTenantClientInfoResponseDto;
 }
 
 export type QualityType = "Compatible" | "Deji" | "Desconocido" | "Oem" | "Original" | "OriginalDesmontaje" | "ServicePack";
@@ -5838,6 +5991,11 @@ export interface UpdateContactInquiryStatusRequestDto {
 
 export interface UpdateDefaultSellingCurrencyRequestDto {
     currencyId?: string;
+}
+
+export interface UpdateProductFlagsRequestDto {
+    isFeatured?: boolean;
+    isNewArrival?: boolean;
 }
 
 export interface UpdateThemeRequestDto {
