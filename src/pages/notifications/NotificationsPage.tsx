@@ -52,7 +52,7 @@ export const NotificationsPage: React.FC = () => {
       header: 'Notification',
       accessor: (n: Notification) => (
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${n.isRead ? 'bg-gray-50' : 'bg-blue-50'}`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${n.isRead ? 'bg-[var(--bg-surface-variant)]' : 'bg-blue-50'}`}>
             {getIcon(n.type)}
           </div>
           <div>
@@ -81,7 +81,7 @@ export const NotificationsPage: React.FC = () => {
             e.stopPropagation();
             if (!n.isRead) handleMarkRead(n.id);
           }}
-          className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded ${n.isRead ? 'text-gray-400 bg-gray-50' : 'text-blue-600 bg-blue-50'}`}
+          className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded ${n.isRead ? 'text-gray-400 bg-[var(--bg-surface-variant)]' : 'text-blue-600 bg-blue-50'}`}
         >
           {n.isRead ? 'Read' : 'Mark Read'}
         </button>
@@ -90,7 +90,7 @@ export const NotificationsPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Notifications"

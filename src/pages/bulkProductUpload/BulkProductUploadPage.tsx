@@ -213,13 +213,13 @@ export const BulkProductUploadPage: React.FC = () => {
   ], [historyStatusByJobId]);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6"><div className="mx-auto max-w-7xl space-y-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6"><div className="mx-auto max-w-7xl space-y-6">
       <PageHeader
         title="Bulk Product Upload"
         description="Upload product CSV files using multipart/form-data, monitor background processing, and resume failed jobs without reprocessing completed rows."
       />
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm space-y-5">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm space-y-5">
         <div className="grid gap-4 md:grid-cols-[1fr_auto] items-end">
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">CSV File</label>
@@ -227,7 +227,7 @@ export const BulkProductUploadPage: React.FC = () => {
               type="file"
               accept=".csv,text/csv"
               onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white"
+              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white"
             />
           </div>
           <button type="button" onClick={handleUpload} disabled={isUploading} className="brand-gradient inline-flex !w-auto items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 disabled:opacity-60">
@@ -243,10 +243,10 @@ export const BulkProductUploadPage: React.FC = () => {
               value={jobIdInput}
               onChange={(event) => setJobIdInput(event.target.value)}
               placeholder="Paste existing job ID"
-              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400"
+              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400"
             />
           </div>
-          <button type="button" onClick={() => refreshJobStatus(jobIdInput.trim())} disabled={isRefreshingStatus} className="inline-flex !w-auto items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
+          <button type="button" onClick={() => refreshJobStatus(jobIdInput.trim())} disabled={isRefreshingStatus} className="inline-flex !w-auto items-center gap-2 rounded-xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-[var(--bg-surface-variant)] disabled:opacity-60">
             <RefreshCcw size={16} /> {isRefreshingStatus ? 'Refreshing...' : 'Check Status'}
           </button>
           <button type="button" onClick={handleResume} disabled={isResuming} className="brand-gradient inline-flex !w-auto items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 disabled:opacity-60">
@@ -259,7 +259,7 @@ export const BulkProductUploadPage: React.FC = () => {
       </motion.div>
 
       {activeJob && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm space-y-4">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <p className="text-xs uppercase tracking-wider text-gray-500">Active Job</p>
@@ -271,8 +271,8 @@ export const BulkProductUploadPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4"><p className="text-xs text-gray-500">Total Rows</p><p className="text-xl font-semibold text-gray-900">{activeJob.totalRows}</p></div>
-            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4"><p className="text-xs text-gray-500">Processed</p><p className="text-xl font-semibold text-gray-900">{activeJob.processedRows}</p></div>
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-4"><p className="text-xs text-gray-500">Total Rows</p><p className="text-xl font-semibold text-gray-900">{activeJob.totalRows}</p></div>
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-4"><p className="text-xs text-gray-500">Processed</p><p className="text-xl font-semibold text-gray-900">{activeJob.processedRows}</p></div>
             <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4"><p className="text-xs text-emerald-700">Successful</p><p className="text-xl font-semibold text-emerald-700">{activeJob.successfulRows}</p></div>
             <div className="rounded-xl border border-rose-100 bg-rose-50 p-4"><p className="text-xs text-rose-700">Failed</p><p className="text-xl font-semibold text-rose-700">{activeJob.failedRows}</p></div>
           </div>
@@ -285,7 +285,7 @@ export const BulkProductUploadPage: React.FC = () => {
         </motion.div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-gray-100 bg-white p-6 shadow-sm space-y-4">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Job History</h2>
           <p className="text-xs text-gray-500">Shows locally tracked jobs for quick resume/status checks.</p>

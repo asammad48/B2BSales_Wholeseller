@@ -44,7 +44,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
               'gap-3 px-4 py-3',
               active
                 ? 'brand-gradient text-white shadow-[0_10px_22px_rgba(245,158,11,0.22)]'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-overlay-5)]'
             )
       )}
       style={
@@ -71,7 +71,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
         )}
       </AnimatePresence>
 
-      {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-white/95 shadow-[0_0_8px_rgba(255,255,255,0.35)]" />}
+      {active && !collapsed && <motion.div layoutId="active-pill" className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--bg-surface-elevated)] shadow-[0_0_8px_var(--focus-ring)]" />}
       {collapsed && active && (
         <motion.div
           layoutId="active-pill-collapsed"

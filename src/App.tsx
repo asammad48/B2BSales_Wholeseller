@@ -42,8 +42,8 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden`}>
-      <div className={`p-4 flex items-center border-b border-gray-50 shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
+    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden`}>
+      <div className={`p-4 flex items-center border-b border-[var(--border-subtle)] shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
         {isSidebarOpen && (
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -87,7 +87,7 @@ const Sidebar: React.FC = () => {
               title={item.label}
               className={`relative flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ease-in-out ${
                 isSidebarOpen
-                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_rgba(245,158,11,0.28)]' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
+                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_rgba(245,158,11,0.28)]' : 'text-gray-500 hover:bg-[var(--bg-surface-variant-strong)] hover:text-gray-800'}`
                   : `justify-center h-12 w-12 mx-auto ${
                       isActive
                         ? 'ring-1 ring-amber-200 shadow-[0_2px_12px_rgba(245,158,11,0.22)]'
@@ -127,7 +127,7 @@ const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-100 flex justify-center">
+      <div className="p-4 border-t border-[var(--border-subtle)] flex justify-center">
         <button
           onClick={logout}
           className={`flex items-center text-sm font-medium text-gray-400 transition-all rounded-2xl group
@@ -150,16 +150,16 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen bg-[#f5f5f5]">
+    <div className="flex min-h-screen bg-[var(--bg-app)]">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-end sticky top-0 z-10">
+        <header className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] px-8 py-4 flex items-center justify-end sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900">{user?.name}</p>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">{user?.role}</p>
             </div>
-            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 border border-gray-200">
+            <div className="w-10 h-10 bg-[var(--bg-surface-variant-strong)] rounded-full flex items-center justify-center text-gray-400 border border-[var(--border-strong)]">
               <UserIcon size={20} />
             </div>
           </div>
@@ -175,8 +175,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
-        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-app)]">
+        <div className="w-8 h-8 border-4 border-[var(--border-strong)] border-t-gray-900 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -187,8 +187,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (!isAdminAppAccessible(user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5] p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-sm text-center">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-app)] p-4">
+        <div className="max-w-md w-full bg-[var(--bg-surface)] p-8 rounded-[24px] shadow-sm text-center">
           <Shield className="mx-auto text-red-500 mb-4" size={48} />
           <h1 className="text-2xl font-light mb-2">Access Denied</h1>
           <p className="text-gray-500 mb-6">Your account does not have permission to access the admin portal.</p>

@@ -136,7 +136,7 @@ export const OrdersPage: React.FC = () => {
       header: 'Order #',
       accessor: (o: Order) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+          <div className="w-8 h-8 bg-[var(--bg-surface-variant-strong)] rounded-lg flex items-center justify-center text-gray-400">
             <ShoppingBag size={16} />
           </div>
           <div>
@@ -165,7 +165,7 @@ export const OrdersPage: React.FC = () => {
       header: 'Actions',
       accessor: (o: Order) => (
         <div className="flex items-center gap-2">
-          <button onClick={(event) => { event.stopPropagation(); openOrderDetails(o); }} className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors" title="View Details">
+          <button onClick={(event) => { event.stopPropagation(); openOrderDetails(o); }} className="p-2 hover:bg-[var(--bg-surface-variant-strong)] rounded-lg text-gray-700 transition-colors" title="View Details">
             <Eye size={16} />
           </button>
           {canMarkAsReady(o.status) && <button onClick={(event) => { event.stopPropagation(); handleReady(o.id); }} className="p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors" title="Mark Ready"><PackageCheck size={16} /></button>}
@@ -181,7 +181,7 @@ export const OrdersPage: React.FC = () => {
   ], [orderDetails]);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Orders"
@@ -216,7 +216,7 @@ export const OrdersPage: React.FC = () => {
         {isUnableModalOpen && selectedOrder && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeUnableModal} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-lg bg-white rounded-[32px] shadow-xl p-8">
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-lg bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-light text-gray-900">Unable to Fulfill</h2>
@@ -227,10 +227,10 @@ export const OrdersPage: React.FC = () => {
 
               <form onSubmit={handleUnableToFulfill} className="space-y-4">
                 <FormField label="Reason">
-                  <textarea name="reason" required rows={4} className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all resize-none" placeholder="Explain why this order cannot be fulfilled" />
+                  <textarea name="reason" required rows={4} className="w-full bg-[var(--bg-surface-variant)] border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-all resize-none" placeholder="Explain why this order cannot be fulfilled" />
                 </FormField>
                 <div className="flex justify-end gap-3">
-                  <button type="button" onClick={closeUnableModal} className="px-5 py-3 rounded-xl bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">Cancel</button>
+                  <button type="button" onClick={closeUnableModal} className="px-5 py-3 rounded-xl bg-[var(--bg-surface-variant-strong)] text-sm font-medium text-gray-700 hover:bg-[var(--bg-surface-variant-strong)]">Cancel</button>
                   <Button type="submit" variant="danger" className="!w-auto px-6">Confirm</Button>
                 </div>
               </form>
@@ -243,7 +243,7 @@ export const OrdersPage: React.FC = () => {
         {(orderDetails || detailsLoading) && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOrderDetails(null)} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-5xl bg-white rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-5xl bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
                   <h2 className="text-2xl font-light text-gray-900">Order Details</h2>
@@ -257,22 +257,22 @@ export const OrdersPage: React.FC = () => {
               ) : (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                    <div className="rounded-2xl bg-gray-50 p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Order</p><p className="mt-2 text-lg font-medium text-gray-900">{orderDetails.orderNumber}</p><p className="text-xs text-gray-400">Created {new Date(orderDetails.createdAt).toLocaleString()}</p></div>
-                    <div className="rounded-2xl bg-gray-50 p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Client</p><p className="mt-2 text-lg font-medium text-gray-900">{orderDetails.clientName || 'Unknown client'}</p><p className="text-xs text-gray-400">{orderDetails.businessName || orderDetails.clientId}</p></div>
-                    <div className="rounded-2xl bg-gray-50 p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Shop</p><p className="mt-2 text-lg font-medium text-gray-900">{orderDetails.shopName || 'Unknown shop'}</p><p className="text-xs text-gray-400">{orderDetails.shopId}</p></div>
-                    <div className="rounded-2xl bg-gray-50 p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Status</p><p className={`mt-2 inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${getStatusColor(orderDetails.status as Order['status'])}`}>{orderDetails.statusLabel}</p><p className="mt-2 text-xs text-gray-400">Ready: {orderDetails.readyAt ? new Date(orderDetails.readyAt).toLocaleString() : '—'}</p><p className="text-xs text-gray-400">Completed: {orderDetails.completedAt ? new Date(orderDetails.completedAt).toLocaleString() : '—'}</p></div>
+                    <div className="rounded-2xl bg-[var(--bg-surface-variant)] p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Order</p><p className="mt-2 text-lg font-medium text-gray-900">{orderDetails.orderNumber}</p><p className="text-xs text-gray-400">Created {new Date(orderDetails.createdAt).toLocaleString()}</p></div>
+                    <div className="rounded-2xl bg-[var(--bg-surface-variant)] p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Client</p><p className="mt-2 text-lg font-medium text-gray-900">{orderDetails.clientName || 'Unknown client'}</p><p className="text-xs text-gray-400">{orderDetails.businessName || orderDetails.clientId}</p></div>
+                    <div className="rounded-2xl bg-[var(--bg-surface-variant)] p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Shop</p><p className="mt-2 text-lg font-medium text-gray-900">{orderDetails.shopName || 'Unknown shop'}</p><p className="text-xs text-gray-400">{orderDetails.shopId}</p></div>
+                    <div className="rounded-2xl bg-[var(--bg-surface-variant)] p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Status</p><p className={`mt-2 inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${getStatusColor(orderDetails.status as Order['status'])}`}>{orderDetails.statusLabel}</p><p className="mt-2 text-xs text-gray-400">Ready: {orderDetails.readyAt ? new Date(orderDetails.readyAt).toLocaleString() : '—'}</p><p className="text-xs text-gray-400">Completed: {orderDetails.completedAt ? new Date(orderDetails.completedAt).toLocaleString() : '—'}</p></div>
                   </div>
 
                   <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
-                    <div className="rounded-[24px] border border-gray-100 overflow-hidden">
-                      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <div className="rounded-[24px] border border-[var(--border-subtle)] overflow-hidden">
+                      <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-gray-900">Items</h3>
                         <span className="text-xs text-gray-400">{orderDetails.items.length} line items</span>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                           <thead>
-                            <tr className="border-b border-gray-50">
+                            <tr className="border-b border-[var(--border-subtle)]">
                               <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-gray-400">Product</th>
                               <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-gray-400">SKU</th>
                               <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-gray-400">Quantity</th>
@@ -282,7 +282,7 @@ export const OrdersPage: React.FC = () => {
                           </thead>
                           <tbody>
                             {orderDetails.items.map((item) => (
-                              <tr key={item.orderItemId || `${item.productId}-${item.sku}`} className="border-b border-gray-50">
+                              <tr key={item.orderItemId || `${item.productId}-${item.sku}`} className="border-b border-[var(--border-subtle)]">
                                 <td className="px-6 py-4 text-sm text-gray-700">{item.productName || 'Unnamed product'}</td>
                                 <td className="px-6 py-4 text-sm text-gray-500">{item.sku || '—'}</td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{item.quantity}</td>
@@ -296,15 +296,15 @@ export const OrdersPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-4">
-                      <div className="rounded-[24px] border border-gray-100 p-5">
+                      <div className="rounded-[24px] border border-[var(--border-subtle)] p-5">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</p>
                         <p className="mt-3 text-sm leading-6 text-gray-700 whitespace-pre-wrap">{orderDetails.notes || 'No notes added for this order.'}</p>
                       </div>
-                      <div className="rounded-[24px] border border-gray-100 p-5 space-y-3">
+                      <div className="rounded-[24px] border border-[var(--border-subtle)] p-5 space-y-3">
                         <div className="flex items-center justify-between text-sm text-gray-600"><span>Subtotal</span><span>{formatMoney(orderDetails.subtotal, orderDetails.currencyCode)}</span></div>
                         <div className="flex items-center justify-between text-sm text-gray-600"><span>Discount</span><span>{formatMoney(orderDetails.discountAmount, orderDetails.currencyCode)}</span></div>
                         <div className="flex items-center justify-between text-sm text-gray-600"><span>Tax</span><span>{formatMoney(orderDetails.taxAmount, orderDetails.currencyCode)}</span></div>
-                        <div className="border-t border-gray-100 pt-3 flex items-center justify-between text-sm font-semibold text-gray-900"><span>Total</span><span>{formatMoney(orderDetails.totalAmount, orderDetails.currencyCode)}</span></div>
+                        <div className="border-t border-[var(--border-subtle)] pt-3 flex items-center justify-between text-sm font-semibold text-gray-900"><span>Total</span><span>{formatMoney(orderDetails.totalAmount, orderDetails.currencyCode)}</span></div>
                       </div>
                     </div>
                   </div>

@@ -265,7 +265,7 @@ export const PosCreateOrderPage: React.FC = () => {
   const total = receipt?.totalAmount ?? subtotal;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="mx-auto max-w-7xl">
         <PageHeader
           title="POS Order"

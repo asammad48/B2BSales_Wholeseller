@@ -129,7 +129,7 @@ export const UsersPage: React.FC = () => {
       header: 'User',
       accessor: (u: UserAdmin) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+          <div className="w-8 h-8 bg-[var(--bg-surface-variant-strong)] rounded-lg flex items-center justify-center text-gray-400">
             <UserIcon size={16} />
           </div>
           <div>
@@ -144,7 +144,7 @@ export const UsersPage: React.FC = () => {
       accessor: (u: UserAdmin) => (
         <div className="flex flex-wrap gap-1">
           {(u.roleNames ?? []).map((roleName, roleIndex) => (
-            <span key={`${u.id}-${roleName}-${roleIndex}`} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold uppercase tracking-widest">
+            <span key={`${u.id}-${roleName}-${roleIndex}`} className="px-2 py-0.5 bg-[var(--bg-surface-variant-strong)] text-gray-600 rounded text-[10px] font-bold uppercase tracking-widest">
               {roleName}
             </span>
           ))}
@@ -181,7 +181,7 @@ export const UsersPage: React.FC = () => {
   ], []);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="User Management"
@@ -216,7 +216,7 @@ export const UsersPage: React.FC = () => {
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCreateModalOpen(false)} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-3xl bg-white rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-3xl bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-light text-gray-900">Create User</h2>
@@ -252,7 +252,7 @@ export const UsersPage: React.FC = () => {
                       <SearchableSelect name="preferredLanguageId" value={preferredLanguageId} onChange={setPreferredLanguageId} options={languages} placeholder="Select language" searchPlaceholder="Search languages" />
                     </FormField>
                     <FormField label="Status">
-                      <label className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                      <label className="flex items-center justify-between rounded-xl bg-[var(--bg-surface-variant)] px-4 py-3 text-sm text-gray-700">
                         <span>Active user account</span>
                         <input type="checkbox" checked={isActive} onChange={(event) => setIsActive(event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-300" />
                       </label>
@@ -260,7 +260,7 @@ export const UsersPage: React.FC = () => {
                   </div>
 
                   <div className="flex justify-end gap-3 pt-2">
-                    <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-5 py-3 rounded-xl bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">
+                    <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-5 py-3 rounded-xl bg-[var(--bg-surface-variant-strong)] text-sm font-medium text-gray-700 hover:bg-[var(--bg-surface-variant-strong)]">
                       Cancel
                     </button>
                     <Button type="submit" className="!w-auto px-6" disabled={submitting}>

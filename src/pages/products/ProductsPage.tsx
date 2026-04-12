@@ -367,7 +367,7 @@ export const ProductsPage: React.FC = () => {
       header: 'Product',
       accessor: (p: Product) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+          <div className="w-8 h-8 bg-[var(--bg-surface-variant-strong)] rounded-lg flex items-center justify-center text-gray-400">
             <Package size={16} />
           </div>
           <div>
@@ -425,7 +425,7 @@ export const ProductsPage: React.FC = () => {
               className={`p-2 rounded-lg border transition-colors ${
                 p.isFeatured
                   ? 'text-amber-500 border-amber-200 bg-amber-50 hover:bg-amber-100'
-                  : 'text-gray-400 border-gray-200 bg-white hover:bg-gray-50'
+                  : 'text-gray-400 border-[var(--border-strong)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-variant)]'
               } ${isUpdating ? 'opacity-60 cursor-not-allowed' : ''}`}
               title={p.isFeatured ? 'Remove from featured' : 'Set as featured'}
             >
@@ -441,7 +441,7 @@ export const ProductsPage: React.FC = () => {
               className={`p-2 rounded-lg border transition-colors ${
                 p.isNewArrival
                   ? 'text-sky-500 border-sky-200 bg-sky-50 hover:bg-sky-100'
-                  : 'text-gray-400 border-gray-200 bg-white hover:bg-gray-50'
+                  : 'text-gray-400 border-[var(--border-strong)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-variant)]'
               } ${isUpdating ? 'opacity-60 cursor-not-allowed' : ''}`}
               title={p.isNewArrival ? 'Remove from new arrivals' : 'Set as new arrival'}
             >
@@ -492,7 +492,7 @@ export const ProductsPage: React.FC = () => {
     : 'Default selling currency is not configured yet.';
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Products"
@@ -502,7 +502,7 @@ export const ProductsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={fetchCurrencySettings}
-                className="bg-white text-gray-700 px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium border border-gray-100 hover:bg-gray-50 transition-colors shadow-sm"
+                className="bg-[var(--bg-surface)] text-gray-700 px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium border border-[var(--border-subtle)] hover:bg-[var(--bg-surface-variant)] transition-colors shadow-sm"
               >
                 <RefreshCcw size={16} className={currencySettingsLoading ? 'animate-spin' : ''} />
                 Refresh rates
@@ -525,7 +525,7 @@ export const ProductsPage: React.FC = () => {
           transition={{ delay: 0.1 }}
           className="space-y-6"
         >
-          <div className="bg-white rounded-[24px] border border-gray-50 p-5 shadow-sm">
+          <div className="bg-[var(--bg-surface)] rounded-[24px] border border-[var(--border-subtle)] p-5 shadow-sm">
             <p className="text-sm font-medium text-gray-900">Pricing context</p>
             <p className="mt-1 text-sm text-gray-500">{currencyStatusText}</p>
             <p className="mt-1 text-xs text-gray-400">Exchange rates loaded: {currencySettings?.exchangeRates.length || 0}</p>
@@ -572,7 +572,7 @@ export const ProductsPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-[32px] shadow-xl p-8"
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-light">Create New Product</h2>
@@ -620,7 +620,7 @@ export const ProductsPage: React.FC = () => {
                     <Input name="defaultBuyingPrice" type="number" min="0" step="0.01" required />
                   </FormField>
 
-                  <div className="col-span-2 rounded-[24px] border border-gray-100 bg-gray-50/60 p-5 space-y-4">
+                  <div className="col-span-2 rounded-[24px] border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-5 space-y-4">
                     <div>
                       <h3 className="text-sm font-semibold text-gray-900">Selling currency pricing</h3>
                       <p className="mt-1 text-xs text-gray-500">Capture the product base currency and price, then derive the selling price in the tenant default selling currency.</p>
@@ -711,7 +711,7 @@ export const ProductsPage: React.FC = () => {
                   <div className="col-span-2">
                     <FormField label="Product Images" error={createError || undefined}>
                       <div className="space-y-4">
-                        <label className="w-full flex items-center justify-center gap-2 rounded-xl bg-gray-50 px-4 py-4 text-sm text-gray-600 cursor-pointer hover:bg-gray-100 transition-colors">
+                        <label className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--bg-surface-variant)] px-4 py-4 text-sm text-gray-600 cursor-pointer hover:bg-[var(--bg-surface-variant-strong)] transition-colors">
                           <ImagePlus size={18} />
                           <span>Add product images</span>
                           <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageSelection} />
@@ -734,7 +734,7 @@ export const ProductsPage: React.FC = () => {
                                   setDraggedImageId(null);
                                 }}
                                 onDragEnd={() => setDraggedImageId(null)}
-                                className="grid grid-cols-[auto_auto_1fr_auto] gap-3 items-center rounded-2xl bg-gray-50 p-3"
+                                className="grid grid-cols-[auto_auto_1fr_auto] gap-3 items-center rounded-2xl bg-[var(--bg-surface-variant)] p-3"
                               >
                                 <button type="button" className="text-gray-400 cursor-grab active:cursor-grabbing" aria-label="Drag image to reorder">
                                   <GripVertical size={18} />
@@ -744,7 +744,7 @@ export const ProductsPage: React.FC = () => {
                                   <div className="flex items-center gap-2 text-xs text-gray-500">
                                     <span className="font-medium text-gray-700">Sort #{index + 1}</span>
                                     {image.isPrimary && (
-                                      <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[11px] text-amber-600">
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--bg-surface)] px-2 py-1 text-[11px] text-amber-600">
                                         <Star size={12} fill="currentColor" /> Primary
                                       </span>
                                     )}
@@ -777,19 +777,19 @@ export const ProductsPage: React.FC = () => {
 
                   <div className="col-span-2">
                     <FormField label="Short Description">
-                      <textarea name="shortDescription" className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all min-h-16" />
+                      <textarea name="shortDescription" className="w-full bg-[var(--bg-surface-variant)] border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-all min-h-16" />
                     </FormField>
                   </div>
 
                   <div className="col-span-2">
                     <FormField label="Long Description">
-                      <textarea name="longDescription" className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all min-h-24" />
+                      <textarea name="longDescription" className="w-full bg-[var(--bg-surface-variant)] border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-all min-h-24" />
                     </FormField>
                   </div>
 
                   <div className="col-span-2">
                     <FormField label="Specifications">
-                      <textarea name="specifications" className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-gray-200 transition-all min-h-24" />
+                      <textarea name="specifications" className="w-full bg-[var(--bg-surface-variant)] border-none rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-all min-h-24" />
                     </FormField>
                   </div>
 
@@ -819,7 +819,7 @@ export const ProductsPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-xl bg-white rounded-[32px] shadow-xl p-8"
+              className="relative w-full max-w-xl bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>

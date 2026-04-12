@@ -107,7 +107,7 @@ const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-white/5 text-center">
+        <div className="mt-8 pt-6 border-t border-[var(--surface-overlay-border)] text-center">
           <p className="text-sm text-[var(--text-muted)]">
             Don't have a wholesale account? <br />
             <Link to="/register" className="text-[var(--color-primary)] hover:underline font-medium">Apply for access</Link>

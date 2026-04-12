@@ -136,8 +136,8 @@ const ThemeSettingsPage: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <div className="h-4 w-3/4 bg-white/5 rounded" />
-                <div className="h-4 w-1/2 bg-white/5 rounded" />
+                <div className="h-4 w-3/4 bg-[var(--surface-overlay-5)] rounded" />
+                <div className="h-4 w-1/2 bg-[var(--surface-overlay-5)] rounded" />
               </div>
 
               <button 

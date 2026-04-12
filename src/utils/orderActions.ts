@@ -23,8 +23,8 @@ export const getStatusColor = (status: OrderStatus): string => {
     case 'Cancelled':
       return 'text-red-600 bg-red-50';
     case 'UnableToFulfill':
-      return 'text-gray-600 bg-gray-50';
+      return 'text-gray-600 bg-[var(--bg-surface-variant)]';
     default:
-      return 'text-gray-600 bg-gray-50';
+      return 'text-gray-600 bg-[var(--bg-surface-variant)]';
   }
 };

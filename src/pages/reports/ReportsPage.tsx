@@ -44,7 +44,7 @@ export const ReportsPage: React.FC = () => {
   }, [range.rangeType, range.startDate, range.endDate]);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader title="Reports" description="Analyze clients, products, stock, sales by shop, and order status trends." />
 
@@ -108,7 +108,7 @@ export const ReportsPage: React.FC = () => {
             />
           </section>
 
-          <section className="bg-white rounded-[24px] p-6 border border-gray-50">
+          <section className="bg-[var(--bg-surface)] rounded-[24px] p-6 border border-[var(--border-subtle)]">
             <h2 className="text-lg font-medium mb-4">Order Status Summary</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
               <div><span className="text-gray-400 block">Pending</span><strong>{orderStatusSummary.pendingOrders || 0}</strong></div>

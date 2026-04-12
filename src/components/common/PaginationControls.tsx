@@ -44,7 +44,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             <select
               value={pageSize}
               onChange={(event) => onPageSizeChange(Number(event.target.value))}
-              className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs font-medium text-gray-700 focus:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-100"
+              className="rounded-lg border border-[var(--border-strong)] bg-[var(--bg-surface)] px-2 py-1.5 text-xs font-medium text-gray-700 focus:border-[var(--border-strong)] focus:outline-none focus:ring-2 focus:ring-gray-100"
             >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
@@ -60,7 +60,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         <button
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
-          className="rounded-lg border border-gray-100 bg-white px-4 py-2 text-xs font-medium transition-colors hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium transition-colors hover:bg-[var(--bg-surface-variant)] disabled:opacity-50"
         >
           Previous
         </button>
@@ -72,7 +72,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
               className={`h-8 min-w-8 rounded-lg border px-2 text-xs font-semibold transition-colors ${
                 pageNumber === currentPage
                   ? 'border-transparent text-white'
-                  : 'border-gray-100 bg-white text-gray-600 hover:bg-gray-50'
+                  : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-gray-600 hover:bg-[var(--bg-surface-variant)]'
               }`}
               style={pageNumber === currentPage ? { backgroundColor: 'var(--primary-color)' } : undefined}
             >
@@ -83,7 +83,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         <button
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
-          className="rounded-lg border border-gray-100 bg-white px-4 py-2 text-xs font-medium transition-colors hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-medium transition-colors hover:bg-[var(--bg-surface-variant)] disabled:opacity-50"
         >
           Next
         </button>

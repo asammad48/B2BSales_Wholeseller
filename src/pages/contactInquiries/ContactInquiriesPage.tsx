@@ -24,7 +24,7 @@ const statusClasses: Record<string, string> = {
   New: 'bg-blue-50 text-blue-600',
   Read: 'bg-amber-50 text-amber-700',
   Replied: 'bg-emerald-50 text-emerald-700',
-  Closed: 'bg-gray-100 text-gray-600',
+  Closed: 'bg-[var(--bg-surface-variant-strong)] text-gray-600',
 };
 
 export const ContactInquiriesPage: React.FC = () => {
@@ -102,7 +102,7 @@ export const ContactInquiriesPage: React.FC = () => {
     {
       header: 'Status',
       accessor: (item: ContactInquiry) => (
-        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${statusClasses[item.status] || 'bg-gray-100 text-gray-600'}`}>
+        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${statusClasses[item.status] || 'bg-[var(--bg-surface-variant-strong)] text-gray-600'}`}>
           {item.status}
         </span>
       ),
@@ -112,7 +112,7 @@ export const ContactInquiriesPage: React.FC = () => {
     {
       header: 'Actions',
       accessor: (item: ContactInquiry) => (
-        <button onClick={(event) => { event.stopPropagation(); openInquiry(item); }} className="inline-flex items-center gap-2 rounded-xl border border-gray-100 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50">
+        <button onClick={(event) => { event.stopPropagation(); openInquiry(item); }} className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] px-3 py-2 text-xs font-medium text-gray-700 hover:bg-[var(--bg-surface-variant)]">
           <Eye size={14} /> View
         </button>
       ),
@@ -120,7 +120,7 @@ export const ContactInquiriesPage: React.FC = () => {
   ], []);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <PageHeader
           title="Contact Inquiries"
@@ -150,7 +150,7 @@ export const ContactInquiriesPage: React.FC = () => {
         {(selectedInquiry || detailLoading) && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedInquiry(null)} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-3xl bg-white rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-3xl bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-light text-gray-900">Inquiry Details</h2>
@@ -164,7 +164,7 @@ export const ContactInquiriesPage: React.FC = () => {
               ) : (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="rounded-2xl bg-gray-50 p-4">
+                    <div className="rounded-2xl bg-[var(--bg-surface-variant)] p-4">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Contact</p>
                       <div className="mt-3 space-y-2 text-sm text-gray-700">
                         <p className="flex items-center gap-2"><Mail size={14} className="text-gray-400" /> {selectedInquiry.email}</p>
@@ -172,7 +172,7 @@ export const ContactInquiriesPage: React.FC = () => {
                         <p className="flex items-center gap-2"><SearchCode size={14} className="text-gray-400" /> {selectedInquiry.name}</p>
                       </div>
                     </div>
-                    <div className="rounded-2xl bg-gray-50 p-4">
+                    <div className="rounded-2xl bg-[var(--bg-surface-variant)] p-4">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Timeline</p>
                       <div className="mt-3 space-y-2 text-sm text-gray-700">
                         <p>Created: {new Date(selectedInquiry.createdAt).toLocaleString()}</p>
@@ -182,10 +182,10 @@ export const ContactInquiriesPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-gray-100 p-5">
+                  <div className="rounded-2xl border border-[var(--border-subtle)] p-5">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subject</p>
                     <h3 className="mt-2 text-lg font-medium text-gray-900">{selectedInquiry.subject || 'No subject'}</h3>
-                    <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm leading-6 text-gray-700 whitespace-pre-wrap">
+                    <div className="mt-4 rounded-2xl bg-[var(--bg-surface-variant)] p-4 text-sm leading-6 text-gray-700 whitespace-pre-wrap">
                       <div className="flex items-center gap-2 mb-2 text-gray-500"><MessageSquareText size={16} /> Message</div>
                       {selectedInquiry.message || 'No message provided.'}
                     </div>

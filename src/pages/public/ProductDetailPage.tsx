@@ -113,7 +113,7 @@ const ProductDetailPage: React.FC = () => {
               />
               {product.isPriceLocked && isGuest && (
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                  <div className="bg-black/60 px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 text-white text-sm backdrop-blur-md">
+                  <div className="bg-black/60 px-4 py-2 rounded-full border border-[var(--surface-overlay-border)] flex items-center gap-2 text-white text-sm backdrop-blur-md">
                     <Lock size={14} className="text-[var(--color-primary)]" />
                     Login to view price
                   </div>
@@ -129,7 +129,7 @@ const ProductDetailPage: React.FC = () => {
                     onClick={() => setActiveImage(img.filePath)}
                     className={cn(
                       "aspect-square admin-card p-2 overflow-hidden transition-all",
-                      activeImage === img.filePath ? "border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20" : "hover:border-white/20"
+                      activeImage === img.filePath ? "border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20" : "hover:border-[var(--surface-overlay-border)]"
                     )}
                   >
                     <img 
@@ -174,7 +174,7 @@ const ProductDetailPage: React.FC = () => {
                 <span className="text-[var(--text-muted)] text-sm">(4.8 • 124 Reviews)</span>
               </div>
 
-              <div className="admin-card p-6 mb-8 bg-gradient-to-br from-white/5 to-transparent">
+              <div className="admin-card p-6 mb-8 bg-gradient-to-br from-[var(--surface-overlay-5)] to-transparent">
                 <div className="flex items-baseline gap-4 mb-2">
                   {isGuest ? (
                     <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ const ProductDetailPage: React.FC = () => {
                     "w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-lg",
                     canOrder 
                       ? "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] shadow-[var(--color-primary-glow)]" 
-                      : "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
+                      : "bg-[var(--surface-overlay-5)] text-white/20 cursor-not-allowed border border-[var(--surface-overlay-border)]"
                   )}
                 >
                   <ShoppingCart size={22} />
@@ -220,14 +220,14 @@ const ProductDetailPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-10">
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/5">
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-[var(--surface-overlay-5)] border border-[var(--surface-overlay-border)]">
                   <ShieldCheck className="text-[var(--color-primary)] shrink-0" size={20} />
                   <div>
                     <p className="text-sm font-bold text-white">Warranty</p>
                     <p className="text-xs text-[var(--text-muted)]">{product.warrantyDays} Days Protection</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/5">
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-[var(--surface-overlay-5)] border border-[var(--surface-overlay-border)]">
                   <Truck className="text-[var(--color-primary)] shrink-0" size={20} />
                   <div>
                     <p className="text-sm font-bold text-white">Shipping</p>
@@ -263,7 +263,7 @@ const ProductDetailPage: React.FC = () => {
                         const [label, value] = spec.split(':');
                         if (!label) return null;
                         return (
-                          <div key={idx} className="grid grid-cols-2 p-4 hover:bg-white/5 transition-colors">
+                          <div key={idx} className="grid grid-cols-2 p-4 hover:bg-[var(--surface-overlay-5)] transition-colors">
                             <span className="text-sm font-medium text-[var(--text-muted)]">{label.trim()}</span>
                             <span className="text-sm text-white font-medium">{value?.trim() || '—'}</span>
                           </div>
@@ -306,7 +306,7 @@ const ProductDetailPage: React.FC = () => {
                   to={`/product/${rel.id}`}
                   className="admin-card admin-card-hover p-4 group"
                 >
-                  <div className="aspect-square rounded-lg overflow-hidden bg-white/5 mb-4 p-4">
+                  <div className="aspect-square rounded-lg overflow-hidden bg-[var(--surface-overlay-5)] mb-4 p-4">
                     <img 
                       src={rel.primaryImageUrl || 'https://picsum.photos/seed/rel/400/400'} 
                       alt={rel.name}
@@ -320,7 +320,7 @@ const ProductDetailPage: React.FC = () => {
                     <span className="text-[var(--color-primary)] font-bold">
                       {isGuest ? 'Locked' : `$${rel.defaultSellingPrice?.toFixed(2)}`}
                     </span>
-                    <div className="p-2 rounded-lg bg-white/5 text-[var(--text-muted)] group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
+                    <div className="p-2 rounded-lg bg-[var(--surface-overlay-5)] text-[var(--text-muted)] group-hover:bg-[var(--color-primary)] group-hover:text-white transition-all">
                       <ShoppingCart size={16} />
                     </div>
                   </div>

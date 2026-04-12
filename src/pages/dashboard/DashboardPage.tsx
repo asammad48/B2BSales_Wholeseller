@@ -16,7 +16,7 @@ const StatCard = ({
   value: string | number;
   helper?: string;
 }) => (
-  <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-50">
+  <div className="bg-[var(--bg-surface)] p-6 rounded-[24px] shadow-sm border border-[var(--border-subtle)]">
     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">{label}</p>
     <p className="text-3xl font-light text-gray-900">{value}</p>
     {helper ? <p className="mt-2 text-xs text-gray-400">{helper}</p> : null}
@@ -37,8 +37,8 @@ const PreviewCard = ({
   children: React.ReactNode;
   action?: React.ReactNode;
 }) => (
-  <div className="bg-white rounded-[24px] shadow-sm border border-gray-50 overflow-hidden">
-    <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+  <div className="bg-[var(--bg-surface)] rounded-[24px] shadow-sm border border-[var(--border-subtle)] overflow-hidden">
+    <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
       <div className="flex items-center gap-2 text-gray-900">
         <Icon size={16} className="text-gray-400" />
         <h2 className="text-sm font-semibold">{title}</h2>
@@ -95,14 +95,14 @@ export const DashboardPage: React.FC = () => {
   }, [overview]);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <PageHeader
           title="Dashboard"
           description="Track operational performance across orders, clients, stock, and inquiries."
           actions={
             <div className="flex items-center gap-3">
-              <div className="px-4 py-2.5 rounded-xl bg-white text-sm text-gray-600 border border-gray-100">
+              <div className="px-4 py-2.5 rounded-xl bg-[var(--bg-surface)] text-sm text-gray-600 border border-[var(--border-subtle)]">
                 Unread notifications: <span className="font-semibold text-gray-900">{overview?.unreadNotificationsCount || 0}</span>
               </div>
               <Link to="/orders" className="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
@@ -116,7 +116,7 @@ export const DashboardPage: React.FC = () => {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
           {loading ? (
-            <div className="bg-white rounded-[24px] p-12 text-center text-gray-500">Loading dashboard overview...</div>
+            <div className="bg-[var(--bg-surface)] rounded-[24px] p-12 text-center text-gray-500">Loading dashboard overview...</div>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -131,7 +131,7 @@ export const DashboardPage: React.FC = () => {
                 <PreviewCard title="Recent Orders" icon={ShoppingBag} action={<Link to="/orders" className="text-xs font-medium text-gray-500 hover:text-gray-900">View all</Link>}>
                   <div className="space-y-3">
                     {(overview?.recentOrders || []).slice(0, 5).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3">
+                      <div key={order.id} className="flex items-center justify-between rounded-2xl border border-[var(--border-subtle)] px-4 py-3">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{order.orderNumber || order.id}</p>
                           <p className="text-xs text-gray-400">{order.clientName || 'Unknown client'} • {order.shopName || 'Unknown shop'}</p>
@@ -148,11 +148,11 @@ export const DashboardPage: React.FC = () => {
 
                 <PreviewCard title="Recent Inquiries" icon={Bell} action={<Link to="/contact-inquiries" className="text-xs font-medium text-gray-500 hover:text-gray-900">Manage inquiries</Link>}>
                   <div className="space-y-3">
-                    <div className="rounded-2xl bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                    <div className="rounded-2xl bg-[var(--bg-surface-variant)] px-4 py-3 text-sm text-gray-600">
                       Unread inquiries: <span className="font-semibold text-gray-900">{overview?.summary.unreadInquiriesCount || 0}</span>
                     </div>
                     {(overview?.recentInquiries || []).slice(0, 5).map((inquiry) => (
-                      <div key={inquiry.id} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3">
+                      <div key={inquiry.id} className="flex items-center justify-between rounded-2xl border border-[var(--border-subtle)] px-4 py-3">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{inquiry.subject || 'No subject'}</p>
                           <p className="text-xs text-gray-400">{inquiry.name || 'Unknown contact'}</p>
@@ -172,7 +172,7 @@ export const DashboardPage: React.FC = () => {
                 <PreviewCard title="Low Stock Preview" icon={PackageSearch}>
                   <div className="space-y-3">
                     {(overview?.lowStockPreview || []).slice(0, 5).map((item) => (
-                      <div key={`${item.productId}-${item.shopId}`} className="rounded-2xl border border-gray-100 px-4 py-3">
+                      <div key={`${item.productId}-${item.shopId}`} className="rounded-2xl border border-[var(--border-subtle)] px-4 py-3">
                         <p className="text-sm font-medium text-gray-900">{item.productName || 'Unnamed product'}</p>
                         <p className="text-xs text-gray-400">{item.sku || 'No SKU'} • {item.shopName || 'Unknown shop'}</p>
                         <p className="mt-1 text-xs text-amber-600">Stock {item.stockQuantity || 0} / Threshold {item.lowStockThreshold || 0}</p>
@@ -185,7 +185,7 @@ export const DashboardPage: React.FC = () => {
                 <PreviewCard title="Best Performing Clients" icon={Users}>
                   <div className="space-y-3">
                     {(overview?.bestPerformingClientsPreview || []).slice(0, 5).map((item, index) => (
-                      <div key={`${item.clientId || 'client'}-${index}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3">
+                      <div key={`${item.clientId || 'client'}-${index}`} className="flex items-center justify-between rounded-2xl border border-[var(--border-subtle)] px-4 py-3">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{item.clientName || 'Unnamed client'}</p>
                           <p className="text-xs text-gray-400">Orders: {item.totalOrders || 0}</p>
@@ -200,7 +200,7 @@ export const DashboardPage: React.FC = () => {
                 <PreviewCard title="Top Selling Products" icon={Boxes}>
                   <div className="space-y-3">
                     {(overview?.topSellingProductsPreview || []).slice(0, 5).map((item, index) => (
-                      <div key={`${item.productId || 'product'}-${index}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3">
+                      <div key={`${item.productId || 'product'}-${index}`} className="flex items-center justify-between rounded-2xl border border-[var(--border-subtle)] px-4 py-3">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{item.productName || 'Unnamed product'}</p>
                                 <p className="text-xs text-gray-400">Qty sold: {item.quantitySold || 0}</p>

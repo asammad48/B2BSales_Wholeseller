@@ -29,11 +29,11 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-[var(--bg-app)] flex items-center justify-center p-4 font-sans">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-[24px] shadow-sm p-8 md:p-12"
+        className="w-full max-w-md bg-[var(--bg-surface)] rounded-[24px] shadow-sm p-8 md:p-12"
       >
         <div className="mb-8">
           <h1 className="text-3xl font-light text-gray-900 mb-2">Admin Portal</h1>
@@ -59,7 +59,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-gray-50 border-none rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-gray-200 transition-all outline-none"
+                className="w-full bg-[var(--bg-surface-variant)] border-none rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[var(--focus-ring)] transition-all outline-none"
                 placeholder="admin@example.com"
               />
             </div>
@@ -76,7 +76,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-gray-50 border-none rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-gray-200 transition-all outline-none"
+                className="w-full bg-[var(--bg-surface-variant)] border-none rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[var(--focus-ring)] transition-all outline-none"
                 placeholder="••••••••"
               />
             </div>
@@ -91,7 +91,7 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-8 border-t border-gray-100">
+        <div className="mt-8 pt-8 border-t border-[var(--border-subtle)]">
           <p className="text-center text-xs text-gray-400">
             Mobia2Z Admin System &copy; 2026
           </p>

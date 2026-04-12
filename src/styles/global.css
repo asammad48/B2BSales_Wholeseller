@@ -26,7 +26,7 @@
 
   /* Cards */
   .admin-card {
-    @apply bg-[var(--bg-card)] rounded-[var(--radius-xl)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-200;
+    @apply bg-[var(--bg-surface)] rounded-[var(--radius-xl)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-200;
   }
   
   .admin-card-hover {
@@ -35,7 +35,7 @@
 
   /* Table Styles */
   .admin-table-container {
-    @apply bg-[var(--bg-card)] rounded-[var(--radius-xl)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-200;
+    @apply bg-[var(--bg-surface)] rounded-[var(--radius-xl)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-200;
   }
 
   .admin-table {
@@ -51,7 +51,7 @@
   }
 
   .admin-table tr:hover td {
-    @apply bg-white/[0.02] text-[var(--text-primary)];
+    @apply bg-[var(--surface-overlay-2)] text-[var(--text-primary)];
   }
 
   /* Buttons */
@@ -60,11 +60,11 @@
   }
 
   .btn-secondary {
-    @apply px-6 py-2.5 bg-white/5 hover:bg-white/10 text-[var(--text-primary)] font-semibold rounded-[var(--radius-lg)] border border-[var(--border-subtle)] transition-all active:scale-95;
+    @apply px-6 py-2.5 bg-[var(--surface-overlay-5)] hover:bg-[var(--surface-overlay-10)] text-[var(--text-primary)] font-semibold rounded-[var(--radius-lg)] border border-[var(--border-subtle)] transition-all active:scale-95;
   }
 
   .btn-ghost {
-    @apply p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-[var(--radius-md)] transition-colors;
+    @apply p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-overlay-5)] rounded-[var(--radius-md)] transition-colors;
   }
 
   /* Form Controls */
@@ -77,7 +77,7 @@
   }
 
   .form-input {
-    @apply w-full bg-white/5 border border-[var(--border-subtle)] rounded-[var(--radius-lg)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] transition-all placeholder:text-[var(--text-muted)];
+    @apply w-full bg-[var(--surface-overlay-5)] border border-[var(--border-subtle)] rounded-[var(--radius-lg)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--border-focus)] transition-all placeholder:text-[var(--text-muted)];
   }
 
   /* Toolbar */
@@ -86,6 +86,6 @@
   }
 
   .search-input-wrapper {
-    @apply flex items-center gap-3 bg-white/5 px-4 py-2 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] w-full md:w-96 focus-within:border-[var(--border-focus)] transition-all;
+    @apply flex items-center gap-3 bg-[var(--surface-overlay-5)] px-4 py-2 rounded-[var(--radius-lg)] border border-[var(--border-subtle)] w-full md:w-96 focus-within:border-[var(--border-focus)] transition-all;
   }
 }
