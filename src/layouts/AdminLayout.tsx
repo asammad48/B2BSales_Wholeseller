@@ -124,9 +124,9 @@ export const AdminLayout = () => {
                   title="Collapse sidebar"
                   aria-label="Collapse sidebar"
                 >
-                  <Boxes size={18} className="text-white" />
+                  <img src="/mobia2z-logo.svg" alt="Mobia2z logo" className="h-5 w-5" />
                 </button>
-                <span className="font-bold text-lg tracking-tight text-white uppercase">Wholesale</span>
+                <span className="font-bold text-lg tracking-tight text-white uppercase">Mobia2z</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -137,7 +137,7 @@ export const AdminLayout = () => {
               title="Expand sidebar"
               aria-label="Expand sidebar"
             >
-              <Boxes size={18} className="text-white" />
+              <img src="/mobia2z-logo.svg" alt="Mobia2z logo" className="h-5 w-5" />
             </button>
           )}
         </div>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Mobia2z logo">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#359BB5"/>
+      <stop offset="100%" stop-color="#1F4F85"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="46" fill="none" stroke="url(#g)" stroke-width="10" stroke-dasharray="220 80" transform="rotate(-20 64 64)"/>
+  <circle cx="64" cy="64" r="31" fill="none" stroke="#1F4F85" stroke-width="2" opacity="0.55"/>
+  <text x="64" y="67" text-anchor="middle" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#1F4F85">A2Z</text>
+  <text x="64" y="88" text-anchor="middle" font-size="12" font-family="Segoe UI, Arial, sans-serif" font-weight="600" fill="#359BB5">Mobi</text>
+</svg>
