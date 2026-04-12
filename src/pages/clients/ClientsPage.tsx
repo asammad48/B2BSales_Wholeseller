@@ -106,13 +106,13 @@ export const ClientsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <PageHeader
           title="Clients"
           description="Create wholesale clients while keeping the current admin layout and form styling intact."
           actions={
-            <button onClick={() => { resetForm(); setIsCreateModalOpen(true); }} className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800">
+            <button onClick={() => { resetForm(); setIsCreateModalOpen(true); }} className="bg-[var(--color-primary)] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-[var(--color-primary-hover)]">
               <Plus size={16} /> Create Client
             </button>
           }
@@ -120,7 +120,7 @@ export const ClientsPage: React.FC = () => {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
           <div className="space-y-4">
-            <div className="bg-white rounded-[24px] border border-gray-50 p-6 shadow-sm">
+            <div className="bg-[var(--bg-surface)] rounded-[24px] border border-[var(--border-subtle)] p-6 shadow-sm">
               <h2 className="text-lg font-medium text-gray-900">Client Directory Preview</h2>
               <p className="mt-1 text-sm text-gray-400">Existing clients are loaded from current lookup data so the create flow can refresh without changing architecture.</p>
             </div>
@@ -132,12 +132,12 @@ export const ClientsPage: React.FC = () => {
                 { header: 'Business', accessor: (item: ClientAdmin) => item.businessName || '—' },
                 { header: 'Email', accessor: (item: ClientAdmin) => item.email || '—' },
                 { header: 'Phone', accessor: (item: ClientAdmin) => item.phone || '—' },
-                { header: 'Status', accessor: (item: ClientAdmin) => <span className="px-2 py-1 rounded-full bg-gray-100 text-[10px] font-bold uppercase tracking-widest text-gray-600">{item.status || '—'}</span> },
+                { header: 'Status', accessor: (item: ClientAdmin) => <span className="px-2 py-1 rounded-full bg-[var(--bg-surface-variant-strong)] text-[10px] font-bold uppercase tracking-widest text-gray-600">{item.status || '—'}</span> },
               ]}
             />
           </div>
 
-          <div className="bg-white rounded-[24px] border border-gray-50 p-6 shadow-sm space-y-4">
+          <div className="bg-[var(--bg-surface)] rounded-[24px] border border-[var(--border-subtle)] p-6 shadow-sm space-y-4">
             <h2 className="text-lg font-medium text-gray-900">Create Flow Notes</h2>
             <div className="space-y-3 text-sm text-gray-600">
               <div className="flex items-start gap-3"><User2 size={16} className="mt-0.5 text-gray-400" /><p>Create a named client profile for wholesale ordering.</p></div>
@@ -160,7 +160,7 @@ export const ClientsPage: React.FC = () => {
         {isCreateModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCreateModalOpen(false)} className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-3xl bg-white rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 20 }} className="relative w-full max-w-3xl bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-light text-gray-900">Create Client</h2>
@@ -206,7 +206,7 @@ export const ClientsPage: React.FC = () => {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
-                  <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-5 py-3 rounded-xl bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">Cancel</button>
+                  <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-5 py-3 rounded-xl bg-[var(--bg-surface-variant-strong)] text-sm font-medium text-gray-700 hover:bg-[var(--bg-surface-variant-strong)]">Cancel</button>
                   <Button type="submit" className="!w-auto px-6" disabled={submitting}>
                     {submitting ? 'Creating...' : 'Create Client'}
                   </Button>

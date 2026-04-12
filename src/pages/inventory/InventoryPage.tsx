@@ -83,7 +83,7 @@ const SerializedUnitsEditor: React.FC<{
   return (
     <div className="space-y-4">
       {drafts.map((draft, index) => (
-        <div key={`serialized-unit-${index}`} className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 space-y-3">
+        <div key={`serialized-unit-${index}`} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-4 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Serialized unit {index + 1}</p>
           </div>
@@ -133,7 +133,7 @@ const InventoryDetailsModal: React.FC<{
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: 20 }}
-      className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-white p-8 shadow-xl"
+      className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-[var(--bg-surface)] p-8 shadow-xl"
     >
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
@@ -147,10 +147,10 @@ const InventoryDetailsModal: React.FC<{
 
       <div className="flex-1 overflow-y-auto pr-1">
       {item.barcodes.length ? (
-        <div className="max-h-full overflow-y-auto rounded-3xl border border-gray-100">
+        <div className="max-h-full overflow-y-auto rounded-3xl border border-[var(--border-subtle)]">
           <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/70">
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-variant)]">
                 <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">#</th>
                 <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">IMEI 1</th>
                 <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">IMEI 2</th>
@@ -159,7 +159,7 @@ const InventoryDetailsModal: React.FC<{
             </thead>
             <tbody>
               {item.barcodes.map((unit, index) => (
-                <tr key={`${unitKey(unit)}-${index}`} className="border-b border-gray-50 last:border-b-0">
+                <tr key={`${unitKey(unit)}-${index}`} className="border-b border-[var(--border-subtle)] last:border-b-0">
                   <td className="px-5 py-4 text-sm text-gray-500">{index + 1}</td>
                   <td className="px-5 py-4 font-mono text-sm text-gray-700">{unit.imei1 || '—'}</td>
                   <td className="px-5 py-4 font-mono text-sm text-gray-700">{unit.imei2 || '—'}</td>
@@ -170,7 +170,7 @@ const InventoryDetailsModal: React.FC<{
           </table>
         </div>
       ) : (
-        <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50/70 p-10 text-center text-sm text-gray-500">
+        <div className="rounded-3xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface-variant)] p-10 text-center text-sm text-gray-500">
           No serialized unit details are available for this inventory record.
         </div>
       )}
@@ -389,7 +389,7 @@ export const InventoryPage: React.FC = () => {
       header: 'Product',
       accessor: (i: InventoryItem) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--bg-surface-variant-strong)] text-gray-400">
             <Package size={16} />
           </div>
           <div>
@@ -429,7 +429,7 @@ export const InventoryPage: React.FC = () => {
               event.stopPropagation();
               setDetailsItem(i);
             }}
-            className="inline-flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--bg-surface-variant-strong)] px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-[var(--bg-surface-variant-strong)]"
           >
             <Eye size={14} /> View units
           </button>
@@ -446,7 +446,7 @@ export const InventoryPage: React.FC = () => {
               setSelectedItem(i);
               setIsAdjustOpen(true);
             }}
-            className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100"
+            className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-[var(--bg-surface-variant-strong)]"
             title="Adjust Stock"
           >
             <Settings2 size={16} />
@@ -576,7 +576,7 @@ export const InventoryPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="mx-auto max-w-7xl">
         <PageHeader
           title="Inventory"
@@ -584,7 +584,7 @@ export const InventoryPage: React.FC = () => {
           actions={
             <button
               onClick={() => setIsStockInOpen(true)}
-              className="flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800"
+              className="flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)]"
               style={{ backgroundColor: 'var(--primary-color)' }}
             >
               <ArrowDownCircle size={18} />
@@ -630,7 +630,7 @@ export const InventoryPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-white p-8 shadow-xl"
+              className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-[var(--bg-surface)] p-8 shadow-xl"
             >
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -683,7 +683,7 @@ export const InventoryPage: React.FC = () => {
                         placeholder="0"
                       />
                     </FormField>
-                    <div className="rounded-2xl border border-gray-100 bg-gray-50/70 px-4 py-3">
+                    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] px-4 py-3">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Tracking type</p>
                       <p className="mt-2 text-sm font-medium text-gray-900">{stockInTrackingType}</p>
                       <p className="mt-1 text-xs text-gray-500">
@@ -728,7 +728,7 @@ export const InventoryPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-white p-8 shadow-xl"
+              className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-[32px] bg-[var(--bg-surface)] p-8 shadow-xl"
             >
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -805,7 +805,7 @@ export const InventoryPage: React.FC = () => {
                   ) : null}
 
                   {isSerializedRemoval ? (
-                    <div className="space-y-4 rounded-3xl border border-gray-100 bg-gray-50/60 p-4">
+                    <div className="space-y-4 rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-4">
                       <div>
                         <h3 className="text-sm font-semibold text-gray-900">Serialized products to remove</h3>
                         <p className="mt-1 text-xs text-gray-500">Select {requiredRemovalCount} unit{requiredRemovalCount === 1 ? '' : 's'} using the searchable dropdown. Search by product name, IMEI 1, IMEI 2, or barcode.</p>
@@ -825,14 +825,14 @@ export const InventoryPage: React.FC = () => {
                       <div className="space-y-2">
                         {selectedRemovalUnits.length ? (
                           selectedRemovalUnits.map((unit, index) => (
-                            <div key={`${unitKey(unit)}-${index}`} className="flex items-start justify-between gap-3 rounded-2xl bg-white px-4 py-3">
+                            <div key={`${unitKey(unit)}-${index}`} className="flex items-start justify-between gap-3 rounded-2xl bg-[var(--bg-surface)] px-4 py-3">
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{buildSerializedUnitLabel(selectedItem, unit)}</p>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => setSelectedRemovalUnits((current) => current.filter((_, currentIndex) => currentIndex !== index))}
-                                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-[var(--bg-surface-variant-strong)] hover:text-gray-600"
                                 title="Remove selection"
                               >
                                 <X size={16} />

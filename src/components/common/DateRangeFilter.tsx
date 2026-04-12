@@ -9,7 +9,7 @@ interface DateRangeFilterProps {
 
 export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ value, onChange }) => {
   return (
-    <div className="bg-white p-4 rounded-[24px] border border-gray-50 mb-6">
+    <div className="bg-[var(--bg-surface)] p-4 rounded-[24px] border border-[var(--border-subtle)] mb-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FormField label="Range">
           <Select

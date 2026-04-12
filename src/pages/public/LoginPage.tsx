@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Lock, Mail, RefreshCcw, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Lock, Mail, RefreshCcw, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../state/AuthContext';
 
 const LoginPage: React.FC = () => {
@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
       <div className="absolute top-8 left-8">
         <Link to="/" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-white transition-colors">
           <ArrowLeft size={18} />
-          Back to Store
+          Back to Mobia2z
         </Link>
       </div>
 
@@ -48,10 +48,10 @@ const LoginPage: React.FC = () => {
         className="w-full max-w-md admin-card p-8 shadow-2xl"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-4 shadow-glow">
-            <ShoppingBag size={24} className="text-white" />
+          <div className="w-12 h-12 bg-[var(--color-primary)] rounded-xl flex items-center justify-center mb-4 shadow-glow p-1.5">
+            <img src="/mobia2z-logo.svg" alt="Mobia2z logo" className="h-full w-full" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Buyer Login</h1>
+          <h1 className="text-2xl font-bold text-white">Mobia2z Login</h1>
           <p className="text-[var(--text-muted)]">Access wholesale pricing and orders</p>
         </div>
         
@@ -107,7 +107,7 @@ const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-white/5 text-center">
+        <div className="mt-8 pt-6 border-t border-[var(--surface-overlay-border)] text-center">
           <p className="text-sm text-[var(--text-muted)]">
             Don't have a wholesale account? <br />
             <Link to="/register" className="text-[var(--color-primary)] hover:underline font-medium">Apply for access</Link>

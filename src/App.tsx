@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './state/AuthContext';
-import { SettingsProvider, useSettings } from './state/SettingsContext';
+import { SettingsProvider } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
 import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload } from 'lucide-react';
@@ -22,7 +22,6 @@ import { BulkProductUploadPage } from './pages/bulkProductUpload/BulkProductUplo
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const { logout } = useAuth();
-  const { settings } = useSettings();
   const [isSidebarOpen, setSidebarOpen] = React.useState(false);
 
   const navItems = [
@@ -42,20 +41,20 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden`}>
-      <div className={`p-4 flex items-center border-b border-gray-50 shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
+    <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden`}>
+      <div className={`p-4 flex items-center border-b border-[var(--border-subtle)] shrink-0 ${isSidebarOpen ? 'justify-between gap-3' : 'justify-center'}`}>
         {isSidebarOpen && (
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="brand-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-[0_6px_18px_rgba(245,158,11,0.35)]"
+              className="brand-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-[0_6px_18px_var(--color-primary-glow)]"
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
-              <Shield size={20} />
+              <img src="/mobia2z-logo.svg" alt="Mobia2z logo" className="h-6 w-6" />
             </button>
             <div className="min-w-0">
-              <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Mobia2Z'}</h1>
+              <h1 className="font-medium text-gray-900 leading-tight truncate">Mobia2z</h1>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
             </div>
           </div>
@@ -64,11 +63,11 @@ const Sidebar: React.FC = () => {
         {!isSidebarOpen && (
           <button
             onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="brand-gradient h-10 w-10 inline-flex items-center justify-center rounded-xl transition-all shrink-0 text-white hover:brightness-110 shadow-[0_6px_18px_rgba(245,158,11,0.35)]"
+            className="brand-gradient h-10 w-10 inline-flex items-center justify-center rounded-xl transition-all shrink-0 text-white hover:brightness-110 shadow-[0_6px_18px_var(--color-primary-glow)]"
             title="Expand sidebar"
             aria-label="Expand sidebar"
           >
-            <Shield size={20} />
+            <img src="/mobia2z-logo.svg" alt="Mobia2z logo" className="h-6 w-6" />
           </button>
         )}
       </div>
@@ -87,11 +86,11 @@ const Sidebar: React.FC = () => {
               title={item.label}
               className={`relative flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ease-in-out ${
                 isSidebarOpen
-                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_rgba(245,158,11,0.28)]' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}`
+                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_var(--color-primary-glow)]' : 'text-gray-500 hover:bg-[var(--bg-surface-variant-strong)] hover:text-gray-800'}`
                   : `justify-center h-12 w-12 mx-auto ${
                       isActive
-                        ? 'ring-1 ring-amber-200 shadow-[0_2px_12px_rgba(245,158,11,0.22)]'
-                        : 'text-gray-400 hover:text-amber-600 hover:ring-1 hover:ring-amber-100 hover:bg-amber-50/60'
+                        ? 'ring-1 ring-[var(--color-primary)]/30 shadow-[0_2px_12px_var(--color-primary-glow)]'
+                        : 'text-gray-400 hover:text-[var(--color-primary)] hover:ring-1 hover:ring-[var(--color-primary)]/20 hover:bg-[var(--bg-surface-variant)]'
                     }`
               }`}
               style={
@@ -106,7 +105,7 @@ const Sidebar: React.FC = () => {
                 className="shrink-0 transition-all"
                 style={
                   !isSidebarOpen && isActive
-                    ? { filter: 'drop-shadow(0 0 5px rgba(245,158,11,0.5))' }
+                    ? { filter: 'drop-shadow(0 0 5px var(--color-primary-glow))' }
                     : undefined
                 }
               />
@@ -118,7 +117,7 @@ const Sidebar: React.FC = () => {
                   className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-l-full"
                   style={{
                     background: 'var(--brand-gradient-vertical)',
-                    boxShadow: '0 0 10px rgba(245,158,11,0.5)',
+                    boxShadow: '0 0 10px var(--color-primary-glow)',
                   }}
                 />
               )}
@@ -127,7 +126,7 @@ const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-100 flex justify-center">
+      <div className="p-4 border-t border-[var(--border-subtle)] flex justify-center">
         <button
           onClick={logout}
           className={`flex items-center text-sm font-medium text-gray-400 transition-all rounded-2xl group
@@ -150,16 +149,16 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen bg-[#f5f5f5]">
+    <div className="flex min-h-screen bg-[var(--bg-app)]">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-end sticky top-0 z-10">
+        <header className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] px-8 py-4 flex items-center justify-end sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900">{user?.name}</p>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">{user?.role}</p>
             </div>
-            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 border border-gray-200">
+            <div className="w-10 h-10 bg-[var(--bg-surface-variant-strong)] rounded-full flex items-center justify-center text-gray-400 border border-[var(--border-strong)]">
               <UserIcon size={20} />
             </div>
           </div>
@@ -175,8 +174,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5]">
-        <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-app)]">
+        <div className="w-8 h-8 border-4 border-[var(--border-strong)] border-t-gray-900 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -187,12 +186,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (!isAdminAppAccessible(user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5] p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-[24px] shadow-sm text-center">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-app)] p-4">
+        <div className="max-w-md w-full bg-[var(--bg-surface)] p-8 rounded-[24px] shadow-sm text-center">
           <Shield className="mx-auto text-red-500 mb-4" size={48} />
           <h1 className="text-2xl font-light mb-2">Access Denied</h1>
           <p className="text-gray-500 mb-6">Your account does not have permission to access the admin portal.</p>
-          <button onClick={() => (window.location.href = '/login')} className="bg-gray-900 text-white px-6 py-2 rounded-xl">Back to Login</button>
+          <button onClick={() => (window.location.href = '/login')} className="bg-[var(--color-primary)] text-white px-6 py-2 rounded-xl">Back to Login</button>
         </div>
       </div>
     );

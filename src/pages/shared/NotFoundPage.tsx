@@ -12,7 +12,7 @@ const NotFoundPage = () => {
         transition={{ duration: 0.5 }}
         className="flex flex-col items-center"
       >
-        <div className="w-24 h-24 bg-white/5 rounded-3xl flex items-center justify-center mb-8 border border-white/5 shadow-2xl">
+        <div className="w-24 h-24 bg-[var(--surface-overlay-5)] rounded-3xl flex items-center justify-center mb-8 border border-[var(--surface-overlay-border)] shadow-2xl">
           <FileQuestion size={48} className="text-[var(--color-primary)]" />
         </div>
         <h1 className="text-6xl font-bold text-white mb-4">404</h1>

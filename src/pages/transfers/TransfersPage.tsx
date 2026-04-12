@@ -295,7 +295,7 @@ export const TransfersPage: React.FC = () => {
       case 'Pending': return 'text-amber-600 bg-amber-50 border-amber-100';
       case 'Dispatched': return 'text-blue-600 bg-blue-50 border-blue-100';
       case 'Received': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
-      default: return 'text-gray-600 bg-gray-50 border-gray-100';
+      default: return 'text-gray-600 bg-[var(--bg-surface-variant)] border-[var(--border-subtle)]';
     }
   };
 
@@ -308,7 +308,7 @@ export const TransfersPage: React.FC = () => {
       header: 'Product',
       accessor: (t: Transfer) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+          <div className="w-8 h-8 bg-[var(--bg-surface-variant-strong)] rounded-lg flex items-center justify-center text-gray-400">
             <Package size={16} />
           </div>
           <div>
@@ -373,7 +373,7 @@ export const TransfersPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Stock Transfers"
@@ -385,7 +385,7 @@ export const TransfersPage: React.FC = () => {
                 resetCreateForm();
                 fetchCreateLookups();
               }}
-              className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
+              className="bg-[var(--color-primary)] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors shadow-sm"
               style={{ backgroundColor: 'var(--primary-color)' }}
             >
               <Plus size={18} />
@@ -439,7 +439,7 @@ export const TransfersPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative my-8 mx-auto w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto bg-white rounded-[32px] shadow-xl p-8"
+              className="relative my-8 mx-auto w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8"
             >
               <div className="flex items-center justify-between mb-6 gap-4">
                 <div>
@@ -495,7 +495,7 @@ export const TransfersPage: React.FC = () => {
                   </FormField>
 
                   {selectedProduct ? (
-                    <div className="rounded-3xl border border-gray-100 bg-gray-50/60 p-4 text-sm text-gray-600 space-y-1">
+                    <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-4 text-sm text-gray-600 space-y-1">
                       <p>
                         <span className="font-medium text-gray-900">Available:</span> {selectedProduct.availableQuantity} unit{selectedProduct.availableQuantity === 1 ? '' : 's'} in {selectedProduct.sourceShopName}
                       </p>
@@ -506,7 +506,7 @@ export const TransfersPage: React.FC = () => {
                   ) : null}
 
                   {selectedProductIsSerialized ? (
-                    <div className="space-y-4 rounded-3xl border border-gray-100 bg-gray-50/60 p-4">
+                    <div className="space-y-4 rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-4">
                       <div>
                         <h3 className="text-sm font-semibold text-gray-900">Serialized units to transfer</h3>
                         <p className="mt-1 text-xs text-gray-500">Use the multi-select dropdown to choose every serialized unit. If you pick 2 serialized products, the transfer quantity will automatically become 2.</p>
@@ -546,7 +546,7 @@ export const TransfersPage: React.FC = () => {
                         type="number"
                         value={String(selectedSerializedBarcodes.length)}
                         readOnly
-                        className="bg-gray-100 text-gray-500"
+                        className="bg-[var(--bg-surface-variant-strong)] text-gray-500"
                       />
                     </FormField>
                   ) : null}
@@ -581,7 +581,7 @@ export const TransfersPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative my-8 mx-auto w-full max-w-xl overflow-hidden bg-white rounded-[32px] shadow-xl p-8"
+              className="relative my-8 mx-auto w-full max-w-xl overflow-hidden bg-[var(--bg-surface)] rounded-[32px] shadow-xl p-8"
             >
               <div className="flex items-center justify-between mb-6 gap-4">
                 <div>
@@ -596,7 +596,7 @@ export const TransfersPage: React.FC = () => {
               </div>
 
               <div className="space-y-4 text-sm text-gray-600">
-                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 space-y-2">
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface-variant)] p-4 space-y-2">
                   <p><span className="font-medium text-gray-900">Transfer ID:</span> {selectedTransfer.id}</p>
                   <p><span className="font-medium text-gray-900">Route:</span> {selectedTransfer.fromShopName} → {selectedTransfer.toShopName}</p>
                   <p><span className="font-medium text-gray-900">Items:</span> {selectedTransfer.items.length}</p>
@@ -604,7 +604,7 @@ export const TransfersPage: React.FC = () => {
 
                 <div className="space-y-2">
                   {transferActionItems.map((item, index) => (
-                    <div key={`${item.productId}-${item.productName}-${index}`} className="rounded-2xl border border-gray-100 p-3 space-y-2">
+                    <div key={`${item.productId}-${item.productName}-${index}`} className="rounded-2xl border border-[var(--border-subtle)] p-3 space-y-2">
                       <p className="font-medium text-gray-900">{item.productName || item.productId}</p>
                       <FormField label="Quantity">
                         <Input
@@ -631,7 +631,7 @@ export const TransfersPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={closeTransferActionModal}
-                  className="px-4 py-2 text-sm rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  className="px-4 py-2 text-sm rounded-xl border border-[var(--border-strong)] text-gray-600 hover:bg-[var(--bg-surface-variant)]"
                   disabled={isProcessingTransferAction}
                 >
                   Cancel

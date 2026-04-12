@@ -1,41 +1,60 @@
 :root {
-  /* Brand Colors */
-  --color-gradient-start: #f59e0b; /* Amber 500 */
-  --color-gradient-end: #f97316; /* Orange 500 */
+  /* Brand Palette */
+  --color-primary: #1F4F85;
+  --color-primary-hover: #18406b;
+  --color-primary-glow: rgba(31, 79, 133, 0.35);
+
+  --color-secondary: #359BB5;
+  --color-accent: #359BB5;
+
+  /* Legacy gradient hooks mapped to new palette */
+  --color-gradient-start: #1F4F85;
+  --color-gradient-end: #359BB5;
   --brand-gradient: linear-gradient(135deg, var(--color-gradient-start) 0%, var(--color-gradient-end) 100%);
   --brand-gradient-vertical: linear-gradient(to bottom, var(--color-gradient-start), var(--color-gradient-end));
-  --brand-gradient-soft: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(249, 115, 22, 0.07) 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(31, 79, 133, 0.2) 0%, rgba(53, 155, 181, 0.14) 100%);
 
-  --color-primary: #10b981; /* Emerald 500 */
-  --color-primary-hover: #059669; /* Emerald 600 */
-  --color-primary-glow: rgba(16, 185, 129, 0.4);
-  
-  --color-secondary: #0f172a; /* Slate 900 */
-  --color-accent: #06b6d4; /* Cyan 500 */
-  
-  /* Neutrals */
-  --bg-main: #0a0a0c;
-  --bg-card: #0f0f12;
-  --bg-sidebar: #0f0f12;
-  --bg-header: rgba(10, 10, 12, 0.8);
-  
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-focus: rgba(16, 185, 129, 0.5);
-  
+  /* App surfaces */
+  --color-bg: #F2F2F2;
+  --color-surface: #EAF1F8;
+
+  --bg-app: var(--color-bg);
+  --bg-main: var(--color-bg);
+  --bg-surface: var(--color-surface);
+  --bg-card: var(--color-surface);
+  --bg-surface-elevated: #f6f9fc;
+  --bg-surface-variant: #dde8f3;
+  --bg-surface-variant-strong: #d2e0ee;
+  --bg-sidebar: var(--color-surface);
+  --bg-header: color-mix(in srgb, var(--color-surface) 88%, white 12%);
+
+  /* Typography */
+  --text-primary: #10243c;
+  --text-secondary: #33506f;
+  --text-muted: #55708d;
+
+  /* Borders and focus */
+  --border-subtle: #c9d9e9;
+  --border-strong: #b3c8de;
+  --border-focus: rgba(53, 155, 181, 0.5);
+  --focus-ring: rgba(53, 155, 181, 0.3);
+
+  /* White-overlay replacements */
+  --surface-overlay-2: rgba(234, 241, 248, 0.2);
+  --surface-overlay-5: rgba(234, 241, 248, 0.5);
+  --surface-overlay-10: rgba(234, 241, 248, 0.75);
+  --surface-overlay-border: rgba(201, 217, 233, 0.7);
+
   /* Radii */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-full: 9999px;
-  
+
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 2px 0 rgba(16, 36, 60, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(16, 36, 60, 0.12), 0 2px 4px -1px rgba(16, 36, 60, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(16, 36, 60, 0.16), 0 4px 6px -2px rgba(16, 36, 60, 0.1);
   --shadow-glow: 0 0 15px var(--color-primary-glow);
 }

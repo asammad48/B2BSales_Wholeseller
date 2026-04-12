@@ -142,13 +142,13 @@ export const BarcodeScannerInput: React.FC<BarcodeScannerInputProps> = ({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           disabled={disabled}
-          className={`w-full bg-gray-50 border-none rounded-xl py-3 pl-4 pr-14 outline-none focus:ring-2 focus:ring-gray-200 transition-all ${className || ''}`}
+          className={`w-full bg-[var(--bg-surface-variant)] border-none rounded-xl py-3 pl-4 pr-14 outline-none focus:ring-2 focus:ring-[var(--focus-ring)] transition-all ${className || ''}`}
         />
         <button
           type="button"
           onClick={() => setIsScannerOpen(true)}
           disabled={disabled}
-          className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl bg-white text-gray-500 shadow-sm transition-colors hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
+          className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl bg-[var(--bg-surface)] text-gray-500 shadow-sm transition-colors hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
           title="Scan barcode"
         >
           <Camera size={16} />
@@ -169,9 +169,9 @@ export const BarcodeScannerInput: React.FC<BarcodeScannerInputProps> = ({
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[32px] bg-white shadow-xl"
+              className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[32px] bg-[var(--bg-surface)] shadow-xl"
             >
-              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+              <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-6 py-5">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Scan barcode</h3>
                   <p className="mt-1 text-sm text-gray-500">Point the camera at the barcode to fill this field automatically.</p>
@@ -197,7 +197,7 @@ export const BarcodeScannerInput: React.FC<BarcodeScannerInputProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsScannerOpen(false)}
-                    className="flex-1 rounded-xl bg-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
+                    className="flex-1 rounded-xl bg-[var(--bg-surface-variant-strong)] px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-[var(--bg-surface-variant-strong)]"
                   >
                     Close scanner
                   </button>

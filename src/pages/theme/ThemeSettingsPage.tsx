@@ -43,7 +43,7 @@ const ThemeSettingsPage: React.FC = () => {
       <div className="admin-toolbar">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Theme Settings</h1>
-          <p className="text-[var(--text-muted)] mt-1">Customize your Mobia2Z dashboard appearance.</p>
+          <p className="text-[var(--text-muted)] mt-1">Customize your Mobia2z dashboard appearance.</p>
         </div>
         <button 
           onClick={handleSave}
@@ -136,8 +136,8 @@ const ThemeSettingsPage: React.FC = () => {
               </div>
 
               <div className="space-y-3">
-                <div className="h-4 w-3/4 bg-white/5 rounded" />
-                <div className="h-4 w-1/2 bg-white/5 rounded" />
+                <div className="h-4 w-3/4 bg-[var(--surface-overlay-5)] rounded" />
+                <div className="h-4 w-1/2 bg-[var(--surface-overlay-5)] rounded" />
               </div>
 
               <button 

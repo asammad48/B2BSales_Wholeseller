@@ -23,8 +23,8 @@ export function DataTable<T extends { id: string | number }>({
 }: DataTableProps<T>) {
   if (loading) {
     return (
-      <div className="bg-white rounded-b-[24px] p-12 flex flex-col items-center justify-center gap-4">
-        <div className="w-8 h-8 border-4 border-gray-100 border-t-gray-900 rounded-full animate-spin"></div>
+      <div className="bg-[var(--bg-surface)] rounded-b-[24px] p-12 flex flex-col items-center justify-center gap-4">
+        <div className="w-8 h-8 border-4 border-[var(--border-subtle)] border-t-gray-900 rounded-full animate-spin"></div>
         <p className="text-gray-400 text-sm">Loading data...</p>
       </div>
     );
@@ -32,18 +32,18 @@ export function DataTable<T extends { id: string | number }>({
 
   if (data.length === 0) {
     return (
-      <div className="bg-white rounded-b-[24px] p-12 text-center">
+      <div className="bg-[var(--bg-surface)] rounded-b-[24px] p-12 text-center">
         <p className="text-gray-400">No records found.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-b-[24px] overflow-hidden">
+    <div className="bg-[var(--bg-surface)] rounded-b-[24px] overflow-hidden">
       <div className={`overflow-auto ${maxHeightClassName}`}>
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-gray-50">
+            <tr className="border-b border-[var(--border-subtle)]">
               {columns.map((col, idx) => (
                 <th 
                   key={idx} 
@@ -59,7 +59,7 @@ export function DataTable<T extends { id: string | number }>({
               <tr 
                 key={`${item.id}-${rowIndex}`}
                 onClick={() => onRowClick?.(item)}
-                className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+                className={`border-b border-[var(--border-subtle)] hover:bg-[var(--bg-surface-variant)] transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
               >
                 {columns.map((col, idx) => (
                   <td key={`${col.header}-${idx}`} className={`px-6 py-4 text-sm text-gray-600 ${col.className || ''}`}>

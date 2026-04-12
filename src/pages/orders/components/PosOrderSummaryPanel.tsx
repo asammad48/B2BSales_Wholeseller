@@ -93,8 +93,8 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
   };
 
   return (
-    <aside className="rounded-[28px] bg-white border border-gray-100 shadow-sm overflow-hidden">
-      <div className="border-b border-gray-100 p-5 sm:p-6">
+    <aside className="rounded-[28px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+      <div className="border-b border-[var(--border-subtle)] p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Receipt Summary</p>
@@ -105,7 +105,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
               <CheckCircle2 size={14} /> Fulfilled
             </span>
           ) : (
-            <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-gray-600">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--bg-surface-variant-strong)] px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-gray-600">
               <ReceiptText size={14} /> Draft
             </span>
           )}
@@ -147,12 +147,12 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
           </FormField>
         </div>
 
-        <div className="rounded-[24px] border border-gray-100 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+        <div className="rounded-[24px] border border-[var(--border-subtle)] overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3">
             <h3 className="text-sm font-semibold text-gray-900">Selected items</h3>
             <span className="text-xs text-gray-400">{cartItems.length} lines</span>
           </div>
-          <div className="max-h-[320px] overflow-y-auto divide-y divide-gray-100 bg-gray-50/40">
+          <div className="max-h-[320px] overflow-y-auto divide-y divide-[var(--border-subtle)] bg-[var(--bg-surface-variant)]">
             {cartItems.length ? (
               cartItems.map((item) => (
                 <div key={item.product.productId} className="p-4">
@@ -197,12 +197,12 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3">
                     <p className="text-xs text-gray-500">{formatMoney(item.product.sellingPrice, item.product.currencyCode)} each</p>
-                    <div className="flex items-center gap-2 rounded-2xl bg-white p-1.5">
+                    <div className="flex items-center gap-2 rounded-2xl bg-[var(--bg-surface)] p-1.5">
                       <button
                         type="button"
                         onClick={() => onDecrementItem(item.product)}
                         disabled={submitting || Boolean(receipt)}
-                        className="flex h-8 w-8 items-center justify-center rounded-xl border border-gray-200 text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 disabled:opacity-40"
+                        className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--border-strong)] text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 disabled:opacity-40"
                       >
                         <Minus size={14} />
                       </button>
@@ -211,7 +211,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
                         type="button"
                         onClick={() => onIncrementItem(item.product)}
                         disabled={submitting || Boolean(receipt) || item.quantity >= (item.product.barcodes.length > 0 ? item.product.barcodes.length : item.product.quantityInHand)}
-                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-40"
                       >
                         <Plus size={14} />
                       </button>
@@ -225,11 +225,11 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-gray-100 p-5 space-y-3">
+        <div className="rounded-[24px] border border-[var(--border-subtle)] p-5 space-y-3">
           <div className="flex items-center justify-between text-sm text-gray-600"><span>Subtotal</span><span>{formatMoney(receipt?.subtotal ?? subtotal, currencyCode)}</span></div>
           <div className="flex items-center justify-between text-sm text-gray-600"><span>Discount</span><span>{formatMoney(discountAmount, currencyCode)}</span></div>
           <div className="flex items-center justify-between text-sm text-gray-600"><span>Tax</span><span>{formatMoney(taxAmount, currencyCode)}</span></div>
-          <div className="border-t border-gray-100 pt-3 flex items-center justify-between text-base font-semibold text-gray-900"><span>Total</span><span>{formatMoney(grandTotal, currencyCode)}</span></div>
+          <div className="border-t border-[var(--border-subtle)] pt-3 flex items-center justify-between text-base font-semibold text-gray-900"><span>Total</span><span>{formatMoney(grandTotal, currencyCode)}</span></div>
         </div>
 
         {receipt ? (
@@ -241,11 +241,11 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-              <div className="rounded-2xl bg-white/80 p-3">
+              <div className="rounded-2xl bg-[var(--bg-surface-elevated)] p-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">Status</p>
                 <p className="mt-1 font-medium text-emerald-900">{receipt.status || 'Completed'}</p>
               </div>
-              <div className="rounded-2xl bg-white/80 p-3">
+              <div className="rounded-2xl bg-[var(--bg-surface-elevated)] p-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">Barcode</p>
                 <p className="mt-1 font-medium text-emerald-900">{receipt.barcodeValue || 'Not provided'}</p>
               </div>

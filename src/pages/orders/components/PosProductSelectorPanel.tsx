@@ -27,14 +27,14 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
   disabled = false,
 }) => {
   return (
-    <section className="rounded-[28px] bg-white border border-gray-100 shadow-sm overflow-hidden">
-      <div className="border-b border-gray-100 p-5 sm:p-6">
+    <section className="rounded-[28px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-sm overflow-hidden">
+      <div className="border-b border-[var(--border-subtle)] p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">POS Products</p>
             <h2 className="mt-1 text-xl font-medium text-gray-900">Stocked items</h2>
           </div>
-          <div className="rounded-2xl bg-gray-50 px-4 py-3 text-right min-w-[112px]">
+          <div className="rounded-2xl bg-[var(--bg-surface-variant)] px-4 py-3 text-right min-w-[112px]">
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Visible</p>
             <p className="mt-1 text-xl font-semibold text-gray-900">{products.length}</p>
           </div>
@@ -52,9 +52,9 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
         </div>
       </div>
 
-      <div className="max-h-[calc(100vh-18rem)] overflow-y-auto p-4 sm:p-5 space-y-3 bg-gray-50/40">
+      <div className="max-h-[calc(100vh-18rem)] overflow-y-auto p-4 sm:p-5 space-y-3 bg-[var(--bg-surface-variant)]">
         {loading ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+          <div className="rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] p-8 text-center text-sm text-gray-500">
             Loading stocked POS products...
           </div>
         ) : products.length ? (
@@ -64,7 +64,7 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
             const isSoldOut = maxQuantity <= 0;
 
             return (
-              <div key={product.productId} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-colors hover:border-gray-200">
+              <div key={product.productId} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-sm transition-colors hover:border-[var(--border-strong)]">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -79,13 +79,13 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
                       {[product.sku, product.brandName, product.modelName].filter(Boolean).join(' • ') || 'No secondary product details'}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                      <span className="rounded-full bg-gray-100 px-2.5 py-1 font-medium text-gray-600">{formatMoney(product.sellingPrice, product.currencyCode)}</span>
+                      <span className="rounded-full bg-[var(--bg-surface-variant-strong)] px-2.5 py-1 font-medium text-gray-600">{formatMoney(product.sellingPrice, product.currencyCode)}</span>
                       <span>In hand: <strong className="text-gray-800">{maxQuantity}</strong></span>
                       {product.lowStockThreshold > 0 ? <span>Low stock at: <strong className="text-gray-800">{product.lowStockThreshold}</strong></span> : null}
                       {product.barcodes.length ? <span>Serialized units: <strong className="text-gray-800">{product.barcodes.length}</strong></span> : null}
                     </div>
                     {product.barcodes.length ? (
-                      <div className="mt-3 rounded-2xl bg-gray-50 px-3 py-2">
+                      <div className="mt-3 rounded-2xl bg-[var(--bg-surface-variant)] px-3 py-2">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Serialized preview</p>
                         <p className="mt-1 text-xs text-gray-500">
                           {product.barcodes
@@ -99,12 +99,12 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
                     ) : null}
                   </div>
 
-                  <div className="flex items-center gap-2 rounded-2xl bg-gray-50 p-2">
+                  <div className="flex items-center gap-2 rounded-2xl bg-[var(--bg-surface-variant)] p-2">
                     <button
                       type="button"
                       onClick={() => onDecrement(product)}
                       disabled={disabled || selectedQty <= 0}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border-strong)] bg-[var(--bg-surface)] text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Minus size={15} />
                     </button>
@@ -116,7 +116,7 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
                       type="button"
                       onClick={() => onIncrement(product)}
                       disabled={disabled || isSoldOut || selectedQty >= maxQuantity}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Plus size={15} />
                     </button>
@@ -126,7 +126,7 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
             );
           })
         ) : (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
+          <div className="rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg-surface)] p-8 text-center text-sm text-gray-500">
             No stocked products matched the current filters.
           </div>
         )}

@@ -265,12 +265,12 @@ export const PosCreateOrderPage: React.FC = () => {
   const total = receipt?.totalAmount ?? subtotal;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
+    <div className="min-h-screen bg-[var(--bg-app)] p-6">
       <div className="mx-auto max-w-7xl">
         <PageHeader
           title="POS Order"
           actions={
-            <Link to="/orders" className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800">
+            <Link to="/orders" className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]">
               <ArrowLeft size={16} /> Back to Orders
             </Link>
           }
