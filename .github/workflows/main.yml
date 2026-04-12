@@ -3,7 +3,7 @@ name: Deploy Admin Website
 on:
   push:
     branches:
-      - main
+      - color_centralization
 
 jobs:
   deploy:
