@@ -227,7 +227,7 @@ export const BulkProductUploadPage: React.FC = () => {
               type="file"
               accept=".csv,text/csv"
               onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
-              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white"
+              className="w-full rounded-xl border border-[var(--border-strong)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--color-primary)] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white"
             />
           </div>
           <button type="button" onClick={handleUpload} disabled={isUploading} className="brand-gradient inline-flex !w-auto items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 disabled:opacity-60">

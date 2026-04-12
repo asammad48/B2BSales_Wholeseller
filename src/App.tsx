@@ -48,7 +48,7 @@ const Sidebar: React.FC = () => {
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="brand-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-[0_6px_18px_rgba(245,158,11,0.35)]"
+              className="brand-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-[0_6px_18px_var(--color-primary-glow)]"
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
@@ -64,7 +64,7 @@ const Sidebar: React.FC = () => {
         {!isSidebarOpen && (
           <button
             onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="brand-gradient h-10 w-10 inline-flex items-center justify-center rounded-xl transition-all shrink-0 text-white hover:brightness-110 shadow-[0_6px_18px_rgba(245,158,11,0.35)]"
+            className="brand-gradient h-10 w-10 inline-flex items-center justify-center rounded-xl transition-all shrink-0 text-white hover:brightness-110 shadow-[0_6px_18px_var(--color-primary-glow)]"
             title="Expand sidebar"
             aria-label="Expand sidebar"
           >
@@ -87,11 +87,11 @@ const Sidebar: React.FC = () => {
               title={item.label}
               className={`relative flex items-center rounded-2xl text-sm font-medium transition-all duration-200 ease-in-out ${
                 isSidebarOpen
-                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_rgba(245,158,11,0.28)]' : 'text-gray-500 hover:bg-[var(--bg-surface-variant-strong)] hover:text-gray-800'}`
+                  ? `gap-3 px-4 py-3 ${isActive ? 'brand-gradient text-white shadow-[0_8px_20px_var(--color-primary-glow)]' : 'text-gray-500 hover:bg-[var(--bg-surface-variant-strong)] hover:text-gray-800'}`
                   : `justify-center h-12 w-12 mx-auto ${
                       isActive
-                        ? 'ring-1 ring-amber-200 shadow-[0_2px_12px_rgba(245,158,11,0.22)]'
-                        : 'text-gray-400 hover:text-amber-600 hover:ring-1 hover:ring-amber-100 hover:bg-amber-50/60'
+                        ? 'ring-1 ring-[var(--color-primary)]/30 shadow-[0_2px_12px_var(--color-primary-glow)]'
+                        : 'text-gray-400 hover:text-[var(--color-primary)] hover:ring-1 hover:ring-[var(--color-primary)]/20 hover:bg-[var(--bg-surface-variant)]'
                     }`
               }`}
               style={
@@ -106,7 +106,7 @@ const Sidebar: React.FC = () => {
                 className="shrink-0 transition-all"
                 style={
                   !isSidebarOpen && isActive
-                    ? { filter: 'drop-shadow(0 0 5px rgba(245,158,11,0.5))' }
+                    ? { filter: 'drop-shadow(0 0 5px var(--color-primary-glow))' }
                     : undefined
                 }
               />
@@ -118,7 +118,7 @@ const Sidebar: React.FC = () => {
                   className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-l-full"
                   style={{
                     background: 'var(--brand-gradient-vertical)',
-                    boxShadow: '0 0 10px rgba(245,158,11,0.5)',
+                    boxShadow: '0 0 10px var(--color-primary-glow)',
                   }}
                 />
               )}
@@ -192,7 +192,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
           <Shield className="mx-auto text-red-500 mb-4" size={48} />
           <h1 className="text-2xl font-light mb-2">Access Denied</h1>
           <p className="text-gray-500 mb-6">Your account does not have permission to access the admin portal.</p>
-          <button onClick={() => (window.location.href = '/login')} className="bg-gray-900 text-white px-6 py-2 rounded-xl">Back to Login</button>
+          <button onClick={() => (window.location.href = '/login')} className="bg-[var(--color-primary)] text-white px-6 py-2 rounded-xl">Back to Login</button>
         </div>
       </div>
     );

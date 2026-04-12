@@ -584,7 +584,7 @@ export const InventoryPage: React.FC = () => {
           actions={
             <button
               onClick={() => setIsStockInOpen(true)}
-              className="flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800"
+              className="flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)]"
               style={{ backgroundColor: 'var(--primary-color)' }}
             >
               <ArrowDownCircle size={18} />

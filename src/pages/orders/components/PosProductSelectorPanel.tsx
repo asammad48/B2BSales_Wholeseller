@@ -116,7 +116,7 @@ export const PosProductSelectorPanel: React.FC<PosProductSelectorPanelProps> = (
                       type="button"
                       onClick={() => onIncrement(product)}
                       disabled={disabled || isSoldOut || selectedQty >= maxQuantity}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Plus size={15} />
                     </button>

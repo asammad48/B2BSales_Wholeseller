@@ -408,7 +408,7 @@ export const Button = ({
   ...props 
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' }) => {
   const variants = {
-    primary: 'bg-gray-900 text-white hover:bg-gray-800',
+    primary: 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)]',
     secondary: 'bg-[var(--bg-surface-variant-strong)] text-gray-900 hover:bg-[var(--bg-surface-variant-strong)]',
     danger: 'bg-red-600 text-white hover:bg-red-700',
   };

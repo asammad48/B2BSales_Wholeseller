@@ -270,7 +270,7 @@ export const PosCreateOrderPage: React.FC = () => {
         <PageHeader
           title="POS Order"
           actions={
-            <Link to="/orders" className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-800">
+            <Link to="/orders" className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]">
               <ArrowLeft size={16} /> Back to Orders
             </Link>
           }

@@ -509,7 +509,7 @@ export const ProductsPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
+                className="bg-[var(--color-primary)] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors shadow-sm"
                 style={{ backgroundColor: 'var(--primary-color)' }}
               >
                 <Plus size={18} />

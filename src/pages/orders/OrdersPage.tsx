@@ -187,7 +187,7 @@ export const OrdersPage: React.FC = () => {
           title="Orders"
           description="Manage wholesale orders, track fulfillment status, inspect full order details, and launch the POS page for new sales."
           actions={
-            <Link to="/orders/pos" className="bg-gray-900 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-gray-800">
+            <Link to="/orders/pos" className="bg-[var(--color-primary)] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-[var(--color-primary-hover)]">
               <Plus size={16} /> Create Order
             </Link>
           }

@@ -105,7 +105,7 @@ export const DashboardPage: React.FC = () => {
               <div className="px-4 py-2.5 rounded-xl bg-[var(--bg-surface)] text-sm text-gray-600 border border-[var(--border-subtle)]">
                 Unread notifications: <span className="font-semibold text-gray-900">{overview?.unreadNotificationsCount || 0}</span>
               </div>
-              <Link to="/orders" className="bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+              <Link to="/orders" className="bg-[var(--color-primary)] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors">
                 View Orders
               </Link>
             </div>

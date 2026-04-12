@@ -85,7 +85,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gray-900 text-white rounded-xl py-3 font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            className="w-full bg-[var(--color-primary)] text-white rounded-xl py-3 font-medium hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
           >
             {isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>

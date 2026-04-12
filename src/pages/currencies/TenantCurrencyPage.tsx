@@ -188,7 +188,7 @@ export const TenantCurrencyPage: React.FC = () => {
                   type="button"
                   onClick={handleSaveDefaultCurrency}
                   disabled={savingDefault || loading}
-                  className="h-[50px] px-5 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center gap-2 justify-center"
+                  className="h-[50px] px-5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50 flex items-center gap-2 justify-center"
                   style={{ backgroundColor: 'var(--primary-color)' }}
                 >
                   <Save size={16} /> {savingDefault ? 'Saving...' : 'Save'}

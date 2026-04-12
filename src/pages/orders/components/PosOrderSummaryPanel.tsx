@@ -211,7 +211,7 @@ export const PosOrderSummaryPanel: React.FC<PosOrderSummaryPanelProps> = ({
                         type="button"
                         onClick={() => onIncrementItem(item.product)}
                         disabled={submitting || Boolean(receipt) || item.quantity >= (item.product.barcodes.length > 0 ? item.product.barcodes.length : item.product.quantityInHand)}
-                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+                        className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-40"
                       >
                         <Plus size={14} />
                       </button>

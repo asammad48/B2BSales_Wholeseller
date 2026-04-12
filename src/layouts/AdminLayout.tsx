@@ -43,7 +43,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
           : cn(
               'gap-3 px-4 py-3',
               active
-                ? 'brand-gradient text-white shadow-[0_10px_22px_rgba(245,158,11,0.22)]'
+                ? 'brand-gradient text-white shadow-[0_10px_22px_var(--color-primary-glow)]'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-overlay-5)]'
             )
       )}
@@ -78,7 +78,7 @@ const SidebarItem = ({ to, icon: Icon, label, active, collapsed }: { to: string;
           className="absolute right-0 w-[3px] h-7 rounded-l-full"
           style={{
             background: 'var(--brand-gradient-vertical)',
-            boxShadow: '0 0 12px rgba(245,158,11,0.6), 0 0 4px rgba(249,115,22,0.3)',
+            boxShadow: '0 0 12px var(--color-primary-glow)',
           }}
         />
       )}
@@ -120,7 +120,7 @@ export const AdminLayout = () => {
               <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="flex items-center gap-2">
                 <button
                   onClick={() => setSidebarOpen(!isSidebarOpen)}
-                  className="brand-gradient w-8 h-8 rounded-lg flex items-center justify-center shadow-[0_6px_16px_rgba(245,158,11,0.3)]"
+                  className="brand-gradient w-8 h-8 rounded-lg flex items-center justify-center shadow-[0_6px_16px_var(--color-primary-glow)]"
                   title="Collapse sidebar"
                   aria-label="Collapse sidebar"
                 >
@@ -133,7 +133,7 @@ export const AdminLayout = () => {
           {!isSidebarOpen && (
             <button
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="brand-gradient h-10 w-10 inline-flex items-center justify-center rounded-lg transition-all text-white hover:brightness-110 shadow-[0_6px_16px_rgba(245,158,11,0.3)]"
+              className="brand-gradient h-10 w-10 inline-flex items-center justify-center rounded-lg transition-all text-white hover:brightness-110 shadow-[0_6px_16px_var(--color-primary-glow)]"
               title="Expand sidebar"
               aria-label="Expand sidebar"
             >
@@ -187,7 +187,7 @@ export const AdminLayout = () => {
                 <p className="text-sm font-semibold text-white">{user?.name || 'Admin User'}</p>
                 <p className="text-xs text-[var(--text-muted)] capitalize">{user?.role || 'Staff'}</p>
               </div>
-              <div className="w-10 h-10 rounded-full p-0.5 shadow-lg shadow-[rgba(245,158,11,0.35)]" style={{ background: 'var(--brand-gradient)' }}>
+              <div className="w-10 h-10 rounded-full p-0.5 shadow-lg shadow-[var(--color-primary-glow)]" style={{ background: 'var(--brand-gradient)' }}>
                 <img
                   src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Admin')}&background=random`}
                   alt="Avatar"
