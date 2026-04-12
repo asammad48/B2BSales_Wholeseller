@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './state/AuthContext';
-import { SettingsProvider, useSettings } from './state/SettingsContext';
+import { SettingsProvider } from './state/SettingsContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { isAdminAppAccessible } from './utils/accessControl';
 import { LogOut, User as UserIcon, Shield, Package, LayoutDashboard, Box, ShoppingBag, ArrowRightLeft, Users, Bell, BarChart3, Building2, MessageSquareMore, Coins, ReceiptText, Upload } from 'lucide-react';
@@ -22,7 +22,6 @@ import { BulkProductUploadPage } from './pages/bulkProductUpload/BulkProductUplo
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const { logout } = useAuth();
-  const { settings } = useSettings();
   const [isSidebarOpen, setSidebarOpen] = React.useState(false);
 
   const navItems = [
@@ -52,10 +51,10 @@ const Sidebar: React.FC = () => {
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
-              <Shield size={20} />
+              <img src="/mobia2z-logo.svg" alt="Mobia2z logo" className="h-6 w-6" />
             </button>
             <div className="min-w-0">
-              <h1 className="font-medium text-gray-900 leading-tight truncate">{settings?.name || 'Mobia2Z'}</h1>
+              <h1 className="font-medium text-gray-900 leading-tight truncate">Mobia2z</h1>
               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Admin</p>
             </div>
           </div>
@@ -68,7 +67,7 @@ const Sidebar: React.FC = () => {
             title="Expand sidebar"
             aria-label="Expand sidebar"
           >
-            <Shield size={20} />
+            <img src="/mobia2z-logo.svg" alt="Mobia2z logo" className="h-6 w-6" />
           </button>
         )}
       </div>

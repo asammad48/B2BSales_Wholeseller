@@ -231,7 +231,7 @@ const ProductDetailPage: React.FC = () => {
                   <Truck className="text-[var(--color-primary)] shrink-0" size={20} />
                   <div>
                     <p className="text-sm font-bold text-white">Shipping</p>
-                    <p className="text-xs text-[var(--text-muted)]">Global Mobia2Z Delivery</p>
+                    <p className="text-xs text-[var(--text-muted)]">Global Mobia2z Delivery</p>
                   </div>
                 </div>
               </div>
@@ -279,7 +279,7 @@ const ProductDetailPage: React.FC = () => {
               <div className="admin-card p-6 border-l-4 border-l-[var(--color-primary)]">
                 <h3 className="font-bold text-white mb-2 flex items-center gap-2">
                   <CheckCircle2 size={18} className="text-[var(--color-primary)]" />
-                  Wholesale Benefits
+                  Mobia2z Benefits
                 </h3>
                 <ul className="space-y-3 text-sm text-[var(--text-muted)]">
                   <li className="flex items-center gap-2">• Bulk pricing discounts</li>

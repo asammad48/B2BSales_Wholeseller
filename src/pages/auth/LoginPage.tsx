@@ -93,7 +93,7 @@ export const LoginPage: React.FC = () => {
 
         <div className="mt-8 pt-8 border-t border-[var(--border-subtle)]">
           <p className="text-center text-xs text-gray-400">
-            Mobia2Z Admin System &copy; 2026
+            Mobia2z Admin System &copy; 2026
           </p>
         </div>
       </motion.div>
